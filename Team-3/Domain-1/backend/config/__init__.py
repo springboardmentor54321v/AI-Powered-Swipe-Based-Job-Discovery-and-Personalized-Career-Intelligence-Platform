@@ -1,0 +1,1 @@
+"""SwipeX Django Configuration Package."""
