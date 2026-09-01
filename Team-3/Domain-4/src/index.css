@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface text-content font-sans antialiased min-h-screen selection:bg-primary/30 selection:text-white;
+  }
+
+  /* Natural focus outline across all interactive elements */
+  button:focus-visible, 
+  input:focus-visible, 
+  select:focus-visible, 
+  textarea:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-surface;
+  }
+}
+
+@layer components {
+  /* Material-inspired surface card */
+  .surface-card {
+    @apply bg-surface-container border border-outline-variant rounded-3xl p-6 sm:p-8;
+  }
+
+  .surface-card-subtle {
+    @apply bg-surface-elevated/70 border border-outline-variant/60 rounded-2xl p-4 sm:p-5;
+  }
+}
