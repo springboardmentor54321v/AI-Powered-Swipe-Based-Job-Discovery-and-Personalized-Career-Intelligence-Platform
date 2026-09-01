@@ -1,0 +1,12 @@
+# Copy this file to docker-compose.override.yml once the service source folders exist.
+# Docker Compose loads the override automatically; it is deliberately ignored locally.
+services:
+  auth-service:
+    build: ./services/auth-service
+    image: swipx-auth:dev
+  job-service:
+    build: ./services/job-service
+    image: swipx-jobs:dev
+  resume-service:
+    build: ./services/resume-service
+    image: swipx-resume:dev

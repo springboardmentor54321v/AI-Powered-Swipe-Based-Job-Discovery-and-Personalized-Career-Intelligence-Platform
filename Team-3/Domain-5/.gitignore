@@ -1,0 +1,14 @@
+# Local development state
+.env
+docker-compose.override.yml
+*.log
+__pycache__/
+.pytest_cache/
+*.py[cod]
+node_modules/
+dist/
+
+# Local database and uploaded resume data
+.docker/postgres/
+.docker/redis/
+uploads/

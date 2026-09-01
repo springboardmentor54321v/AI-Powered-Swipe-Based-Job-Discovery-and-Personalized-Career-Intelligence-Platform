@@ -1,0 +1,70 @@
+name: swipx-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-swipx}
+      POSTGRES_USER: ${POSTGRES_USER:-swipx}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-locally}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./platform/database/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Interns 1–3 add their Dockerfiles and commands in docker-compose.override.yml.
+  # The shared network and service names below are the frozen integration contract.
+  auth-service:
+    profiles: ["services"]
+    image: ${AUTH_SERVICE_IMAGE:-swipx-auth:dev}
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-swipx}:${POSTGRES_PASSWORD:-change-me-locally}@postgres:5432/${POSTGRES_DB:-swipx}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    ports: ["8001:8000"]
+
+  job-service:
+    profiles: ["services"]
+    image: ${JOB_SERVICE_IMAGE:-swipx-jobs:dev}
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-swipx}:${POSTGRES_PASSWORD:-change-me-locally}@postgres:5432/${POSTGRES_DB:-swipx}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    ports: ["8002:8000"]
+
+  resume-service:
+    profiles: ["services"]
+    image: ${RESUME_SERVICE_IMAGE:-swipx-resume:dev}
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-swipx}:${POSTGRES_PASSWORD:-change-me-locally}@postgres:5432/${POSTGRES_DB:-swipx}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    ports: ["8003:8000"]
+
+volumes:
+  postgres-data:
+  redis-data:
