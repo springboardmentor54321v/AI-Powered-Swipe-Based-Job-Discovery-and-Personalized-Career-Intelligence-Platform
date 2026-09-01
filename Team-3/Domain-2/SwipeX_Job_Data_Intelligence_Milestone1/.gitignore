@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+*.py[cod]
+swipex_jobs.db
+.pytest_cache/
