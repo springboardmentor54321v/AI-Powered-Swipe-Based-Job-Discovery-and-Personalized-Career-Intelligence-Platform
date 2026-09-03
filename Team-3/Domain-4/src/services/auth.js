@@ -174,6 +174,24 @@ export const authService = {
   },
 
   /**
+   * Update active user role (useful for testing & development)
+   * @param {string} newRole - 'job_seeker' | 'recruiter' | 'admin'
+   */
+  setRole(newRole) {
+    const current = this.getSession() || {};
+    const updated = {
+      ...current,
+      role: newRole,
+      user: {
+        ...(current.user || {}),
+        role: newRole,
+      },
+    };
+    this.setSession(updated);
+    return updated;
+  },
+
+  /**
    * End current session
    */
   logout() {

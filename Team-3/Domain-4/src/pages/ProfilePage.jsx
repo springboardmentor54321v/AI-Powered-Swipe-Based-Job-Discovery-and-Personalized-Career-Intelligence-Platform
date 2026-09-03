@@ -68,17 +68,66 @@ export default function ProfilePage() {
           </Button>
         </div>
 
-        {/* Account Details */}
-        <div className="pt-4 border-t border-outline-variant space-y-3">
-          <h2 className="text-xs font-semibold text-content-muted">Identity & Permissions</h2>
+        {/* Account Details & Role Switcher */}
+        <div className="pt-4 border-t border-outline-variant space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-semibold text-content-muted">Identity & Permissions</h2>
+            <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">
+              Testing Mode
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="p-3 rounded-2xl bg-surface-elevated/50 border border-outline-variant/60">
               <span className="text-content-subtle block text-[11px]">User ID</span>
               <span className="font-semibold text-content mt-0.5 block">{user.user_id || user.id || '1 (Local Session)'}</span>
             </div>
             <div className="p-3 rounded-2xl bg-surface-elevated/50 border border-outline-variant/60">
-              <span className="text-content-subtle block text-[11px]">Assigned Role</span>
-              <span className="font-semibold text-content mt-0.5 block capitalize">{userRole}</span>
+              <span className="text-content-subtle block text-[11px]">Active Role</span>
+              <span className="font-semibold text-primary mt-0.5 block capitalize">{userRole}</span>
+            </div>
+          </div>
+
+          {/* Test Role Switcher Buttons */}
+          <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-content">Switch Role (Testing Preview)</span>
+              <span className="text-[11px] text-content-subtle">Updates Dashboard & Permissions</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => authService.setRole('job_seeker')}
+                className={`py-2 px-3 rounded-xl text-xs font-medium transition-all ${
+                  (session?.role || user.role) === 'job_seeker'
+                    ? 'bg-primary text-surface font-semibold shadow-sm ring-2 ring-primary/40'
+                    : 'bg-surface-elevated text-content-muted hover:text-content hover:bg-surface-elevated/80 border border-outline-variant/50'
+                }`}
+              >
+                Job Seeker
+              </button>
+              <button
+                type="button"
+                onClick={() => authService.setRole('recruiter')}
+                className={`py-2 px-3 rounded-xl text-xs font-medium transition-all ${
+                  (session?.role || user.role) === 'recruiter'
+                    ? 'bg-primary text-surface font-semibold shadow-sm ring-2 ring-primary/40'
+                    : 'bg-surface-elevated text-content-muted hover:text-content hover:bg-surface-elevated/80 border border-outline-variant/50'
+                }`}
+              >
+                Recruiter
+              </button>
+              <button
+                type="button"
+                onClick={() => authService.setRole('admin')}
+                className={`py-2 px-3 rounded-xl text-xs font-medium transition-all ${
+                  (session?.role || user.role) === 'admin'
+                    ? 'bg-primary text-surface font-semibold shadow-sm ring-2 ring-primary/40'
+                    : 'bg-surface-elevated text-content-muted hover:text-content hover:bg-surface-elevated/80 border border-outline-variant/50'
+                }`}
+              >
+                Admin
+              </button>
             </div>
           </div>
         </div>
