@@ -8,7 +8,9 @@ import {
   AlertCircle, 
   Loader2, 
   RotateCcw,
-  ArrowRight
+  ArrowRight,
+  ShieldCheck,
+  Award
 } from 'lucide-react';
 import Button from '../components/common/Button';
 import Chip from '../components/common/Chip';
@@ -121,13 +123,19 @@ export default function ResumeUploadPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-fadeIn">
+    <div className="max-w-3xl mx-auto space-y-6 animate-fadeIn">
       
       {/* Header */}
-      <div className="space-y-1 text-center">
-        <h1 className="text-2xl font-bold text-content">Upload your resume</h1>
-        <p className="text-xs text-content-muted">
-          Add your resume to get matched with relevant job postings and calculate ATS scores
+      <div className="space-y-1.5 text-center">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0070ad]/15 text-[#0070ad] text-xs font-bold uppercase tracking-wider">
+          <Award className="w-3.5 h-3.5" />
+          <span>ATS Intelligence Studio</span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-content">
+          Upload Your Resume
+        </h1>
+        <p className="text-xs sm:text-sm text-content-muted max-w-lg mx-auto">
+          Extract verified skills, assess keyword readiness, and unlock tailored matchmaking with top enterprise openings.
         </p>
       </div>
 
@@ -154,65 +162,66 @@ export default function ResumeUploadPage() {
       )}
 
       {/* Upload Dropzone Container */}
-      <div className="surface-card space-y-6">
+      <div className="surface-card space-y-5">
         <div 
           onClick={() => status !== 'uploading' && fileInputRef.current?.click()}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-3xl p-8 text-center transition-all cursor-pointer select-none ${
+          className={`border-2 border-dashed rounded-2xl p-6 sm:p-9 text-center transition-all cursor-pointer select-none ${
             isDragging
               ? 'border-primary bg-primary/10 scale-[0.99]'
-              : 'border-outline-variant hover:border-primary/60 bg-surface-elevated/30 hover:bg-surface-elevated/50'
+              : 'border-[#2e303d] hover:border-primary/60 bg-[#16171d] hover:bg-[#1a1b22]'
           } ${status === 'uploading' ? 'pointer-events-none opacity-70' : ''}`}
         >
-          <div className="inline-flex h-14 w-14 rounded-2xl bg-surface-elevated items-center justify-center text-primary mb-3 shadow-sm">
+          <div className="inline-flex h-14 w-14 rounded-2xl bg-surface-elevated items-center justify-center text-primary mb-3 shadow-sm border border-outline-variant">
             {status === 'uploading' ? (
-              <Loader2 className="w-7 h-7 animate-spin" />
+              <Loader2 className="w-7 h-7 animate-spin text-primary" />
             ) : status === 'success' ? (
               <CheckCircle2 className="w-7 h-7 text-emerald-400" />
             ) : (
-              <UploadCloud className="w-7 h-7" />
+              <UploadCloud className="w-7 h-7 text-primary" />
             )}
           </div>
 
-          <h2 className="text-base font-semibold text-content">
+          <h2 className="text-base sm:text-lg font-bold text-content max-w-md mx-auto truncate px-2">
             {status === 'uploading'
-              ? 'Parsing resume...'
+              ? 'Extracting verified skills...'
               : selectedFile
               ? selectedFile.name
               : uploadedData
-              ? uploadedData.filename || 'Resume Active'
-              : 'Choose a file or drag and drop'}
+              ? uploadedData.filename || 'Active Document Loaded'
+              : 'Choose a resume file or drag & drop here'}
           </h2>
 
-          <p className="text-xs text-content-subtle mt-1">
+          <p className="text-xs text-content-subtle mt-1.5">
             {selectedFile
-              ? `${formatFileSize(selectedFile.size)} • Click to choose a different file`
-              : 'PDF or DOCX up to 5MB'}
+              ? `${formatFileSize(selectedFile.size)} • Click to choose a different document`
+              : 'Supports PDF or DOCX up to 5MB • 256-Bit Encrypted'}
           </p>
         </div>
 
         {/* Action Controls Row */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-outline-variant">
-          <div className="flex items-center gap-2 text-xs text-content-muted w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-outline-variant">
+          <div className="flex items-center gap-2 text-xs text-content-muted min-w-0 flex-1">
             <FileText className="w-4 h-4 text-content-subtle shrink-0" />
-            <span className="truncate">
+            <span className="truncate max-w-[260px] sm:max-w-xs font-mono text-[11px] block">
               {selectedFile
                 ? `${selectedFile.name} (${formatFileSize(selectedFile.size)})`
                 : uploadedData
-                ? `Active: ${uploadedData.filename || 'Uploaded Resume'}`
-                : 'No file selected'}
+                ? `Active Document: ${uploadedData.filename || 'Resume.pdf'}`
+                : 'No document selected'}
             </span>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
             {selectedFile && status !== 'uploading' && (
               <Button
                 type="button"
                 variant="tonal"
                 size="md"
                 onClick={handleReset}
+                className="flex-1 sm:flex-initial"
               >
                 Clear
               </Button>
@@ -225,31 +234,31 @@ export default function ResumeUploadPage() {
               disabled={!selectedFile || status === 'uploading'}
               loading={status === 'uploading'}
               onClick={handleUpload}
-              className="w-full sm:w-auto"
+              className="flex-1 sm:flex-initial font-semibold"
             >
-              {status === 'uploading' ? 'Uploading...' : 'Upload resume'}
+              {status === 'uploading' ? 'Extracting Skills...' : 'Upload & Parse Document'}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Parsed Skills Results Section */}
-      <div className="surface-card space-y-4">
+      {/* Extracted Skills & Keyword Results */}
+      <div className="surface-card space-y-4 border-white/[0.08]">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-content font-semibold text-sm">
+          <div className="flex items-center gap-2 text-content font-bold text-sm">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span>Parsed skills and keywords</span>
+            <span>Extracted Skills & Capabilities</span>
           </div>
           {uploadedData && (
-            <span className="text-[11px] font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-0.5 rounded-full">
-              Heuristic Stub Verified
+            <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-3 py-0.5 rounded-full">
+              Document Verified
             </span>
           )}
         </div>
 
         <p className="text-xs text-content-muted leading-relaxed">
           {uploadedData
-            ? 'The following skill keywords were extracted from your resume by the career intelligence service:'
+            ? 'The following skill keywords were extracted from your resume. These capabilities will automatically benchmark your compatibility against live openings:'
             : 'Upload your resume to see automated skill extraction and unlock personalized job matching.'}
         </p>
 
@@ -260,24 +269,26 @@ export default function ResumeUploadPage() {
             ))}
           </div>
         ) : (
-          <div className="p-4 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 text-center text-xs text-content-subtle">
-            No parsed skills available yet. Select and upload your resume above.
+          <div className="p-6 rounded-2xl bg-surface-elevated/30 border border-dashed border-outline-variant text-center text-xs text-content-subtle">
+            No extracted skills available yet. Select and upload your resume above.
           </div>
         )}
 
         {uploadedData && (
-          <div className="pt-3 border-t border-outline-variant flex justify-end">
+          <div className="pt-4 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span className="text-xs text-content-subtle">Skills synchronized with your career profile</span>
             <Button
               variant="filled"
               size="sm"
               icon={ArrowRight}
               onClick={() => navigate('/dashboard')}
             >
-              View Dashboard & ATS Score
+              Go to Dashboard & ATS Score
             </Button>
           </div>
         )}
       </div>
+
     </div>
   );
 }

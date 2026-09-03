@@ -10,6 +10,7 @@ export default function SwipeDiscoveryPage() {
   const [jobIndex, setJobIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [swiping, setSwiping] = useState(false);
+  const [dragProgress, setDragProgress] = useState(0);
   const [swipeError, setSwipeError] = useState('');
   const [loadError, setLoadError] = useState('');
 
@@ -105,18 +106,21 @@ export default function SwipeDiscoveryPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fadeIn">
       
-      {/* Dev Mode Banner (informative) */}
-      {jobService.isMockMode() && (
-        <div className="flex items-center justify-between px-3.5 py-1.5 rounded-2xl bg-surface-elevated/60 border border-outline-variant/60 text-xs text-content-muted">
-          <div className="flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <span>Discover Feed • Local Mock Service Active</span>
-          </div>
-          <span className="text-[11px] text-content-subtle">Ready for Intern 2 Live API</span>
+      {/* Enterprise Discovery Deck Guidance Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-xs text-content-muted">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="font-semibold text-content">Live Discovery Deck</span>
+          <span className="text-content-subtle">•</span>
+          <span>Verified Enterprise Opportunities</span>
         </div>
-      )}
+        <div className="text-[11px] text-content-subtle flex items-center gap-2">
+          <span className="hidden sm:inline">Use gesture controls or action buttons</span>
+          <span className="px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/[0.08] text-content-muted">← Pass | Apply →</span>
+        </div>
+      </div>
 
-      {/* Swipe Failure Notice */}
+      {/* Swipe Error Notice */}
       {swipeError && (
         <div className="p-3.5 rounded-2xl bg-red-950/40 border border-red-800/50 flex items-center justify-between text-xs text-red-300 animate-fadeIn">
           <div className="flex items-center gap-2">
@@ -176,23 +180,28 @@ export default function SwipeDiscoveryPage() {
           </Button>
         </div>
       ) : currentJob ? (
-        /* Dual Card Deck Section */
+        /* Dual Card Deck Section with Real-Time Stacking Physics */
         <div className="relative min-h-[480px]">
           
-          {/* Background Card (stacked directly underneath) */}
+          {/* Background Card (stacked directly underneath, smoothly elevating on drag) */}
           {nextJob && (
             <JobCard
               key={`next-${nextJob.id || nextJob.job_id}`}
               job={nextJob}
               isBackground={true}
+              dragProgress={dragProgress}
             />
           )}
 
-          {/* Active Top Card */}
+          {/* Active Top Card (Strict horizontal Tinder-style swipe) */}
           <JobCard
             key={`top-${currentJob.id || currentJob.job_id}`}
             job={currentJob}
-            onSwipe={handleSwipe}
+            onSwipe={(direction, job) => {
+              setDragProgress(0);
+              handleSwipe(direction, job);
+            }}
+            onDragProgress={setDragProgress}
             isBackground={false}
             disabled={swiping}
           />

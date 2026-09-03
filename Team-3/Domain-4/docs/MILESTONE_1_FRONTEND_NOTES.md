@@ -71,6 +71,7 @@ Team-3/Domain-4/
 
 | Route | Page Component | Description |
 | :--- | :--- | :--- |
+| `/` | `HomePage` | Platform overview, interactive swipe demo sandbox, 3-step workflow, multi-role showcase, and architecture preview. |
 | `/login` | `LoginPage` | User sign in with form validation and Google OAuth integration point. |
 | `/register` | `RegisterPage` | Role selection (`Job Seeker`, `Recruiter`, `Admin`) and user registration. |
 | `/discover` | `SwipeDiscoveryPage` | Interactive job cards with swipe-left (skip) and swipe-right (save/apply). |

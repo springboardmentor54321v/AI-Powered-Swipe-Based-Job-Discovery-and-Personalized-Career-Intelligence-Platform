@@ -11,7 +11,7 @@ export default function Button({
   className = '', 
   ...props 
 }) {
-  const baseStyles = 'inline-flex items-center justify-center font-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none select-none';
+  const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-150 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none select-none';
   
   const sizeStyles = {
     sm: 'px-3.5 py-1.5 text-xs rounded-xl gap-1.5 min-h-[36px]',

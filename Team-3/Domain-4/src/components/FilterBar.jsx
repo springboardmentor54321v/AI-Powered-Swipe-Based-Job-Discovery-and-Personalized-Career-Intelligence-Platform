@@ -49,8 +49,8 @@ export default function FilterBar({
         </div>
 
         {/* Quick Filter Chips & Filters Button */}
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {companyTypes.map((type) => (
               <Chip
                 key={type}
@@ -62,26 +62,28 @@ export default function FilterBar({
             ))}
           </div>
 
-          <Button
-            variant={filterOpen ? 'filled' : 'tonal'}
-            size="sm"
-            icon={SlidersHorizontal}
-            onClick={() => setFilterOpen(!filterOpen)}
-          >
-            Filters
-          </Button>
-
-          {hasActiveFilters && onResetFilters && (
-            <button
-              type="button"
-              onClick={onResetFilters}
-              title="Reset filters"
-              className="p-2 rounded-xl text-content-subtle hover:text-content hover:bg-surface-elevated transition-colors text-xs flex items-center gap-1"
+          <div className="flex items-center gap-2">
+            <Button
+              variant={filterOpen ? 'filled' : 'tonal'}
+              size="sm"
+              icon={SlidersHorizontal}
+              onClick={() => setFilterOpen(!filterOpen)}
             >
-              <X className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Reset</span>
-            </button>
-          )}
+              Filters
+            </Button>
+
+            {hasActiveFilters && onResetFilters && (
+              <button
+                type="button"
+                onClick={onResetFilters}
+                title="Reset filters"
+                className="p-2 rounded-xl text-content-subtle hover:text-content hover:bg-surface-elevated transition-colors text-xs flex items-center gap-1"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Reset</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

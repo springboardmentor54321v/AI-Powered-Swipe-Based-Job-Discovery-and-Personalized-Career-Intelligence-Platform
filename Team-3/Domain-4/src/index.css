@@ -3,26 +3,76 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-surface text-content font-sans antialiased min-h-screen selection:bg-primary/30 selection:text-white;
+  html {
+    scroll-behavior: smooth;
   }
 
-  /* Natural focus outline across all interactive elements */
+  body {
+    @apply bg-[#101116] text-content font-sans antialiased min-h-screen selection:bg-primary/25 selection:text-white;
+  }
+
+  /* Unobtrusive dark scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #14151b;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a2c36;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3a3d4a;
+  }
+
+  /* Soft, natural focus outline */
   button:focus-visible, 
   input:focus-visible, 
   select:focus-visible, 
   textarea:focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-surface;
+    @apply outline-none ring-2 ring-primary/60 ring-offset-1 ring-offset-[#101116];
   }
 }
 
 @layer components {
-  /* Material-inspired surface card */
+  /* Warm, human-designed surface cards */
   .surface-card {
-    @apply bg-surface-container border border-outline-variant rounded-3xl p-6 sm:p-8;
+    @apply bg-[#17181e] border border-[#282a36] rounded-2xl p-4 sm:p-6 shadow-sm;
   }
 
   .surface-card-subtle {
-    @apply bg-surface-elevated/70 border border-outline-variant/60 rounded-2xl p-4 sm:p-5;
+    @apply bg-[#1c1d25] border border-[#262833] rounded-xl p-3.5 sm:p-5;
+  }
+
+  /* Cozy subtle card interaction */
+  .hover-card {
+    @apply transition-all duration-200 ease-out hover:border-[#3b3e4f] hover:bg-[#191a22];
+  }
+
+  /* Micro card lift on hover */
+  .hover-lift {
+    @apply transition-all duration-200 ease-out hover:-translate-y-1 hover:border-[#3e4256] hover:shadow-lg hover:shadow-black/30;
+  }
+
+  /* Smooth button active feedback */
+  .btn-press {
+    @apply active:scale-[0.97] transition-all duration-150;
+  }
+
+  /* Smooth animated text gradient */
+  .animated-gradient-text {
+    background: linear-gradient(90deg, #e3e3e7 0%, #9d7bf6 30%, #72a4f5 55%, #9d7bf6 80%, #e3e3e7 100%);
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: textGradient 6s ease-in-out infinite;
+  }
+
+  /* Page transition wrapper */
+  .page-transition {
+    @apply animate-pageEnter;
   }
 }

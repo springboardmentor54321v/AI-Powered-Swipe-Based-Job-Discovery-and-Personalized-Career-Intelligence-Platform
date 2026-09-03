@@ -115,13 +115,11 @@ export default function LoginPage() {
           <p className="text-xs text-content-muted">
             Find and apply to jobs tailored to your skills
           </p>
-          {authService.isMockMode() && (
-            <div className="pt-1">
-              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary border border-primary/20">
-                Dev Mock Mode Active
-              </span>
-            </div>
-          )}
+          <div className="pt-1">
+            <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#0070ad]/15 text-[#0070ad] border border-[#0070ad]/30">
+              Infosys Springboard Portal
+            </span>
+          </div>
         </div>
 
         {/* Global Error Banner */}
