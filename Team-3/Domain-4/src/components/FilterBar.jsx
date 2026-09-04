@@ -126,9 +126,9 @@ export default function FilterBar({
               className="w-full bg-surface-elevated border border-outline-variant rounded-xl px-3 py-2 text-content focus:border-primary"
             >
               <option value="Any">Any salary</option>
-              <option value="10">₹10+ LPA</option>
-              <option value="20">₹20+ LPA</option>
-              <option value="30">₹30+ LPA</option>
+              <option value="1000000">₹10+ LPA</option>
+              <option value="2000000">₹20+ LPA</option>
+              <option value="3000000">₹30+ LPA</option>
             </select>
           </div>
 

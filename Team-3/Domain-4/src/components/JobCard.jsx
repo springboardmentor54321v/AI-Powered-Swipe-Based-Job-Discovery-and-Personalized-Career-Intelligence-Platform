@@ -212,9 +212,10 @@ export default function JobCard({
 
 function formatSalary(salaryRange, rawSalary) {
   if (salaryRange && typeof salaryRange === 'object') {
-    const min = salaryRange.min ? `$${salaryRange.min.toLocaleString()}` : null;
-    const max = salaryRange.max ? `$${salaryRange.max.toLocaleString()}` : null;
-    if (min && max) return `${min} - ${max}`;
+    // The Job API stores annual salaries in Indian Rupees.
+    const min = salaryRange.min ? `₹${Number(salaryRange.min).toLocaleString('en-IN')}` : null;
+    const max = salaryRange.max ? `₹${Number(salaryRange.max).toLocaleString('en-IN')}` : null;
+    if (min && max) return `${min} - ${max} per year`;
     if (min) return `From ${min}`;
     if (max) return `Up to ${max}`;
   }
