@@ -45,13 +45,17 @@ function PublicPage({ children }) {
   return <AppLayout>{children}</AppLayout>;
 }
 
+function PublicOnlyRoute({ children }) {
+  return authService.isAuthenticated() ? <DashboardRedirect /> : <AppLayout>{children}</AppLayout>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<PublicPage><HomePage /></PublicPage>} />
-        <Route path="/login" element={<PublicPage><LoginPage /></PublicPage>} />
-        <Route path="/register" element={<PublicPage><RegisterPage /></PublicPage>} />
+        <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+        <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />
         <Route path="/discover" element={<ProtectedRoute><Navigate to="/dashboard/job-seeker/discover" replace /></ProtectedRoute>} />
         <Route path="/resume" element={<ProtectedRoute><Navigate to="/dashboard/job-seeker/resume" replace /></ProtectedRoute>} />
