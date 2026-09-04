@@ -41,6 +41,19 @@ function extractErrorMessage(data, status, statusText) {
     }
   }
   if (data.message) return data.message;
+
+  // Django REST Framework commonly responds with a top-level error plus a
+  // `details` object. Prefer the useful field-level reason over "Validation error".
+  if (data.details && typeof data.details === 'object') {
+    const detailMessages = Object.entries(data.details)
+      .flatMap(([key, value]) => {
+        const messages = Array.isArray(value) ? value : [value];
+        return messages.map((message) => `${key}: ${typeof message === 'string' ? message : JSON.stringify(message)}`);
+      })
+      .join(' | ');
+    if (detailMessages) return detailMessages;
+  }
+
   if (data.error) return typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
 
   // DRF field errors object e.g. { email: ["Invalid email"], password: ["Too short"] }

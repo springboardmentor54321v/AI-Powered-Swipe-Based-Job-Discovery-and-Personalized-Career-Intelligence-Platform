@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Briefcase, Building, ShieldCheck, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Briefcase, Building, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import authService from '../services/auth';
@@ -32,12 +32,6 @@ export default function RegisterPage() {
       title: 'Recruiter',
       desc: 'Post jobs and find candidates',
       icon: Building,
-    },
-    {
-      id: 'admin',
-      title: 'Admin',
-      desc: 'Platform management',
-      icon: ShieldCheck,
     },
   ];
 

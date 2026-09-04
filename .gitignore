@@ -1,0 +1,11 @@
+# Generated Python files
+__pycache__/
+*.py[cod]
+
+# Generated frontend files
+node_modules/
+dist/
+
+# Local editor and operating-system files
+.vscode/
+.DS_Store
