@@ -1,0 +1,30 @@
+company_id,name,slug,company_type,industry,headquarters,website,founded_year,employee_count_range
+1,Google,google,MNC,Internet & Cloud Technology,"Mountain View, CA (Bengaluru/Hyderabad)",https://careers.google.com,1998,10000+
+2,Microsoft,microsoft,MNC,Software & AI Solutions,"Redmond, WA (Hyderabad/Bengaluru/Noida)",https://careers.microsoft.com,1975,10000+
+3,Amazon,amazon,MNC,E-commerce & Cloud Computing (AWS),"Seattle, WA (Bengaluru/Hyderabad/Chennai)",https://amazon.jobs,1994,10000+
+4,Adobe,adobe,MNC,Creative & Cloud Software,"San Jose, CA (Noida/Bengaluru)",https://adobe.com/careers,1982,10000+
+5,Tata Consultancy Services (TCS),tcs,MNC,IT Services & Consulting,"Mumbai, India (Pan India)",https://tcs.com/careers,1968,10000+
+6,Infosys,infosys,MNC,Next-Gen Digital Services,"Bengaluru, India",https://infosys.com/careers,1981,10000+
+7,Cisco,cisco,MNC,Networking & Cybersecurity,"San Jose, CA (Bengaluru)",https://cisco.com/careers,1984,10000+
+8,Oracle,oracle,MNC,Database & Enterprise Cloud,"Austin, TX (Hyderabad/Bengaluru)",https://oracle.com/careers,1977,10000+
+9,IBM,ibm,MNC,Hybrid Cloud & Cognitive Enterprise,"Armonk, NY (Bengaluru/Kochi)",https://ibm.com/careers,1911,10000+
+10,Salesforce,salesforce,MNC,CRM & Enterprise SaaS,"San Francisco, CA (Hyderabad/Bengaluru)",https://salesforce.com/careers,1999,10000+
+11,Razorpay,razorpay,Startup,Fintech & Payments,"Bengaluru, Karnataka, India",https://razorpay.com/jobs,2014,1000-5000
+12,Swiggy,swiggy,Startup,Hyperlocal Delivery & Quick Commerce,"Bengaluru, Karnataka, India",https://careers.swiggy.com,2014,5000-10000
+13,CRED,cred,Startup,Fintech & Rewards,"Bengaluru, Karnataka, India",https://cred.club/careers,2018,500-1000
+14,Zepto,zepto,Startup,Quick Commerce,"Mumbai / Bengaluru, India",https://zeptonow.com/careers,2021,1000-5000
+15,Postman,postman,Startup,API Development Platform,"San Francisco, CA & Bengaluru",https://postman.com/careers,2014,500-1000
+16,Zerodha,zerodha,Startup,Fintech & Stock Broking,"Bengaluru, Karnataka, India",https://zerodha.com/careers,2010,1000-5000
+17,Zomato,zomato,Startup,Food Tech & Quick Commerce (Blinkit),"Gurugram, Haryana, India",https://zomato.com/careers,2008,5000-10000
+18,Groww,groww,Startup,Investment Tech & Wealth Management,"Bengaluru, Karnataka, India",https://groww.in/careers,2016,1000-5000
+19,PhonePe,phonepe,Startup,Digital Payments & Financial Services,"Bengaluru, Karnataka, India",https://phonepe.com/careers,2015,5000-10000
+20,Meesho,meesho,Startup,E-Commerce & Social Selling,"Bengaluru, Karnataka, India",https://meesho.io/careers,2015,1000-5000
+21,Urban Company,urban-company,Startup,Home Services & Gig Economy,"Gurugram, Haryana, India",https://urbancompany.com/careers,2014,1000-5000
+22,NovaAI Labs,novaai-labs,Newly Founded,Generative AI & Agentic Workflows,Bengaluru (Remote-First),https://novaailabs.dev,2023,1-20
+23,SynthLogic Systems,synthlogic,Newly Founded,AI Career Intelligence & HR Tech,Pune / Remote,https://synthlogicsys.io,2024,1-15
+24,NeuralScale Dynamics,neuralscale,Newly Founded,Deep Learning & Model Optimization,"Hyderabad, Telangana",https://neuralscale.ai,2023,1-25
+25,PromptCraft AI,promptcraft-ai,Newly Founded,AI Developer Tooling & LLM Eval,Delhi NCR / Remote,https://promptcraft.studio,2024,1-10
+26,DataVortex Technologies,datavortex,Newly Founded,Real-time Vector Search & RAG,"Bengaluru, India",https://datavortex.tech,2023,1-15
+27,CogniGen Systems,cognigen,Newly Founded,Autonomous Agents for Healthcare,Chennai / Remote,https://cognigen.ai,2024,1-12
+28,OmniAgentic AI,omniagentic,Newly Founded,Multi-Agent Code Synthesis,Bengaluru / Remote,https://omniagentic.dev,2024,1-10
+29,ByteForge Tech,byteforge,Newly Founded,Edge AI & Embedded Computing,"Pune, Maharashtra",https://byteforge.io,2023,1-20
