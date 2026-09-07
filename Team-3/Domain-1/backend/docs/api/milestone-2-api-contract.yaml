@@ -1,0 +1,712 @@
+openapi: 3.0.3
+info:
+  title: SwipeX Milestone 2 - Job, Company & Swipe Services API Contract
+  version: 2.0.0
+  description: >-
+    OpenAPI 3.0 contract for SwipeX Milestone 2 covering Job Discovery, Search,
+    Company Directory, and Candidate Swiping services.
+    Maintained by Intern 2 (Backend & Identity Management).
+    All endpoints are routed through the SwipeX API Gateway (/api/v1/).
+
+servers:
+  - url: http://127.0.0.1:8000/api/v1
+    description: Local API Gateway (Django / DRF)
+  - url: http://localhost:8000/api/v1
+    description: Localhost API Gateway
+
+tags:
+  - name: Jobs
+    description: Job discovery, details, and multi-criteria searching
+  - name: Swipes
+    description: Candidate swipe interactions (apply, save, skip) and history
+  - name: Companies
+    description: Company directory and employer profiles
+
+paths:
+  /jobs:
+    get:
+      tags:
+        - Jobs
+      summary: List Job Postings
+      description: >-
+        Public endpoint with optional multi-criteria filtering and pagination.
+        Enables candidates to explore current job listings.
+      operationId: listJobs
+      parameters:
+        - name: page
+          in: query
+          description: "Page number for paginated results (default: 1)"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          description: "Number of items per page (default: 20, max: 100)"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: type
+          in: query
+          description: "Employment type (e.g. Full-time, Internship, Contract)"
+          required: false
+          schema:
+            type: string
+            example: "Full-time"
+        - name: location
+          in: query
+          description: "Filter jobs by location substring (e.g. Hyderabad, Bengaluru)"
+          required: false
+          schema:
+            type: string
+            example: "Hyderabad"
+        - name: remote
+          in: query
+          description: "Filter by remote status"
+          required: false
+          schema:
+            type: boolean
+            example: true
+        - name: salary_min
+          in: query
+          description: "Minimum annual salary filter (in INR)"
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            example: 600000
+        - name: salary_max
+          in: query
+          description: "Maximum annual salary filter (in INR)"
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            example: 1800000
+        - name: skills
+          in: query
+          description: "Comma-separated skill keywords to match (any match)"
+          required: false
+          schema:
+            type: string
+            example: "Python,Django,PostgreSQL"
+        - name: company_type
+          in: query
+          description: "Filter by company type (e.g. Startup, Enterprise, MNC)"
+          required: false
+          schema:
+            type: string
+            example: "Startup"
+      responses:
+        "200":
+          description: Successfully retrieved list of job postings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobListResponse"
+        "400":
+          description: Bad request (invalid query parameter format)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Downstream Job Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayErrorResponse"
+
+  /jobs/{id}:
+    get:
+      tags:
+        - Jobs
+      summary: Get Job Details by ID
+      description: >-
+        Public endpoint. Retrieves comprehensive details for a specific job posting,
+        including description, requirements, company profile, and compensation.
+      operationId: getJobById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Unique identifier of the job posting"
+          schema:
+            type: integer
+            minimum: 1
+            example: 101
+      responses:
+        "200":
+          description: Job details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobDetail"
+        "404":
+          description: Job posting not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  summary: Job not found
+                  value:
+                    error: "Job not found"
+                    detail: "No job posting exists with ID 101."
+                    status_code: 404
+        "503":
+          description: Downstream Job Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayErrorResponse"
+
+  /jobs/search:
+    get:
+      tags:
+        - Jobs
+      summary: Search and Filter Jobs
+      description: >-
+        Advanced search endpoint matching jobs across multiple dimensions: keyword search
+        across title/description, location, experience level, salary brackets, and required skills.
+      operationId: searchJobs
+      parameters:
+        - name: keyword
+          in: query
+          description: "Free-text search term matched against job title and description"
+          required: false
+          schema:
+            type: string
+            example: "Backend Engineer"
+        - name: location
+          in: query
+          description: "City, region, or location string"
+          required: false
+          schema:
+            type: string
+            example: "Bangalore"
+        - name: job_type
+          in: query
+          description: "Employment contract type (Full-time, Part-time, Internship, Contract)"
+          required: false
+          schema:
+            type: string
+            example: "Full-time"
+        - name: salary_min
+          in: query
+          description: "Minimum annual compensation"
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            example: 800000
+        - name: salary_max
+          in: query
+          description: "Maximum annual compensation"
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            example: 2400000
+        - name: experience_level
+          in: query
+          description: "Required experience band (Fresher, Junior, Mid-Level, Senior, Lead)"
+          required: false
+          schema:
+            type: string
+            enum: ["Fresher", "Junior", "Mid-Level", "Senior", "Lead"]
+            example: "Mid-Level"
+        - name: skills
+          in: query
+          description: "Comma-separated required skill tokens"
+          required: false
+          schema:
+            type: string
+            example: "Python,Docker,PostgreSQL"
+        - name: is_remote
+          in: query
+          description: "Filter for remote positions only"
+          required: false
+          schema:
+            type: boolean
+            example: true
+        - name: page
+          in: query
+          description: "Page number for paginated search results"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          description: "Number of items returned per page"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Search results matching the criteria
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobListResponse"
+        "400":
+          description: Invalid search parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Downstream Job/Search Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayErrorResponse"
+
+  /swipes:
+    post:
+      tags:
+        - Swipes
+      summary: Record Candidate Swipe
+      description: >-
+        Protected endpoint. Allows an authenticated job_seeker to record an interaction
+        on a job posting. Supported Milestone 2 swipe actions are apply, save, and skip
+        (with backward compatibility for right/left).
+        Enforces one active record per (user_id, job_id) pair.
+      operationId: recordSwipe
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SwipeRequest"
+      responses:
+        "201":
+          description: Swipe recorded or updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SwipeResponse"
+        "400":
+          description: Validation error (invalid action or missing job_id)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidAction:
+                  summary: Invalid swipe action
+                  value:
+                    error: "Validation Error"
+                    detail: "action must be one of: apply, save, skip (or right, left)"
+                    status_code: 400
+        "401":
+          description: Unauthorized - missing or expired JWT access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                unauthorized:
+                  summary: Missing token
+                  value:
+                    error: "Authentication credentials were not provided."
+                    status_code: 401
+        "403":
+          description: Forbidden - authenticated user is not a job_seeker
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                forbiddenRole:
+                  summary: Recruiter attempting to swipe
+                  value:
+                    error: "Forbidden"
+                    detail: "Only candidates with the 'job_seeker' role can perform swipe actions."
+                    status_code: 403
+        "404":
+          description: Target job_id does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                jobNotFound:
+                  summary: Job not found
+                  value:
+                    error: "Job not found"
+                    detail: "Cannot swipe on non-existent job ID 99999."
+                    status_code: 404
+        "503":
+          description: Downstream Swipe Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayErrorResponse"
+
+  /companies:
+    get:
+      tags:
+        - Companies
+      summary: List Companies
+      description: >-
+        Public directory endpoint. Retrieves list of employer companies, industry sectors,
+        headquarters, and company metadata.
+      operationId: listCompanies
+      parameters:
+        - name: page
+          in: query
+          description: "Page number for pagination"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          description: "Number of companies per page"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: industry
+          in: query
+          description: "Filter by industry sector (e.g. Software, Financial Services, Healthcare)"
+          required: false
+          schema:
+            type: string
+            example: "Software"
+        - name: company_type
+          in: query
+          description: "Filter by organizational tier (e.g. Startup, Enterprise, MNC)"
+          required: false
+          schema:
+            type: string
+            example: "Startup"
+        - name: search
+          in: query
+          description: "Keyword search across company name"
+          required: false
+          schema:
+            type: string
+            example: "Tech"
+      responses:
+        "200":
+          description: Successfully retrieved list of companies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyListResponse"
+        "400":
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Downstream Company Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayErrorResponse"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >-
+        SwipeX stateless JWT Bearer token issued by POST /api/v1/auth/login or
+        GET /api/v1/auth/oauth/google/callback. Format: Authorization: Bearer <access_token>
+
+  schemas:
+    SalaryRange:
+      type: object
+      properties:
+        min:
+          type: integer
+          nullable: true
+          example: 600000
+          description: "Minimum annual salary in INR"
+        max:
+          type: integer
+          nullable: true
+          example: 1500000
+          description: "Maximum annual salary in INR"
+
+    Job:
+      type: object
+      required:
+        - job_id
+        - title
+        - company
+        - location
+        - remote
+        - salary_range
+        - skills
+        - posted_at
+      properties:
+        job_id:
+          type: integer
+          example: 101
+          description: "Unique database ID of the job posting"
+        title:
+          type: string
+          example: "Senior Python Developer"
+          description: "Job role title"
+        company:
+          type: string
+          example: "Acme Cloud Solutions"
+          description: "Registered name of hiring company"
+        company_type:
+          type: string
+          example: "Enterprise"
+          description: "Tier or category of the company"
+        location:
+          type: string
+          example: "Hyderabad, India"
+          description: "Primary geographic location or office"
+        remote:
+          type: boolean
+          example: true
+          description: "True if remote/work-from-home is supported"
+        salary_range:
+          $ref: "#/components/schemas/SalaryRange"
+        skills:
+          type: array
+          items:
+            type: string
+          example: ["Python", "Django", "PostgreSQL", "Docker"]
+          description: "Normalized list of technical and domain skills required"
+        posted_at:
+          type: string
+          format: date-time
+          example: "2026-09-01T10:00:00Z"
+          description: "Timestamp when posting was published"
+        experience_level:
+          type: string
+          example: "Mid-Level"
+          description: "Candidate experience seniority level"
+        applicant_count:
+          type: integer
+          example: 14
+          description: "Total number of applications/swipes received"
+
+    JobDetail:
+      allOf:
+        - $ref: "#/components/schemas/Job"
+        - type: object
+          required:
+            - description
+            - industry
+          properties:
+            description:
+              type: string
+              example: "We are seeking a seasoned Python/Django engineer to scale microservice gateways..."
+              description: "Comprehensive job responsibilities, qualifications, and benefits"
+            industry:
+              type: string
+              example: "Information Technology"
+              description: "Industry vertical of the employer"
+            company_id:
+              type: integer
+              example: 12
+              description: "Relational ID of the company profile"
+
+    PaginationMeta:
+      type: object
+      required:
+        - total_count
+        - page
+        - page_size
+        - total_pages
+      properties:
+        total_count:
+          type: integer
+          example: 1420
+          description: "Total number of matching records in database"
+        page:
+          type: integer
+          example: 1
+          description: "Current page number"
+        page_size:
+          type: integer
+          example: 20
+          description: "Number of items on current page"
+        total_pages:
+          type: integer
+          example: 71
+          description: "Total pages available under current filters"
+        has_next:
+          type: boolean
+          example: true
+        has_prev:
+          type: boolean
+          example: false
+
+    JobListResponse:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 1420
+        pagination:
+          $ref: "#/components/schemas/PaginationMeta"
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/Job"
+
+    SwipeRequest:
+      type: object
+      required:
+        - job_id
+        - action
+      properties:
+        job_id:
+          type: integer
+          example: 101
+          description: "Target job identifier to swipe on"
+        action:
+          type: string
+          enum: ["apply", "save", "skip", "right", "left"]
+          example: "apply"
+          description: >-
+            Milestone 2 swipe action: apply, save, skip (or legacy right, left)
+
+    SwipeResponse:
+      type: object
+      required:
+        - swipe_id
+        - job_id
+        - action
+        - swiped_at
+      properties:
+        swipe_id:
+          type: integer
+          example: 45
+          description: "Unique identifier of recorded swipe record"
+        job_id:
+          type: integer
+          example: 101
+        action:
+          type: string
+          example: "apply"
+          description: "Action recorded for this candidate and job"
+        swiped_at:
+          type: string
+          format: date-time
+          example: "2026-09-07T14:30:00Z"
+        status:
+          type: string
+          example: "recorded"
+          description: "Confirmation status (recorded or updated)"
+
+    Company:
+      type: object
+      required:
+        - id
+        - name
+        - company_type
+        - industry
+        - headquarters
+      properties:
+        id:
+          type: integer
+          example: 12
+        name:
+          type: string
+          example: "Acme Cloud Solutions"
+        company_type:
+          type: string
+          example: "Enterprise"
+          description: "Category classification (Startup, Mid-Market, Enterprise, MNC)"
+        industry:
+          type: string
+          example: "Information Technology"
+        headquarters:
+          type: string
+          example: "Hyderabad, Telangana"
+        founded_year:
+          type: integer
+          nullable: true
+          example: 2018
+        website:
+          type: string
+          nullable: true
+          example: "https://acmecloud.example.com"
+        active_jobs_count:
+          type: integer
+          example: 8
+          description: "Current number of open positions posted by this company"
+
+    CompanyListResponse:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 150
+        pagination:
+          $ref: "#/components/schemas/PaginationMeta"
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/Company"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - status_code
+      properties:
+        error:
+          type: string
+          example: "Bad Request"
+        detail:
+          type: string
+          example: "Detailed error description or field error breakdown."
+        status_code:
+          type: integer
+          example: 400
+
+    GatewayErrorResponse:
+      type: object
+      required:
+        - error
+        - service
+        - detail
+        - status_code
+      properties:
+        error:
+          type: string
+          example: "Job Service Unavailable"
+        service:
+          type: string
+          example: "Job Service"
+        detail:
+          type: string
+          example: "Downstream Job Service connection refused at http://127.0.0.1:8001"
+        status_code:
+          type: integer
+          example: 503
