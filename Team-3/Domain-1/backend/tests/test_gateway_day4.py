@@ -72,7 +72,7 @@ class GatewayDay4Tests(TestCase):
         }
         mock_request.return_value = mock_resp
 
-        res = self.client.get("/api/v1/jobs")
+        res = self.client.get("/api/v1/jobs/")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data["jobs"]), 1)
         self.assertEqual(res.data["jobs"][0]["title"], "Software Engineer")
@@ -88,7 +88,7 @@ class GatewayDay4Tests(TestCase):
         mock_resp.json.return_value = {"jobs": []}
         mock_request.return_value = mock_resp
 
-        query_url = "/api/v1/jobs?location=Hyderabad&remote=true&skills=python,django"
+        query_url = "/api/v1/jobs/?location=Hyderabad&remote=true&skills=python,django"
         res = self.client.get(query_url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -135,8 +135,8 @@ class GatewayDay4Tests(TestCase):
         mock_request.return_value = mock_resp
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.candidate_token}")
-        swipe_payload = {"job_id": "101", "direction": "right"}
-        res = self.client.post("/api/v1/swipes", swipe_payload, format="json")
+        swipe_payload = {"job_id": 101, "action": "apply"}
+        res = self.client.post("/api/v1/swipes/", swipe_payload, format="json")
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res.data["status"], "recorded")
@@ -171,7 +171,7 @@ class GatewayDay4Tests(TestCase):
     # ------------------------------------------------------------
     def test_06_protected_route_without_jwt(self):
         self.client.credentials() # Clear headers
-        res = self.client.post("/api/v1/swipes", {"job_id": "101", "direction": "right"}, format="json")
+        res = self.client.post("/api/v1/swipes/", {"job_id": 101, "action": "apply"}, format="json")
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
         res_history = self.client.get("/api/v1/swipes/history")
@@ -182,7 +182,7 @@ class GatewayDay4Tests(TestCase):
     # ------------------------------------------------------------
     def test_07_protected_route_with_invalid_jwt(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer corrupted.or.invalid.token")
-        res = self.client.post("/api/v1/swipes", {"job_id": "101", "direction": "right"}, format="json")
+        res = self.client.post("/api/v1/swipes/", {"job_id": 101, "action": "apply"}, format="json")
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     # ------------------------------------------------------------
@@ -191,12 +191,12 @@ class GatewayDay4Tests(TestCase):
     def test_08_protected_route_with_wrong_role(self):
         # Recruiter trying to swipe on jobs -> 403 Forbidden
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.recruiter_token}")
-        res = self.client.post("/api/v1/swipes", {"job_id": "101", "direction": "right"}, format="json")
+        res = self.client.post("/api/v1/swipes/", {"job_id": 101, "action": "apply"}, format="json")
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
         # Admin trying to swipe on jobs -> 403 Forbidden
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.admin_token}")
-        res_admin = self.client.post("/api/v1/swipes", {"job_id": "101", "direction": "right"}, format="json")
+        res_admin = self.client.post("/api/v1/swipes/", {"job_id": 101, "action": "apply"}, format="json")
         self.assertEqual(res_admin.status_code, status.HTTP_403_FORBIDDEN)
 
     # ------------------------------------------------------------
@@ -234,8 +234,8 @@ class GatewayDay4Tests(TestCase):
         res_ats = self.client.get("/api/v1/resume/res_123/ats-score")
         self.assertEqual(res_ats.status_code, status.HTTP_200_OK)
 
-        # GET /api/v1/recommendations
-        res_rec = self.client.get("/api/v1/recommendations")
+        # GET /api/v1/recommendations/
+        res_rec = self.client.get("/api/v1/recommendations/")
         self.assertEqual(res_rec.status_code, status.HTTP_200_OK)
 
     # ------------------------------------------------------------
@@ -245,7 +245,7 @@ class GatewayDay4Tests(TestCase):
     def test_downstream_service_unavailable(self, mock_request):
         mock_request.side_effect = requests.exceptions.ConnectionError("Connection refused")
 
-        res = self.client.get("/api/v1/jobs")
+        res = self.client.get("/api/v1/jobs/")
         self.assertEqual(res.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
         self.assertIn("error", res.data)
         self.assertEqual(res.data["status_code"], 503)

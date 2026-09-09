@@ -1,1 +1,0 @@
-# SwipeX API Gateway Module

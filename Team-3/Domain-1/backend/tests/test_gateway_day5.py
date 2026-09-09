@@ -151,7 +151,7 @@ class GatewayDay5Tests(TestCase):
         mock_request.return_value = mock_response
 
         res = self.client.get(
-            "/api/v1/recommendations?resume_id=test-uuid-12345",
+            "/api/v1/recommendations/?resume_id=test-uuid-12345",
             HTTP_AUTHORIZATION=f"Bearer {self.candidate_token}"
         )
 
@@ -217,7 +217,7 @@ class GatewayDay5Tests(TestCase):
         mock_request.side_effect = requests.exceptions.ConnectionError("Connection refused")
 
         res = self.client.get(
-            "/api/v1/recommendations?resume_id=123",
+            "/api/v1/recommendations/?resume_id=123",
             HTTP_AUTHORIZATION=f"Bearer {self.candidate_token}"
         )
         self.assertEqual(res.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -230,7 +230,7 @@ class GatewayDay5Tests(TestCase):
         mock_request.side_effect = requests.exceptions.Timeout("Read timeout")
 
         res = self.client.get(
-            "/api/v1/recommendations?resume_id=123",
+            "/api/v1/recommendations/?resume_id=123",
             HTTP_AUTHORIZATION=f"Bearer {self.candidate_token}"
         )
         self.assertEqual(res.status_code, status.HTTP_504_GATEWAY_TIMEOUT)
@@ -258,15 +258,15 @@ class GatewayDay5Tests(TestCase):
         mock_request.return_value = mock_response
 
         # Jobs
-        res_jobs = self.client.get("/api/v1/jobs")
+        res_jobs = self.client.get("/api/v1/jobs/")
         self.assertEqual(res_jobs.status_code, status.HTTP_200_OK)
 
         # Swipes
         mock_response.status_code = 201
         mock_response.json.return_value = {"status": "recorded"}
         res_swipe = self.client.post(
-            "/api/v1/swipes",
-            {"job_id": "101", "direction": "right"},
+            "/api/v1/swipes/",
+            {"job_id": 101, "action": "apply"},
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.candidate_token}"
         )

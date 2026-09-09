@@ -38,3 +38,8 @@ class IsAdmin(HasRole):
     """Allows access strictly to users with the ADMIN role."""
     allowed_roles = [RoleEnum.ADMIN]
     message = "Permission denied: Requires ADMIN role."
+
+class IsJobSeekerOrRecruiter(HasRole):
+    """Allows access to users with either JOB_SEEKER or RECRUITER role."""
+    allowed_roles = [RoleEnum.JOB_SEEKER, RoleEnum.RECRUITER]
+    message = "Permission denied: Requires JOB_SEEKER or RECRUITER role."

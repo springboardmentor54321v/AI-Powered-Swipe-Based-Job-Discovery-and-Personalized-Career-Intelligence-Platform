@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import UploadResumePlaceholderView, ATSScorePlaceholderView
+from .views import UploadResumeView, ATSScoreView
 
 urlpatterns = [
-    path("upload", UploadResumePlaceholderView.as_view(), name="resume-upload"),
-    path("<str:resume_id>/ats-score", ATSScorePlaceholderView.as_view(), name="resume-ats-score"),
+    path("upload", UploadResumeView.as_view(), name="resume-upload"),
+    path("<str:resume_id>/ats-score", ATSScoreView.as_view(), name="resume-ats-score"),
 ]

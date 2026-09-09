@@ -221,9 +221,12 @@ class AuthenticationDay3Tests(TestCase):
     def test_13_google_oauth_behavior(self):
         url = "/api/v1/auth/oauth/google"
         res = self.client.get(url)
-        # Without real credentials configured locally, returns configuration guidance status
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn("configured_redirect_uri", res.data)
+        # If credentials exist in .env, redirects to Google (302); otherwise 200 guidance
+        self.assertIn(res.status_code, [status.HTTP_200_OK, status.HTTP_302_FOUND])
+        if res.status_code == status.HTTP_302_FOUND:
+            self.assertTrue(res.url.startswith("https://accounts.google.com"))
+        else:
+            self.assertIn("configured_redirect_uri", res.data)
 
         # Test callback with missing code
         res_cb = self.client.get("/api/v1/auth/oauth/google/callback")
