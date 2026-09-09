@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 from .authentication import JWTAuthentication
 from .permissions import IsAuthenticated, IsJobSeeker, IsRecruiter, IsAdmin
@@ -11,6 +12,11 @@ from .serializers import (
     LoginSerializer,
     RefreshTokenSerializer,
     CurrentUserSerializer,
+    RegisterResponseSerializer,
+    LoginResponseSerializer,
+    RefreshTokenResponseSerializer,
+    MessageResponseSerializer,
+    GoogleOAuthResponseSerializer,
 )
 from .oauth_service import (
     is_oauth_configured,
@@ -26,7 +32,18 @@ class RegisterView(APIView):
     Creates a new user account with hashed password and assigned role.
     """
     permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer
 
+    @extend_schema(
+        summary="Register User Account",
+        description="Creates a new user account with hashed password and assigned role (job_seeker or recruiter).",
+        request=RegisterSerializer,
+        responses={
+            201: RegisterResponseSerializer,
+            400: OpenApiTypes.OBJECT,
+        },
+        tags=["Authentication"],
+    )
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if not serializer.is_valid():
@@ -48,7 +65,18 @@ class LoginView(APIView):
     Authenticates user credentials and returns access token, refresh token, and role.
     """
     permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
 
+    @extend_schema(
+        summary="User Login",
+        description="Authenticates user credentials and returns access token, refresh token, and user role.",
+        request=LoginSerializer,
+        responses={
+            200: LoginResponseSerializer,
+            401: OpenApiTypes.OBJECT,
+        },
+        tags=["Authentication"],
+    )
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
@@ -75,6 +103,15 @@ class GoogleOAuthView(APIView):
     """
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        summary="Initiate Google OAuth2 Sign-In",
+        description="Initiates Google OAuth2 authorization flow. Redirects to Google or returns setup instructions if unconfigured.",
+        responses={
+            200: GoogleOAuthResponseSerializer,
+            302: OpenApiTypes.STR,
+        },
+        tags=["Authentication"],
+    )
     def get(self, request):
         if not is_oauth_configured():
             client_id, _, redirect_uri = get_oauth_config()
@@ -102,6 +139,24 @@ class GoogleOAuthCallbackView(APIView):
     """
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        summary="Google OAuth2 Callback",
+        description="Handles Google OAuth2 redirect callback with authorization code and exchanges it for tokens.",
+        parameters=[
+            OpenApiParameter(
+                name="code",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description="Authorization code returned by Google OAuth2"
+            )
+        ],
+        responses={
+            200: LoginResponseSerializer,
+            400: OpenApiTypes.OBJECT,
+        },
+        tags=["Authentication"],
+    )
     def get(self, request):
         code = request.query_params.get("code")
         if not code:
@@ -126,7 +181,18 @@ class RefreshTokenView(APIView):
     Obtains a newly minted access token using a valid refresh token.
     """
     permission_classes = [AllowAny]
+    serializer_class = RefreshTokenSerializer
 
+    @extend_schema(
+        summary="Refresh Access Token",
+        description="Obtains a newly minted access token using a valid refresh token.",
+        request=RefreshTokenSerializer,
+        responses={
+            200: RefreshTokenResponseSerializer,
+            401: OpenApiTypes.OBJECT,
+        },
+        tags=["Authentication"],
+    )
     def post(self, request):
         serializer = RefreshTokenSerializer(data=request.data)
         if not serializer.is_valid():
@@ -149,7 +215,17 @@ class CurrentUserView(APIView):
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    serializer_class = CurrentUserSerializer
 
+    @extend_schema(
+        summary="Get Current User Profile",
+        description="Returns current authenticated user identity and role from JWT token.",
+        responses={
+            200: CurrentUserSerializer,
+            401: OpenApiTypes.OBJECT,
+        },
+        tags=["Authentication"],
+    )
     def get(self, request):
         serializer = CurrentUserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -164,6 +240,16 @@ class JobSeekerProtectedView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsJobSeeker]
 
+    @extend_schema(
+        summary="Candidate Role Verification",
+        description="Protected test endpoint accessible exclusively by JOB_SEEKER role.",
+        responses={
+            200: MessageResponseSerializer,
+            401: OpenApiTypes.OBJECT,
+            403: OpenApiTypes.OBJECT,
+        },
+        tags=["RBAC Verification"],
+    )
     def get(self, request):
         return Response(
             {
@@ -181,6 +267,16 @@ class RecruiterProtectedView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsRecruiter]
 
+    @extend_schema(
+        summary="Recruiter Role Verification",
+        description="Protected test endpoint accessible exclusively by RECRUITER role.",
+        responses={
+            200: MessageResponseSerializer,
+            401: OpenApiTypes.OBJECT,
+            403: OpenApiTypes.OBJECT,
+        },
+        tags=["RBAC Verification"],
+    )
     def get(self, request):
         return Response(
             {
@@ -198,6 +294,16 @@ class AdminProtectedView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdmin]
 
+    @extend_schema(
+        summary="Admin Role Verification",
+        description="Protected test endpoint accessible exclusively by ADMIN role.",
+        responses={
+            200: MessageResponseSerializer,
+            401: OpenApiTypes.OBJECT,
+            403: OpenApiTypes.OBJECT,
+        },
+        tags=["RBAC Verification"],
+    )
     def get(self, request):
         return Response(
             {

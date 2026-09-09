@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status, serializers
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 from apps.auth_service.authentication import JWTAuthentication
 from apps.auth_service.permissions import IsJobSeeker
@@ -101,8 +101,10 @@ class ListJobsView(APIView):
                 description="Filter by company type (e.g. Startup, Enterprise, MNC)"
             ),
         ],
+        operation_id="list_jobs",
         summary="List Job Postings",
         description="Public endpoint. Fetches paginated job listings with optional multi-criteria filtering from the downstream Job Service.",
+        responses={200: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
         tags=["Jobs"],
     )
     def get(self, request):
@@ -132,8 +134,10 @@ class JobDetailView(APIView):
                 description="Unique identifier of the job posting (e.g. 101)"
             ),
         ],
+        operation_id="get_job_detail",
         summary="Get Job Details by ID",
         description="Public endpoint. Fetches comprehensive job details including description, company info, and compensation from the downstream Job Service.",
+        responses={200: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
         tags=["Jobs"],
     )
     def get(self, request, job_id):
@@ -193,6 +197,7 @@ class RecordSwipeView(APIView):
     permission_classes = [IsJobSeeker]
 
     @extend_schema(
+        operation_id="record_candidate_swipe",
         request=SwipeActionSerializer,
         summary="Record Candidate Swipe",
         description=(
@@ -200,6 +205,14 @@ class RecordSwipeView(APIView):
             "Protected endpoint requiring Bearer JWT. The authenticated user's "
             "identity is securely injected — client-supplied identity headers are stripped."
         ),
+        responses={
+            200: OpenApiTypes.OBJECT,
+            201: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT,
+            401: OpenApiTypes.OBJECT,
+            403: OpenApiTypes.OBJECT,
+            503: OpenApiTypes.OBJECT,
+        },
         tags=["Swipes"],
     )
     def post(self, request):
@@ -265,8 +278,10 @@ class SwipeHistoryView(APIView):
     permission_classes = [IsJobSeeker]
 
     @extend_schema(
+        operation_id="get_candidate_swipe_history",
         summary="Get Candidate Swipe History",
         description="Protected endpoint for JOB_SEEKER role. Retrieves the authenticated candidate's recorded swipe history from the downstream Swipe Service.",
+        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
         tags=["Swipes"],
     )
     def get(self, request):

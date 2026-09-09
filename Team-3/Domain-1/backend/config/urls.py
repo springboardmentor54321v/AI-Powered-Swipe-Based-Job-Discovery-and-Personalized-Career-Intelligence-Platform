@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from drf_spectacular.utils import extend_schema, OpenApiTypes
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
@@ -14,6 +15,12 @@ class HealthCheckView(APIView):
     Development health check endpoint (GET /health).
     Verifies Django backend process is running and responding.
     """
+    @extend_schema(
+        summary="Service Health Check",
+        description="Verifies Django backend process is alive and responding.",
+        responses={200: OpenApiTypes.OBJECT},
+        tags=["System"],
+    )
     def get(self, request):
         return Response({"status": "ok"}, status=status.HTTP_200_OK)
 

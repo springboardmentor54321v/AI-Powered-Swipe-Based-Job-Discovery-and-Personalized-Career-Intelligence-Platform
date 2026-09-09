@@ -16,7 +16,51 @@ PORT = 8001
 
 SAMPLE_JOBS = [
     {
-        "id": "101",
+        "id": 1,
+        "title": "Software Engineer",
+        "company": "Microsoft India",
+        "location": "Hyderabad",
+        "remote": True,
+        "salary_min": 1200000,
+        "salary_max": 2000000,
+        "skills": ["c#", "azure", "react", "sql", "docker"],
+        "description": "Create cloud-native services used by customers worldwide."
+    },
+    {
+        "id": 2,
+        "title": "Frontend Developer",
+        "company": "Postman",
+        "location": "Bengaluru",
+        "remote": True,
+        "salary_min": 800000,
+        "salary_max": 1300000,
+        "skills": ["javascript", "typescript", "react", "css", "rest api"],
+        "description": "Build beautiful developer experiences for API teams."
+    },
+    {
+        "id": 3,
+        "title": "AI Research Intern",
+        "company": "Sarvam AI",
+        "location": "Bengaluru",
+        "remote": True,
+        "salary_min": 300000,
+        "salary_max": 480000,
+        "skills": ["python", "nlp", "pytorch", "transformers", "pandas"],
+        "description": "Evaluate Indian-language language models and data pipelines."
+    },
+    {
+        "id": 4,
+        "title": "DevOps Engineer",
+        "company": "Razorpay",
+        "location": "Pune",
+        "remote": True,
+        "salary_min": 850000,
+        "salary_max": 1400000,
+        "skills": ["docker", "kubernetes", "aws", "linux", "github actions"],
+        "description": "Maintain CI/CD systems and container infrastructure."
+    },
+    {
+        "id": 101,
         "title": "Full Stack Python Developer",
         "company": "Tech Corp",
         "location": "Hyderabad",
@@ -27,7 +71,7 @@ SAMPLE_JOBS = [
         "description": "Develop full-stack web applications using Django REST Framework and React."
     },
     {
-        "id": "102",
+        "id": 102,
         "title": "Backend Systems Engineer",
         "company": "SwipeX Labs",
         "location": "Bangalore",
@@ -38,7 +82,7 @@ SAMPLE_JOBS = [
         "description": "Scale high-throughput API gateway and microservice architecture."
     },
     {
-        "id": "103",
+        "id": 103,
         "title": "Frontend Engineer (React)",
         "company": "Innovate Ltd",
         "location": "Hyderabad",
@@ -58,7 +102,7 @@ class JobServiceHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
-        self.wfile.write(json.dumps(data, indent=2).encode("utf-8"))
+        self.wfile.write(json.dumps(data).encode("utf-8"))
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -67,11 +111,13 @@ class JobServiceHandler(BaseHTTPRequestHandler):
 
         # GET /api/v1/jobs
         if path in ["/api/v1/jobs", "/api/v1/jobs/"]:
-            results = SAMPLE_JOBS
-            # Filter by location
+            results = list(SAMPLE_JOBS)
+
+            # Filter by location substring
             if "location" in query:
                 loc = query["location"][0].lower()
                 results = [j for j in results if loc in j["location"].lower()]
+
             # Filter by remote
             if "remote" in query:
                 is_remote = query["remote"][0].lower() == "true"
@@ -84,10 +130,10 @@ class JobServiceHandler(BaseHTTPRequestHandler):
         if path.startswith("/api/v1/jobs/"):
             job_id = path.split("/")[-1]
             for job in SAMPLE_JOBS:
-                if job["id"] == job_id:
+                if str(job["id"]) == str(job_id):
                     self._send_json(job)
                     return
-            self._send_json({"error": f"Job {job_id} not found"}, status_code=404)
+            self._send_json({"detail": f"Job {job_id} not found"}, status_code=404)
             return
 
         # GET /api/v1/swipes/history
@@ -100,7 +146,7 @@ class JobServiceHandler(BaseHTTPRequestHandler):
             })
             return
 
-        self._send_json({"error": "Route not found in Job Service"}, status_code=404)
+        self._send_json({"detail": "Route not found in Job Service"}, status_code=404)
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -115,12 +161,23 @@ class JobServiceHandler(BaseHTTPRequestHandler):
 
         # POST /api/v1/swipes
         if path in ["/api/v1/swipes", "/api/v1/swipes/"]:
+            target_job_id = payload.get("job_id")
+            if target_job_id is None:
+                self._send_json({"detail": "job_id is required"}, status_code=400)
+                return
+
+            # Check if job exists in database
+            job = next((j for j in SAMPLE_JOBS if str(j["id"]) == str(target_job_id)), None)
+            if not job:
+                self._send_json({"detail": f"Job {target_job_id} not found"}, status_code=404)
+                return
+
             user_id = self.headers.get("X-User-Id", "anonymous")
             user_role = self.headers.get("X-User-Role", "anonymous")
             swipe_record = {
                 "user_id": user_id,
                 "user_role": user_role,
-                "job_id": payload.get("job_id", "101"),
+                "job_id": job["id"],
                 "direction": payload.get("direction", "right"),
                 "status": "recorded"
             }

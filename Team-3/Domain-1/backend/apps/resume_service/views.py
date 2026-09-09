@@ -15,7 +15,7 @@ from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import serializers
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 from apps.auth_service.authentication import JWTAuthentication
 from apps.auth_service.permissions import IsJobSeeker, IsJobSeekerOrRecruiter
@@ -52,8 +52,10 @@ class UploadResumeView(APIView):
                 "required": ["file"]
             }
         },
+        operation_id="upload_candidate_resume",
         summary="Upload Candidate Resume (PDF)",
         description="Uploads candidate PDF resume. Protected endpoint for JOB_SEEKER. Forwards multipart/form-data to Intern 3 Resume Service.",
+        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
         tags=["Resume"],
     )
     def post(self, request):
@@ -93,8 +95,10 @@ class ATSScoreView(APIView):
                 description="Target Job ID from dataset to compare skills against"
             ),
         ],
+        operation_id="get_resume_ats_score",
         summary="Get Resume ATS Match Score",
         description="Retrieves ATS match score and missing keywords for given resume_id and job_id. Accessible by JOB_SEEKER and RECRUITER.",
+        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
         tags=["Resume"],
     )
     def get(self, request, resume_id):
@@ -133,8 +137,10 @@ class RecommendationsView(APIView):
                 description="Candidate User ID"
             ),
         ],
+        operation_id="get_career_recommendations",
         summary="Get Career Recommendations",
         description="Returns recommended jobs matching candidate skills from Intern 3 Recommendation Service. Protected endpoint for JOB_SEEKER.",
+        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
         tags=["Resume"],
     )
     def get(self, request):
