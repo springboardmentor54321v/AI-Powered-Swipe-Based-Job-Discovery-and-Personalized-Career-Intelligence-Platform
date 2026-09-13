@@ -1,0 +1,59 @@
+\if :{?companies_csv}
+\else
+  \echo 'Set companies_csv with -v companies_csv=...'
+  \quit
+\endif
+\if :{?jobs_csv}
+\else
+  \echo 'Set jobs_csv with -v jobs_csv=...'
+  \quit
+\endif
+
+CREATE TEMP TABLE seed_companies (
+  source_company_id TEXT, name TEXT, company_type TEXT, about TEXT, company_size TEXT,
+  industry TEXT, is_newly_founded TEXT, review_count TEXT, aggregate_rating TEXT
+);
+\copy seed_companies FROM :'companies_csv' WITH (FORMAT csv, HEADER true)
+
+INSERT INTO companies (source_company_id, name, company_type, about, company_size, industry, is_newly_founded, review_count, aggregate_rating)
+SELECT source_company_id, name, company_type::company_type, NULLIF(about, ''), NULLIF(company_size, ''), NULLIF(industry, ''),
+       is_newly_founded::boolean, NULLIF(review_count, '')::integer, NULLIF(aggregate_rating, '')::numeric(2,1)
+FROM seed_companies
+ON CONFLICT (source_company_id) DO UPDATE SET
+  name = EXCLUDED.name, company_type = EXCLUDED.company_type, about = EXCLUDED.about,
+  company_size = EXCLUDED.company_size, industry = EXCLUDED.industry,
+  is_newly_founded = EXCLUDED.is_newly_founded, review_count = EXCLUDED.review_count,
+  aggregate_rating = EXCLUDED.aggregate_rating, updated_at = now();
+
+CREATE TEMP TABLE seed_jobs (
+  source_job_id TEXT, source_company_id TEXT, company_type TEXT, title TEXT, description TEXT,
+  location TEXT, is_remote TEXT, job_type TEXT, skills_pipe_delimited TEXT, minimum_salary TEXT,
+  maximum_salary TEXT, salary_currency TEXT, salary_display TEXT, minimum_experience TEXT,
+  maximum_experience TEXT, posted_at TEXT, raw_job_uploaded TEXT, applicant_count TEXT, is_active TEXT
+);
+\copy seed_jobs FROM :'jobs_csv' WITH (FORMAT csv, HEADER true)
+
+INSERT INTO jobs (
+  source_job_id, company_id, title, description, location, is_remote, job_type, skills,
+  minimum_salary, maximum_salary, salary_currency, salary_display, minimum_experience,
+  maximum_experience, posted_at, raw_job_uploaded, applicant_count, is_active
+)
+SELECT s.source_job_id, c.id, s.title, NULLIF(s.description, ''), s.location, s.is_remote::boolean,
+       NULLIF(s.job_type, ''), CASE WHEN NULLIF(s.skills_pipe_delimited, '') IS NULL THEN ARRAY[]::text[] ELSE string_to_array(s.skills_pipe_delimited, '|') END,
+       NULLIF(s.minimum_salary, '')::numeric(14,2), NULLIF(s.maximum_salary, '')::numeric(14,2), s.salary_currency,
+       NULLIF(s.salary_display, ''), NULLIF(s.minimum_experience, '')::numeric(4,1), NULLIF(s.maximum_experience, '')::numeric(4,1),
+       NULLIF(s.posted_at, '')::timestamptz, NULLIF(s.raw_job_uploaded, ''), NULLIF(s.applicant_count, '')::integer, s.is_active::boolean
+FROM seed_jobs s JOIN companies c ON c.source_company_id = s.source_company_id
+ON CONFLICT (source_job_id) DO UPDATE SET
+  company_id = EXCLUDED.company_id, title = EXCLUDED.title, description = EXCLUDED.description,
+  location = EXCLUDED.location, is_remote = EXCLUDED.is_remote, job_type = EXCLUDED.job_type,
+  skills = EXCLUDED.skills, minimum_salary = EXCLUDED.minimum_salary, maximum_salary = EXCLUDED.maximum_salary,
+  salary_currency = EXCLUDED.salary_currency, salary_display = EXCLUDED.salary_display,
+  minimum_experience = EXCLUDED.minimum_experience, maximum_experience = EXCLUDED.maximum_experience,
+  posted_at = EXCLUDED.posted_at, raw_job_uploaded = EXCLUDED.raw_job_uploaded,
+  applicant_count = EXCLUDED.applicant_count, is_active = EXCLUDED.is_active, updated_at = now();
+
+ANALYZE companies;
+ANALYZE jobs;
+SELECT 'companies' AS entity, COUNT(*) AS rows FROM companies
+UNION ALL SELECT 'jobs', COUNT(*) FROM jobs;
