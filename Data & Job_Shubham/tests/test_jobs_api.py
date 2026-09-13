@@ -24,7 +24,6 @@ def test_get_jobs_unfiltered(client: TestClient):
     jobs = response.json()
     assert isinstance(jobs, list)
     assert len(jobs) > 0
-    # Check SRS 7.2 interface contract fields
     first_job = jobs[0]
     assert "job_id" in first_job
     assert "title" in first_job
@@ -34,11 +33,12 @@ def test_get_jobs_unfiltered(client: TestClient):
     assert "salary_range" in first_job
     assert "skills" in first_job
     assert "posted_at" in first_job
+    assert "freshness_label" in first_job
+    assert "is_early_applicant" in first_job
     assert isinstance(first_job["skills"], list)
 
 
 def test_get_jobs_filter_by_company_type(client: TestClient):
-    # Test MNC filter
     response_mnc = client.get("/api/v1/jobs?type=MNC")
     assert response_mnc.status_code == 200
     jobs_mnc = response_mnc.json()
@@ -46,7 +46,6 @@ def test_get_jobs_filter_by_company_type(client: TestClient):
     for j in jobs_mnc:
         assert j["company_type"] == "MNC"
 
-    # Test Newly Founded filter
     response_startup = client.get("/api/v1/jobs?type=Newly Founded")
     assert response_startup.status_code == 200
     jobs_startup = response_startup.json()
@@ -84,8 +83,27 @@ def test_get_jobs_filter_by_salary(client: TestClient):
             assert j["salary_max"] >= min_sal
 
 
+def test_search_jobs_dedicated_endpoint(client: TestClient):
+    # Search keyword "Python FastAPI"
+    response = client.get("/api/v1/jobs/search?q=Python+FastAPI")
+    assert response.status_code == 200
+    results = response.json()
+    assert isinstance(results, list)
+    assert len(results) > 0
+    assert any("FastAPI" in j["title"] or "Python" in j["title"] for j in results)
+
+
+def test_search_jobs_low_competition(client: TestClient):
+    response = client.get("/api/v1/jobs/search?low_competition_only=true")
+    assert response.status_code == 200
+    results = response.json()
+    assert len(results) > 0
+    for j in results:
+        assert j["applicant_count"] < 25
+        assert j["competition_level"] == "Low"
+
+
 def test_get_job_detail_success(client: TestClient):
-    # Fetch job list first
     list_res = client.get("/api/v1/jobs")
     job_id = list_res.json()[0]["job_id"]
 
@@ -95,8 +113,8 @@ def test_get_job_detail_success(client: TestClient):
     assert job_detail["id"] == job_id
     assert "description" in job_detail
     assert "company" in job_detail
-    assert "name" in job_detail["company"]
-    assert "industry" in job_detail["company"]
+    assert "freshness_label" in job_detail
+    assert "competition_score" in job_detail
 
 
 def test_get_job_detail_not_found(client: TestClient):

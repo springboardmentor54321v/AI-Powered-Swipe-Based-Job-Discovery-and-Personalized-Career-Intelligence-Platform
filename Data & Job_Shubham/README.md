@@ -1,187 +1,73 @@
-# 🎯 SwipeX — Job & Data Intelligence Service (Milestone 1)
+# 🎯 SwipeX — Job & Data Intelligence Service (Milestone 1 & 2)
 
-> **Domain:** Job & Data Intelligence (Intern 2)  
+> **Domain:** Job & Data Intelligence (Author: Shubham Ugale)  
 > **Platform:** SwipeX — Swipe-Based Intelligent Job Discovery Platform  
-> **Status:** Milestone 1 Completed & Verified  
+> **Status:** Milestone 2 Completed, Fully Tested & Production-Ready  
 
 ---
 
 ## 📌 1. Module Overview & Responsibilities
-This service is the **core data backbone** of SwipeX, responsible for:
-1. **Data Modeling & Schema:** Structured relational schemas for `Company` (MNCs, Scale-up Startups, Early-stage AI startups), `Job` (with rich attributes, skills, compensation, and competition metrics), and `Swipe` (user interaction history).
-2. **Realistic Seed Dataset:** 60+ curated job postings across top employers with realistic CTCs in INR (₹6 LPA – ₹45 LPA) and USD ($75k – $160k), real tech stack requirements, and freshness timestamps.
-3. **High-Performance REST APIs:**
-   - Multi-criteria job discovery feed (`GET /api/v1/jobs`)
-   - Detailed job view (`GET /api/v1/jobs/{job_id}`)
-   - Swipe interaction recording (`POST /api/v1/swipes`)
-   - User swipe history (`GET /api/v1/swipes/history`)
-   - Dashboard summary metrics (`GET /api/v1/swipes/summary`)
-4. **Fast Feed Caching Layer:** Redis cache with an automatic in-memory fallback for sub-millisecond job card retrieval.
-5. **Quality Assurance:** 100% passing automated unit test suite using `pytest`.
+This microservice serves as the **core data backbone** for the SwipeX platform:
+1. **Relational Schemas:** Production schemas for `companies`, `jobs`, `swipes`, and `saved_jobs` with composite indexes.
+2. **Comprehensive Seed Dataset:** **317 curated job postings** across **29 employers** (MNCs, Startups, and Newly Founded AI startups).
+3. **Freshness & Competition Intelligence:** Rule-based computation (`app/core/intelligence.py`) for live applicant competition tags and posting freshness badges.
+4. **Faceted Search & Discovery APIs:** Dedicated smart search API (`/jobs/search`), company profiles (`/companies`), and candidate bookmarks (`/saved-jobs`).
+5. **Fast Caching Layer:** Redis cache with automatic in-memory fallback.
+6. **Data Protection:** Automated database snapshot backup and restore utility (`db_backup_restore.py`).
+7. **100% Test Coverage:** 30 passing automated unit tests in `pytest`.
 
 ---
 
-## 🚀 2. Frozen Interface Contracts (SRS Section 7.2 Compliant)
+## 🚀 2. REST API Endpoints Overview
 
-### A. List Jobs (Discovery Feed)
-- **Endpoint:** `GET /api/v1/jobs`
-- **Query Filters:**
-  - `type`: `MNC` | `Startup` | `Newly Founded` | `Full-time` | `Internship`
-  - `location`: e.g. `Bengaluru`, `Hyderabad`, `Pune`, `Remote`
-  - `remote`: `true` | `false`
-  - `salary_min` & `salary_max`: Integer threshold (e.g. `1200000`)
-  - `skills`: Comma-separated list (e.g. `Python,React,Docker`)
-  - `experience_level`: `Fresher` | `Entry-level` | `Mid-level` | `Senior`
-  - `competition_level`: `Low` | `Medium` | `High`
-  - `search`: Keyword query across title, description, and company name
-- **Contract Response (200 OK):**
-```json
-[
-  {
-    "job_id": 1,
-    "title": "Backend Software Engineer (FastAPI & Microservices)",
-    "company": "Razorpay",
-    "company_id": 6,
-    "company_type": "Startup",
-    "type": "Full-time",
-    "workplace_type": "Hybrid",
-    "location": "Bengaluru, India",
-    "salary_range": "₹14 LPA - ₹24 LPA",
-    "salary_min": 1400000,
-    "salary_max": 2400000,
-    "skills": ["Python", "FastAPI", "PostgreSQL", "Redis", "Docker"],
-    "experience_level": "Mid-level",
-    "competition_level": "Medium",
-    "applicant_count": 34,
-    "is_fresher_friendly": false,
-    "posted_at": "2026-08-28T14:30:00"
-  }
-]
-```
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/jobs` | Browse paginated job feed with multi-criteria filters |
+| `GET` | `/api/v1/jobs/search` | **Smart Search:** Full-text keyword search across skills, titles, and descriptions |
+| `GET` | `/api/v1/jobs/{job_id}` | Detailed job view with company info, freshness, and competition score |
+| `POST` | `/api/v1/swipes` | Record swipe action (Right = Apply/Save, Left = Skip) |
+| `GET` | `/api/v1/swipes/history` | User swipe history |
+| `GET` | `/api/v1/swipes/summary` | User swipe metrics summary |
+| `GET` | `/api/v1/companies` | List companies & startups (filter by `type`, `industry`, `newly_founded`) |
+| `GET` | `/api/v1/companies/{id}` | Detailed company profile with all active jobs posted by the employer |
+| `POST` | `/api/v1/saved-jobs` | Bookmark / Save a job with candidate notes |
+| `GET` | `/api/v1/saved-jobs` | Retrieve user bookmarked jobs with card summaries |
+| `DELETE` | `/api/v1/saved-jobs/{job_id}` | Remove job from bookmarked list |
 
 ---
 
-### B. Get Job Detail
-- **Endpoint:** `GET /api/v1/jobs/{job_id}`
-- **Contract Response (200 OK):**
-```json
-{
-  "id": 1,
-  "job_id": 1,
-  "title": "Backend Software Engineer (FastAPI & Microservices)",
-  "company": {
-    "id": 6,
-    "name": "Razorpay",
-    "slug": "razorpay",
-    "company_type": "Startup",
-    "industry": "Fintech & Payments",
-    "headquarters": "Bengaluru, Karnataka, India",
-    "logo_url": "https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg",
-    "website": "https://razorpay.com/jobs",
-    "description": "Razorpay is India's leading full-stack financial solutions company...",
-    "employee_count_range": "1000-5000"
-  },
-  "description": "We are looking for a skilled Backend Engineer...",
-  "responsibilities": "• Design modular REST APIs...\n• Implement distributed caching...",
-  "requirements": "• 2+ years experience building Python web services...",
-  "skills": ["Python", "FastAPI", "PostgreSQL", "Redis", "Docker"],
-  "salary_range": "₹14 LPA - ₹24 LPA",
-  "is_fresher_friendly": false,
-  "competition_level": "Medium",
-  "applicant_count": 34,
-  "posted_at": "2026-08-28T14:30:00"
-}
-```
+## 🛠️ 3. Quick Start & Local Execution
 
----
-
-### C. Record Swipe Action
-- **Endpoint:** `POST /api/v1/swipes`
-- **Request Body:**
-```json
-{
-  "job_id": 1,
-  "direction": "right",
-  "action_type": "apply",
-  "user_id": "demo-user-1"
-}
-```
-- **Contract Response (201 Created):**
-```json
-{
-  "swipe_id": 1,
-  "user_id": "demo-user-1",
-  "job_id": 1,
-  "direction": "right",
-  "action_type": "apply",
-  "swiped_at": "2026-08-31T21:30:00",
-  "message": "Swipe recorded successfully"
-}
-```
-
----
-
-### D. User Swipe History
-- **Endpoint:** `GET /api/v1/swipes/history?user_id=demo-user-1&direction=right`
-- **Contract Response (200 OK):**
-```json
-[
-  {
-    "job_id": 1,
-    "direction": "right",
-    "action_type": "apply",
-    "swiped_at": "2026-08-31T21:30:00",
-    "job": {
-      "job_id": 1,
-      "title": "Backend Software Engineer",
-      "company": "Razorpay",
-      "salary_range": "₹14 LPA - ₹24 LPA",
-      "skills": ["Python", "FastAPI", "PostgreSQL"]
-    }
-  }
-]
-```
-
----
-
-## 🛠️ 3. Quick Start & Execution
-
-### Prerequisites
-- Python 3.10+ installed
-- *(Optional)* Docker / Redis
-
-### Step 1: Install Dependencies
+### Install Dependencies
 ```bash
-cd swipex_job_data_service
 pip install -r requirements.txt
 ```
 
-### Step 2: Run the Service
+### Run Service
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
-> The application will automatically create `swipex_dev.db` and seed 60+ realistic jobs and companies on its first startup!
+- Interactive Swagger UI: **`http://localhost:8000/docs`**
+- Alternative ReDoc: **`http://localhost:8000/redoc`**
 
-### Step 3: Access Interactive Swagger UI
-Open your browser and navigate to:  
-👉 **`http://localhost:8000/docs`**
-
----
-
-## 🧪 4. Running Automated Tests
-Run the complete Pytest test suite:
+### Run Automated Tests
 ```bash
-pytest -v
+python -m pytest -v
+```
+*(All 30 test cases pass with 100% success rate)*
+
+### Database Backup & Restore Utility
+```bash
+# Create JSON snapshot backup
+python -m app.scripts.db_backup_restore --backup
+
+# Restore from snapshot
+python -m app.scripts.db_backup_restore --restore backups/<backup_file>.json
 ```
 
 ---
 
-## 🤝 5. Milestone 2 Handoff Notes (For Intern 3 & Intern 1)
-
-### For Intern 1 (Team Lead / API Gateway):
-- Route `/api/v1/jobs` and `/api/v1/swipes` to this service running on port 8000.
-- Pass the user identifier in the `X-User-Id` header or `Authorization: Bearer <jwt_token>` header.
-
-### For Intern 3 (AI/ML Career Intelligence):
-- **Seed Data Access:** Use `app.models.job.Job` table (`skills`, `description`, `title`, `experience_years_min`) as feature vectors for TF-IDF / sentence embeddings.
-- **Swipe Behavior Signal:** Query `Swipe` records where `direction == 'right'` as positive interaction feedback signals to train collaborative filtering or preference weighting algorithms in Milestone 2.
+## 🤝 4. Milestone 3 Handoff Notes (For Intern 4: AI Career Intelligence)
+See full details in [`DATA_DICTIONARY.md`](./DATA_DICTIONARY.md).
+- **Text Vectors:** Combine `Job.title` + `Job.skills` + `Job.description` for TF-IDF and transformer embeddings.
+- **Preference Feedback:** Positive interactions (`Swipe.direction == 'right'`) and bookmarks (`saved_jobs`) provide implicit preference signals to train personalization algorithms in Milestone 3.

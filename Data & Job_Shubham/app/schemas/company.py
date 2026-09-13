@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, ConfigDict
 from app.models.company import CompanyType
 
@@ -8,8 +8,10 @@ class CompanyBase(BaseModel):
     name: str
     slug: str
     company_type: CompanyType
+    is_newly_founded: bool = False
     industry: str = "Technology"
     headquarters: str
+    funding_stage: Optional[str] = "Growth"
     logo_url: Optional[str] = None
     website: Optional[str] = None
     description: Optional[str] = None
@@ -26,3 +28,11 @@ class CompanyOut(CompanyBase):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CompanyListResponse(BaseModel):
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+    companies: List[CompanyOut]

@@ -4,45 +4,44 @@ import os
 import random
 from datetime import datetime, timedelta
 
-# Create data directory
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data"))
 os.makedirs(DATA_DIR, exist_ok=True)
 
 COMPANIES = [
     # --- Top Global & Indian MNCs ---
-    {"name": "Google", "slug": "google", "company_type": "MNC", "industry": "Internet & Cloud Technology", "headquarters": "Mountain View, CA (Bengaluru/Hyderabad)", "website": "https://careers.google.com", "founded_year": 1998, "employee_count_range": "10000+"},
-    {"name": "Microsoft", "slug": "microsoft", "company_type": "MNC", "industry": "Software & AI Solutions", "headquarters": "Redmond, WA (Hyderabad/Bengaluru/Noida)", "website": "https://careers.microsoft.com", "founded_year": 1975, "employee_count_range": "10000+"},
-    {"name": "Amazon", "slug": "amazon", "company_type": "MNC", "industry": "E-commerce & Cloud Computing (AWS)", "headquarters": "Seattle, WA (Bengaluru/Hyderabad/Chennai)", "website": "https://amazon.jobs", "founded_year": 1994, "employee_count_range": "10000+"},
-    {"name": "Adobe", "slug": "adobe", "company_type": "MNC", "industry": "Creative & Cloud Software", "headquarters": "San Jose, CA (Noida/Bengaluru)", "website": "https://adobe.com/careers", "founded_year": 1982, "employee_count_range": "10000+"},
-    {"name": "Tata Consultancy Services (TCS)", "slug": "tcs", "company_type": "MNC", "industry": "IT Services & Consulting", "headquarters": "Mumbai, India (Pan India)", "website": "https://tcs.com/careers", "founded_year": 1968, "employee_count_range": "10000+"},
-    {"name": "Infosys", "slug": "infosys", "company_type": "MNC", "industry": "Next-Gen Digital Services", "headquarters": "Bengaluru, India", "website": "https://infosys.com/careers", "founded_year": 1981, "employee_count_range": "10000+"},
-    {"name": "Cisco", "slug": "cisco", "company_type": "MNC", "industry": "Networking & Cybersecurity", "headquarters": "San Jose, CA (Bengaluru)", "website": "https://cisco.com/careers", "founded_year": 1984, "employee_count_range": "10000+"},
-    {"name": "Oracle", "slug": "oracle", "company_type": "MNC", "industry": "Database & Enterprise Cloud", "headquarters": "Austin, TX (Hyderabad/Bengaluru)", "website": "https://oracle.com/careers", "founded_year": 1977, "employee_count_range": "10000+"},
-    {"name": "IBM", "slug": "ibm", "company_type": "MNC", "industry": "Hybrid Cloud & Cognitive Enterprise", "headquarters": "Armonk, NY (Bengaluru/Kochi)", "website": "https://ibm.com/careers", "founded_year": 1911, "employee_count_range": "10000+"},
-    {"name": "Salesforce", "slug": "salesforce", "company_type": "MNC", "industry": "CRM & Enterprise SaaS", "headquarters": "San Francisco, CA (Hyderabad/Bengaluru)", "website": "https://salesforce.com/careers", "founded_year": 1999, "employee_count_range": "10000+"},
+    {"name": "Google", "slug": "google", "company_type": "MNC", "is_newly_founded": False, "industry": "Internet & Cloud Technology", "headquarters": "Mountain View, CA (Bengaluru/Hyderabad)", "website": "https://careers.google.com", "founded_year": 1998, "employee_count_range": "10000+", "funding_stage": "Public / Post-IPO"},
+    {"name": "Microsoft", "slug": "microsoft", "company_type": "MNC", "is_newly_founded": False, "industry": "Software & AI Solutions", "headquarters": "Redmond, WA (Hyderabad/Bengaluru/Noida)", "website": "https://careers.microsoft.com", "founded_year": 1975, "employee_count_range": "10000+", "funding_stage": "Public / Post-IPO"},
+    {"name": "Amazon", "slug": "amazon", "company_type": "MNC", "is_newly_founded": False, "industry": "E-commerce & Cloud Computing (AWS)", "headquarters": "Seattle, WA (Bengaluru/Hyderabad/Chennai)", "website": "https://amazon.jobs", "founded_year": 1994, "employee_count_range": "10000+", "funding_stage": "Public / Post-IPO"},
+    {"name": "Adobe", "slug": "adobe", "company_type": "MNC", "is_newly_founded": False, "industry": "Creative & Cloud Software", "headquarters": "San Jose, CA (Noida/Bengaluru)", "website": "https://adobe.com/careers", "founded_year": 1982, "employee_count_range": "10000+", "funding_stage": "Public / Post-IPO"},
+    {"name": "Tata Consultancy Services (TCS)", "slug": "tcs", "company_type": "MNC", "is_newly_founded": False, "industry": "IT Services & Consulting", "headquarters": "Mumbai, India (Pan India)", "website": "https://tcs.com/careers", "founded_year": 1968, "employee_count_range": "10000+", "funding_stage": "Public / Post-IPO"},
+    {"name": "Infosys", "slug": "infosys", "company_type": "MNC", "is_newly_founded": False, "industry": "Next-Gen Digital Services", "headquarters": "Bengaluru, India", "website": "https://infosys.com/careers", "founded_year": 1981, "employee_count_range": "10000+", "funding_stage": "Public / Post-IPO"},
+    {"name": "Cisco", "slug": "cisco", "company_type": "MNC", "is_newly_founded": False, "industry": "Networking & Cybersecurity", "headquarters": "San Jose, CA (Bengaluru)", "website": "https://cisco.com/careers", "founded_year": 1984, "employee_count_range": "10000+", "funding_stage": "Public / Post-IPO"},
+    {"name": "Oracle", "slug": "oracle", "company_type": "MNC", "is_newly_founded": False, "industry": "Database & Enterprise Cloud", "headquarters": "Austin, TX (Hyderabad/Bengaluru)", "website": "https://oracle.com/careers", "founded_year": 1977, "employee_count_range": "10000+", "funding_stage": "Public / Post-IPO"},
+    {"name": "IBM", "slug": "ibm", "company_type": "MNC", "is_newly_founded": False, "industry": "Hybrid Cloud & Cognitive Enterprise", "headquarters": "Armonk, NY (Bengaluru/Kochi)", "website": "https://ibm.com/careers", "founded_year": 1911, "employee_count_range": "10000+", "funding_stage": "Public / Post-IPO"},
+    {"name": "Salesforce", "slug": "salesforce", "company_type": "MNC", "is_newly_founded": False, "industry": "CRM & Enterprise SaaS", "headquarters": "San Francisco, CA (Hyderabad/Bengaluru)", "website": "https://salesforce.com/careers", "founded_year": 1999, "employee_count_range": "10000+", "funding_stage": "Public / Post-IPO"},
 
     # --- High-Growth Tech Startups & Unicorns ---
-    {"name": "Razorpay", "slug": "razorpay", "company_type": "Startup", "industry": "Fintech & Payments", "headquarters": "Bengaluru, Karnataka, India", "website": "https://razorpay.com/jobs", "founded_year": 2014, "employee_count_range": "1000-5000"},
-    {"name": "Swiggy", "slug": "swiggy", "company_type": "Startup", "industry": "Hyperlocal Delivery & Quick Commerce", "headquarters": "Bengaluru, Karnataka, India", "website": "https://careers.swiggy.com", "founded_year": 2014, "employee_count_range": "5000-10000"},
-    {"name": "CRED", "slug": "cred", "company_type": "Startup", "industry": "Fintech & Rewards", "headquarters": "Bengaluru, Karnataka, India", "website": "https://cred.club/careers", "founded_year": 2018, "employee_count_range": "500-1000"},
-    {"name": "Zepto", "slug": "zepto", "company_type": "Startup", "industry": "Quick Commerce", "headquarters": "Mumbai / Bengaluru, India", "website": "https://zeptonow.com/careers", "founded_year": 2021, "employee_count_range": "1000-5000"},
-    {"name": "Postman", "slug": "postman", "company_type": "Startup", "industry": "API Development Platform", "headquarters": "San Francisco, CA & Bengaluru", "website": "https://postman.com/careers", "founded_year": 2014, "employee_count_range": "500-1000"},
-    {"name": "Zerodha", "slug": "zerodha", "company_type": "Startup", "industry": "Fintech & Stock Broking", "headquarters": "Bengaluru, Karnataka, India", "website": "https://zerodha.com/careers", "founded_year": 2010, "employee_count_range": "1000-5000"},
-    {"name": "Zomato", "slug": "zomato", "company_type": "Startup", "industry": "Food Tech & Quick Commerce (Blinkit)", "headquarters": "Gurugram, Haryana, India", "website": "https://zomato.com/careers", "founded_year": 2008, "employee_count_range": "5000-10000"},
-    {"name": "Groww", "slug": "groww", "company_type": "Startup", "industry": "Investment Tech & Wealth Management", "headquarters": "Bengaluru, Karnataka, India", "website": "https://groww.in/careers", "founded_year": 2016, "employee_count_range": "1000-5000"},
-    {"name": "PhonePe", "slug": "phonepe", "company_type": "Startup", "industry": "Digital Payments & Financial Services", "headquarters": "Bengaluru, Karnataka, India", "website": "https://phonepe.com/careers", "founded_year": 2015, "employee_count_range": "5000-10000"},
-    {"name": "Meesho", "slug": "meesho", "company_type": "Startup", "industry": "E-Commerce & Social Selling", "headquarters": "Bengaluru, Karnataka, India", "website": "https://meesho.io/careers", "founded_year": 2015, "employee_count_range": "1000-5000"},
-    {"name": "Urban Company", "slug": "urban-company", "company_type": "Startup", "industry": "Home Services & Gig Economy", "headquarters": "Gurugram, Haryana, India", "website": "https://urbancompany.com/careers", "founded_year": 2014, "employee_count_range": "1000-5000"},
+    {"name": "Razorpay", "slug": "razorpay", "company_type": "Startup", "is_newly_founded": False, "industry": "Fintech & Payments", "headquarters": "Bengaluru, Karnataka, India", "website": "https://razorpay.com/jobs", "founded_year": 2014, "employee_count_range": "1000-5000", "funding_stage": "Series F / Unicorn"},
+    {"name": "Swiggy", "slug": "swiggy", "company_type": "Startup", "is_newly_founded": False, "industry": "Hyperlocal Delivery & Quick Commerce", "headquarters": "Bengaluru, Karnataka, India", "website": "https://careers.swiggy.com", "founded_year": 2014, "employee_count_range": "5000-10000", "funding_stage": "Public / Pre-IPO"},
+    {"name": "CRED", "slug": "cred", "company_type": "Startup", "is_newly_founded": False, "industry": "Fintech & Rewards", "headquarters": "Bengaluru, Karnataka, India", "website": "https://cred.club/careers", "founded_year": 2018, "employee_count_range": "500-1000", "funding_stage": "Series E / Unicorn"},
+    {"name": "Zepto", "slug": "zepto", "company_type": "Startup", "is_newly_founded": False, "industry": "Quick Commerce", "headquarters": "Mumbai / Bengaluru, India", "website": "https://zeptonow.com/careers", "founded_year": 2021, "employee_count_range": "1000-5000", "funding_stage": "Series G / Unicorn"},
+    {"name": "Postman", "slug": "postman", "company_type": "Startup", "is_newly_founded": False, "industry": "API Development Platform", "headquarters": "San Francisco, CA & Bengaluru", "website": "https://postman.com/careers", "founded_year": 2014, "employee_count_range": "500-1000", "funding_stage": "Series D / Unicorn"},
+    {"name": "Zerodha", "slug": "zerodha", "company_type": "Startup", "is_newly_founded": False, "industry": "Fintech & Stock Broking", "headquarters": "Bengaluru, Karnataka, India", "website": "https://zerodha.com/careers", "founded_year": 2010, "employee_count_range": "1000-5000", "funding_stage": "Bootstrapped / Profitable"},
+    {"name": "Zomato", "slug": "zomato", "company_type": "Startup", "is_newly_founded": False, "industry": "Food Tech & Quick Commerce (Blinkit)", "headquarters": "Gurugram, Haryana, India", "website": "https://zomato.com/careers", "founded_year": 2008, "employee_count_range": "5000-10000", "funding_stage": "Public / Post-IPO"},
+    {"name": "Groww", "slug": "groww", "company_type": "Startup", "is_newly_founded": False, "industry": "Investment Tech & Wealth Management", "headquarters": "Bengaluru, Karnataka, India", "website": "https://groww.in/careers", "founded_year": 2016, "employee_count_range": "1000-5000", "funding_stage": "Series E / Unicorn"},
+    {"name": "PhonePe", "slug": "phonepe", "company_type": "Startup", "is_newly_founded": False, "industry": "Digital Payments & Financial Services", "headquarters": "Bengaluru, Karnataka, India", "website": "https://phonepe.com/careers", "founded_year": 2015, "employee_count_range": "5000-10000", "funding_stage": "Decacorn"},
+    {"name": "Meesho", "slug": "meesho", "company_type": "Startup", "is_newly_founded": False, "industry": "E-Commerce & Social Selling", "headquarters": "Bengaluru, Karnataka, India", "website": "https://meesho.io/careers", "founded_year": 2015, "employee_count_range": "1000-5000", "funding_stage": "Series F / Unicorn"},
+    {"name": "Urban Company", "slug": "urban-company", "company_type": "Startup", "is_newly_founded": False, "industry": "Home Services & Gig Economy", "headquarters": "Gurugram, Haryana, India", "website": "https://urbancompany.com/careers", "founded_year": 2014, "employee_count_range": "1000-5000", "funding_stage": "Series F / Unicorn"},
 
     # --- Newly Founded AI & Deep Tech Startups ---
-    {"name": "NovaAI Labs", "slug": "novaai-labs", "company_type": "Newly Founded", "industry": "Generative AI & Agentic Workflows", "headquarters": "Bengaluru (Remote-First)", "website": "https://novaailabs.dev", "founded_year": 2023, "employee_count_range": "1-20"},
-    {"name": "SynthLogic Systems", "slug": "synthlogic", "company_type": "Newly Founded", "industry": "AI Career Intelligence & HR Tech", "headquarters": "Pune / Remote", "website": "https://synthlogicsys.io", "founded_year": 2024, "employee_count_range": "1-15"},
-    {"name": "NeuralScale Dynamics", "slug": "neuralscale", "company_type": "Newly Founded", "industry": "Deep Learning & Model Optimization", "headquarters": "Hyderabad, Telangana", "website": "https://neuralscale.ai", "founded_year": 2023, "employee_count_range": "1-25"},
-    {"name": "PromptCraft AI", "slug": "promptcraft-ai", "company_type": "Newly Founded", "industry": "AI Developer Tooling & LLM Eval", "headquarters": "Delhi NCR / Remote", "website": "https://promptcraft.studio", "founded_year": 2024, "employee_count_range": "1-10"},
-    {"name": "DataVortex Technologies", "slug": "datavortex", "company_type": "Newly Founded", "industry": "Real-time Vector Search & RAG", "headquarters": "Bengaluru, India", "website": "https://datavortex.tech", "founded_year": 2023, "employee_count_range": "1-15"},
-    {"name": "CogniGen Systems", "slug": "cognigen", "company_type": "Newly Founded", "industry": "Autonomous Agents for Healthcare", "headquarters": "Chennai / Remote", "website": "https://cognigen.ai", "founded_year": 2024, "employee_count_range": "1-12"},
-    {"name": "OmniAgentic AI", "slug": "omniagentic", "company_type": "Newly Founded", "industry": "Multi-Agent Code Synthesis", "headquarters": "Bengaluru / Remote", "website": "https://omniagentic.dev", "founded_year": 2024, "employee_count_range": "1-10"},
-    {"name": "ByteForge Tech", "slug": "byteforge", "company_type": "Newly Founded", "industry": "Edge AI & Embedded Computing", "headquarters": "Pune, Maharashtra", "website": "https://byteforge.io", "founded_year": 2023, "employee_count_range": "1-20"}
+    {"name": "NovaAI Labs", "slug": "novaai-labs", "company_type": "Newly Founded", "is_newly_founded": True, "industry": "Generative AI & Agentic Workflows", "headquarters": "Bengaluru (Remote-First)", "website": "https://novaailabs.dev", "founded_year": 2024, "employee_count_range": "1-20", "funding_stage": "Seed ($2M)"},
+    {"name": "SynthLogic Systems", "slug": "synthlogic", "company_type": "Newly Founded", "is_newly_founded": True, "industry": "AI Career Intelligence & HR Tech", "headquarters": "Pune / Remote", "website": "https://synthlogicsys.io", "founded_year": 2024, "employee_count_range": "1-15", "funding_stage": "Pre-Seed ($500K)"},
+    {"name": "NeuralScale Dynamics", "slug": "neuralscale", "company_type": "Newly Founded", "is_newly_founded": True, "industry": "Deep Learning & Model Optimization", "headquarters": "Hyderabad, Telangana", "website": "https://neuralscale.ai", "founded_year": 2023, "employee_count_range": "1-25", "funding_stage": "Seed ($3M)"},
+    {"name": "PromptCraft AI", "slug": "promptcraft-ai", "company_type": "Newly Founded", "is_newly_founded": True, "industry": "AI Developer Tooling & LLM Eval", "headquarters": "Delhi NCR / Remote", "website": "https://promptcraft.studio", "founded_year": 2024, "employee_count_range": "1-10", "funding_stage": "Bootstrapped"},
+    {"name": "DataVortex Technologies", "slug": "datavortex", "company_type": "Newly Founded", "is_newly_founded": True, "industry": "Real-time Vector Search & RAG", "headquarters": "Bengaluru, India", "website": "https://datavortex.tech", "founded_year": 2023, "employee_count_range": "1-15", "funding_stage": "Seed ($1.5M)"},
+    {"name": "CogniGen Systems", "slug": "cognigen", "company_type": "Newly Founded", "is_newly_founded": True, "industry": "Autonomous Agents for Healthcare", "headquarters": "Chennai / Remote", "website": "https://cognigen.ai", "founded_year": 2024, "employee_count_range": "1-12", "funding_stage": "Pre-Seed ($750K)"},
+    {"name": "OmniAgentic AI", "slug": "omniagentic", "company_type": "Newly Founded", "is_newly_founded": True, "industry": "Multi-Agent Code Synthesis", "headquarters": "Bengaluru / Remote", "website": "https://omniagentic.dev", "founded_year": 2024, "employee_count_range": "1-10", "funding_stage": "Seed ($2.5M)"},
+    {"name": "ByteForge Tech", "slug": "byteforge", "company_type": "Newly Founded", "is_newly_founded": True, "industry": "Edge AI & Embedded Computing", "headquarters": "Pune, Maharashtra", "website": "https://byteforge.io", "founded_year": 2023, "employee_count_range": "1-20", "funding_stage": "Seed ($1.2M)"}
 ]
 
 JOB_TEMPLATES = [
@@ -202,8 +201,8 @@ def generate_datasets():
     companies_csv_path = os.path.join(DATA_DIR, "companies_dataset.csv")
     with open(companies_csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=[
-            "company_id", "name", "slug", "company_type", "industry", 
-            "headquarters", "website", "founded_year", "employee_count_range"
+            "company_id", "name", "slug", "company_type", "is_newly_founded", "industry", 
+            "headquarters", "funding_stage", "website", "founded_year", "employee_count_range"
         ])
         writer.writeheader()
         for i, c in enumerate(COMPANIES, start=1):
@@ -212,8 +211,10 @@ def generate_datasets():
                 "name": c["name"],
                 "slug": c["slug"],
                 "company_type": c["company_type"],
+                "is_newly_founded": c["is_newly_founded"],
                 "industry": c["industry"],
                 "headquarters": c["headquarters"],
+                "funding_stage": c["funding_stage"],
                 "website": c["website"],
                 "founded_year": c["founded_year"],
                 "employee_count_range": c["employee_count_range"]
@@ -222,14 +223,13 @@ def generate_datasets():
 
     print(f" Created {companies_csv_path} ({len(COMPANIES)} companies)")
 
-    # 2. Generate 250+ Realistic Jobs Dataset CSV & JSON
+    # 2. Generate 300+ Realistic Jobs Dataset CSV & JSON
     jobs_rows = []
     job_id_counter = 1
     now = datetime.utcnow()
 
     for comp_id, company in enumerate(COMPANIES, start=1):
-        # Generate 8 to 12 diverse job postings per company
-        num_postings = random.randint(8, 12)
+        num_postings = random.randint(9, 13)
         selected_templates = random.sample(JOB_TEMPLATES * 2, num_postings)
 
         for tmpl in selected_templates:
@@ -238,7 +238,6 @@ def generate_datasets():
             if "Remote" in loc:
                 workplace = "Remote"
 
-            # Realistic competition & applicant distribution
             if company["company_type"] == "MNC":
                 competition = random.choice(["High", "High", "Medium"])
                 applicants = random.randint(50, 220)
@@ -247,7 +246,7 @@ def generate_datasets():
                 competition = random.choice(["Medium", "Low", "Medium"])
                 applicants = random.randint(15, 80)
                 sal_multiplier = random.uniform(0.95, 1.35)
-            else: # Newly Founded
+            else:  # Newly Founded
                 competition = "Low"
                 applicants = random.randint(3, 20)
                 sal_multiplier = random.uniform(0.85, 1.15)
@@ -256,14 +255,17 @@ def generate_datasets():
             sal_max = int(tmpl["salary_max"] * sal_multiplier)
             sal_period = "Per Month" if tmpl["job_type"] == "Internship" else "Per Annum"
 
-            days_ago = random.randint(1, 20)
+            days_ago = random.randint(0, 18)
             posted_date = (now - timedelta(days=days_ago, hours=random.randint(1, 23))).strftime("%Y-%m-%d %H:%M:%S")
+
+            freshness_label = "Just Posted" if days_ago <= 1 else ("Recently Posted" if days_ago <= 3 else "Active")
 
             job_record = {
                 "job_id": job_id_counter,
                 "company_id": comp_id,
                 "company_name": company["name"],
                 "company_type": company["company_type"],
+                "is_newly_founded": company["is_newly_founded"],
                 "company_industry": company["industry"],
                 "job_title": tmpl["title"],
                 "role_category": tmpl["role_category"],
@@ -284,6 +286,8 @@ def generate_datasets():
                 "competition_level": competition,
                 "applicant_count": applicants,
                 "is_fresher_friendly": tmpl["fresher"],
+                "is_early_applicant": applicants < 15,
+                "freshness_label": freshness_label,
                 "is_active": True,
                 "posted_at": posted_date
             }

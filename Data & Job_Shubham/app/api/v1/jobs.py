@@ -14,6 +14,7 @@ from app.schemas.job import (
     JobSummaryOut, JobDetailOut, JobListResponse
 )
 from app.schemas.company import CompanyOut
+from app.core.intelligence import compute_job_freshness, compute_competition_level
 
 router = APIRouter()
 
@@ -47,6 +48,37 @@ def format_salary_range(sal_min: Optional[int], sal_max: Optional[int], currency
         return f"Up to {symbol}{format_num(sal_max)}{suffix}"
 
 
+def serialize_job_summary(job: Job) -> JobSummaryOut:
+    freshness = compute_job_freshness(job.posted_at)
+    comp_info = compute_competition_level(job.applicant_count)
+
+    return JobSummaryOut(
+        job_id=job.id,
+        title=job.title,
+        company=job.company.name if job.company else "Unknown",
+        company_id=job.company_id,
+        company_type=job.company.company_type if job.company else CompanyType.STARTUP,
+        is_newly_founded=job.company.is_newly_founded if job.company else False,
+        company_logo_url=job.company.logo_url if job.company else None,
+        type=job.job_type.value,
+        workplace_type=job.workplace_type.value,
+        location=job.location,
+        salary_range=format_salary_range(job.salary_min, job.salary_max, job.salary_currency, job.salary_period),
+        salary_min=job.salary_min,
+        salary_max=job.salary_max,
+        salary_currency=job.salary_currency,
+        skills=job.skills,
+        experience_level=job.experience_level.value,
+        competition_level=comp_info["competition_level"],
+        applicant_count=job.applicant_count,
+        is_fresher_friendly=job.is_fresher_friendly,
+        posted_at=job.posted_at,
+        freshness_label=freshness["freshness_label"],
+        posted_days_ago=freshness["days_ago"],
+        is_early_applicant=comp_info["is_early_applicant"]
+    )
+
+
 @router.get("", response_model=List[JobSummaryOut], summary="List Jobs (Frozen Contract API)")
 @router.get("/list", response_model=JobListResponse, summary="List Jobs (With Pagination Metadata)")
 def get_jobs(
@@ -58,6 +90,8 @@ def get_jobs(
     skills: Optional[str] = Query(None, description="Comma-separated skill names (e.g. Python,React,SQL)"),
     experience_level: Optional[str] = Query(None, description="Experience level: Fresher, Entry-level, Mid-level, Senior"),
     competition_level: Optional[str] = Query(None, description="Competition level: Low, Medium, High"),
+    fresher_friendly: Optional[bool] = Query(None, description="Filter for fresher-friendly positions"),
+    newly_founded: Optional[bool] = Query(None, description="Filter jobs from newly founded startups"),
     search: Optional[str] = Query(None, description="Keyword search across title, description, company"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
@@ -66,19 +100,15 @@ def get_jobs(
     cache: CacheManager = Depends(get_cache)
 ):
     """
-    Returns filtered job listings matching SRS 7.2 Interface Contract:
-    `GET /api/v1/jobs?type=&location=&remote=&salary_min=&salary_max=&skills=` -> 200 `[ { job_id, title, company, type, location, salary_range, skills[], posted_at } ]`
+    Returns filtered job listings matching SRS Interface Contracts with Milestone 2 intelligence indicators.
     """
-    # Cache key for identical queries
-    cache_key = f"jobs:t={type}:loc={location}:rem={remote}:smin={salary_min}:smax={salary_max}:sk={skills}:exp={experience_level}:comp={competition_level}:q={search}:p={page}:ps={page_size}:sort={sort_by}"
+    cache_key = f"jobs:t={type}:loc={location}:rem={remote}:smin={salary_min}:smax={salary_max}:sk={skills}:exp={experience_level}:comp={competition_level}:ff={fresher_friendly}:nf={newly_founded}:q={search}:p={page}:ps={page_size}:sort={sort_by}"
     cached_data = cache.get(cache_key)
     if cached_data:
         return cached_data
 
-    # Query construction
     query = db.query(Job).join(Company).filter(Job.is_active == True)
 
-    # 1. Type filter (Can match either company_type or job_type)
     if type:
         type_clean = type.strip()
         query = query.filter(
@@ -88,7 +118,6 @@ def get_jobs(
             )
         )
 
-    # 2. Location filter
     if location:
         query = query.filter(
             or_(
@@ -97,34 +126,34 @@ def get_jobs(
             )
         )
 
-    # 3. Remote filter
     if remote is not None:
         if remote is True:
             query = query.filter(Job.workplace_type == WorkplaceType.REMOTE)
         else:
             query = query.filter(Job.workplace_type != WorkplaceType.REMOTE)
 
-    # 4. Salary filters
     if salary_min is not None:
         query = query.filter(Job.salary_max >= salary_min)
     if salary_max is not None:
         query = query.filter(Job.salary_min <= salary_max)
 
-    # 5. Skills filter (Checks inside skills serialized text)
     if skills:
         skill_list = [s.strip().lower() for s in skills.split(",") if s.strip()]
         for skill in skill_list:
             query = query.filter(Job._skills.ilike(f"%{skill}%"))
 
-    # 6. Experience level
     if experience_level:
         query = query.filter(cast(Job.experience_level, String).ilike(f"%{experience_level.strip()}%"))
 
-    # 7. Competition level
     if competition_level:
         query = query.filter(cast(Job.competition_level, String).ilike(f"%{competition_level.strip()}%"))
 
-    # 8. Free-text search query
+    if fresher_friendly is not None:
+        query = query.filter(Job.is_fresher_friendly == fresher_friendly)
+
+    if newly_founded is not None:
+        query = query.filter(Company.is_newly_founded == newly_founded)
+
     if search:
         search_term = f"%{search.strip()}%"
         query = query.filter(
@@ -136,49 +165,96 @@ def get_jobs(
             )
         )
 
-    # 9. Sorting
     if sort_by == "salary_desc":
         query = query.order_by(desc(Job.salary_max), desc(Job.posted_at))
     elif sort_by == "competition_asc":
         query = query.order_by(asc(Job.applicant_count), desc(Job.posted_at))
-    else:  # default posted_at_desc
+    else:
         query = query.order_by(desc(Job.posted_at))
 
-    total = query.count()
-    total_pages = (total + page_size - 1) // page_size if page_size > 0 else 1
-
     jobs_slice = query.offset((page - 1) * page_size).limit(page_size).all()
+    formatted_jobs = [serialize_job_summary(j) for j in jobs_slice]
 
-    formatted_jobs = [
-        JobSummaryOut(
-            job_id=j.id,
-            title=j.title,
-            company=j.company.name if j.company else "Unknown",
-            company_id=j.company_id,
-            company_type=j.company.company_type if j.company else CompanyType.STARTUP,
-            company_logo_url=j.company.logo_url if j.company else None,
-            type=j.job_type.value,
-            workplace_type=j.workplace_type.value,
-            location=j.location,
-            salary_range=format_salary_range(j.salary_min, j.salary_max, j.salary_currency, j.salary_period),
-            salary_min=j.salary_min,
-            salary_max=j.salary_max,
-            salary_currency=j.salary_currency,
-            skills=j.skills,
-            experience_level=j.experience_level.value,
-            competition_level=j.competition_level.value,
-            applicant_count=j.applicant_count,
-            is_fresher_friendly=j.is_fresher_friendly,
-            posted_at=j.posted_at
-        )
-        for j in jobs_slice
-    ]
-
-    # Save to cache
     serialized = [j.model_dump(mode="json") for j in formatted_jobs]
     cache.set(cache_key, serialized, ttl=300)
 
     return formatted_jobs
+
+
+@router.get("/search", response_model=List[JobSummaryOut], summary="Smart Full-Text Search & Multi-Criteria Filtering (FR-03)")
+def search_jobs(
+    q: Optional[str] = Query(None, description="Free text keyword search query (e.g., 'Python FastAPI', 'Swiggy', 'ML Intern')"),
+    location: Optional[str] = Query(None, description="Target city or 'Remote'"),
+    job_type: Optional[str] = Query(None, description="Full-time, Internship, Contract"),
+    experience_level: Optional[str] = Query(None, description="Fresher, Entry-level, Mid-level, Senior"),
+    salary_min: Optional[int] = Query(None, description="Minimum salary bracket"),
+    salary_max: Optional[int] = Query(None, description="Maximum salary bracket"),
+    skills: Optional[str] = Query(None, description="Required skills (comma-separated)"),
+    company_type: Optional[str] = Query(None, description="MNC, Startup, Newly Founded"),
+    is_fresh_only: Optional[bool] = Query(None, description="Only jobs posted within last 3 days"),
+    low_competition_only: Optional[bool] = Query(None, description="Only low competition jobs (< 25 applicants)"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(25, ge=1, le=100, description="Page size"),
+    db: Session = Depends(get_db)
+):
+    """
+    Dedicated Milestone 2 Search API (FR-03).
+    Performs fast multi-attribute keyword search across job title, description,
+    responsibilities, requirements, skills array, and company details.
+    """
+    query = db.query(Job).join(Company).filter(Job.is_active == True)
+
+    if q:
+        terms = [t.strip() for t in q.split() if len(t.strip()) > 1]
+        for term in terms:
+            like_pat = f"%{term}%"
+            query = query.filter(
+                or_(
+                    Job.title.ilike(like_pat),
+                    Job.description.ilike(like_pat),
+                    Job.role_category.ilike(like_pat),
+                    Job._skills.ilike(like_pat),
+                    Company.name.ilike(like_pat),
+                    Company.industry.ilike(like_pat)
+                )
+            )
+
+    if location:
+        query = query.filter(Job.location.ilike(f"%{location.strip()}%"))
+
+    if job_type:
+        query = query.filter(cast(Job.job_type, String).ilike(f"%{job_type.strip()}%"))
+
+    if experience_level:
+        query = query.filter(cast(Job.experience_level, String).ilike(f"%{experience_level.strip()}%"))
+
+    if salary_min is not None:
+        query = query.filter(Job.salary_max >= salary_min)
+
+    if salary_max is not None:
+        query = query.filter(Job.salary_min <= salary_max)
+
+    if skills:
+        skill_items = [s.strip().lower() for s in skills.split(",") if s.strip()]
+        for skill in skill_items:
+            query = query.filter(Job._skills.ilike(f"%{skill}%"))
+
+    if company_type:
+        query = query.filter(cast(Company.company_type, String).ilike(f"%{company_type.strip()}%"))
+
+    if low_competition_only is True:
+        query = query.filter(Job.applicant_count < 25)
+
+    query = query.order_by(desc(Job.posted_at))
+
+    results = query.offset((page - 1) * page_size).limit(page_size).all()
+    formatted = [serialize_job_summary(j) for j in results]
+
+    # If is_fresh_only is True, filter in memory based on intelligence rule
+    if is_fresh_only is True:
+        formatted = [j for j in formatted if j.freshness_label in ["Just Posted", "Recently Posted"]]
+
+    return formatted
 
 
 @router.get("/{job_id}", response_model=JobDetailOut, summary="Get Job Detail by ID")
@@ -189,7 +265,7 @@ def get_job_by_id(
 ):
     """
     Returns full job details including company profile, description,
-    requirements, and compensation metadata.
+    requirements, compensation metadata, freshness indicators, and competition score.
     """
     cache_key = f"job_detail:{job_id}"
     cached = cache.get(cache_key)
@@ -204,6 +280,8 @@ def get_job_by_id(
         )
 
     company_out = CompanyOut.model_validate(job.company) if job.company else None
+    freshness = compute_job_freshness(job.posted_at)
+    comp_info = compute_competition_level(job.applicant_count)
 
     detail = JobDetailOut(
         id=job.id,
@@ -226,13 +304,17 @@ def get_job_by_id(
         experience_level=job.experience_level,
         experience_years_min=job.experience_years_min,
         experience_years_max=job.experience_years_max,
-        competition_level=job.competition_level,
+        competition_level=comp_info["competition_level"],
         applicant_count=job.applicant_count,
         is_fresher_friendly=job.is_fresher_friendly,
         is_active=job.is_active,
         posted_at=job.posted_at,
         expires_at=job.expires_at,
-        created_at=job.posted_at
+        created_at=job.posted_at,
+        freshness_label=freshness["freshness_label"],
+        posted_days_ago=freshness["days_ago"],
+        is_early_applicant=comp_info["is_early_applicant"],
+        competition_score=comp_info["competition_score"]
     )
 
     cache.set(cache_key, detail.model_dump(mode="json"), ttl=600)

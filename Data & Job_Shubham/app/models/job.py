@@ -1,12 +1,13 @@
 import json
 from datetime import datetime
 from enum import Enum
-from typing import List
+from typing import List, Optional
 from sqlalchemy import (
-    Column, Integer, String, Text, DateTime, Boolean, ForeignKey, Enum as SQLEnum
+    Column, Integer, String, Text, DateTime, Boolean, ForeignKey, Index, Enum as SQLEnum
 )
 from sqlalchemy.orm import relationship
 from app.core.database import Base
+from app.core.intelligence import compute_job_freshness, compute_competition_level
 
 
 class JobType(str, Enum):
@@ -86,16 +87,24 @@ class Job(Base):
         nullable=False,
         index=True
     )
-    applicant_count = Column(Integer, default=0, nullable=False)
+    applicant_count = Column(Integer, default=0, nullable=False, index=True)
     is_fresher_friendly = Column(Boolean, default=True, nullable=False, index=True)
     is_active = Column(Boolean, default=True, nullable=False, index=True)
     
     posted_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     expires_at = Column(DateTime, nullable=True)
 
+    # Composite indexes for fast multi-criteria filtering
+    __table_args__ = (
+        Index("ix_jobs_type_location", "job_type", "location"),
+        Index("ix_jobs_salary_range", "salary_min", "salary_max"),
+        Index("ix_jobs_exp_competition", "experience_level", "competition_level"),
+    )
+
     # Relationships
     company = relationship("Company", back_populates="jobs")
     swipes = relationship("Swipe", back_populates="job", cascade="all, delete-orphan")
+    saved_by_users = relationship("SavedJob", back_populates="job", cascade="all, delete-orphan")
 
     @property
     def skills(self) -> List[str]:
@@ -107,6 +116,14 @@ class Job(Base):
     @skills.setter
     def skills(self, val: List[str]):
         self._skills = json.dumps(val)
+
+    @property
+    def freshness_info(self) -> dict:
+        return compute_job_freshness(self.posted_at)
+
+    @property
+    def competition_info(self) -> dict:
+        return compute_competition_level(self.applicant_count)
 
     def __repr__(self):
         return f"<Job(id={self.id}, title='{self.title}', company_id={self.company_id})>"

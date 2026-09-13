@@ -10,6 +10,7 @@ from app.models.job import (
     Job, JobType, WorkplaceType, ExperienceLevel, CompetitionLevel
 )
 from app.models.swipe import Swipe, SwipeDirection, SwipeActionType
+from app.models.saved_job import SavedJob
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data"))
 COMPANIES_CSV = os.path.join(DATA_DIR, "companies_dataset.csv")
@@ -19,6 +20,7 @@ JOBS_CSV = os.path.join(DATA_DIR, "jobs_dataset.csv")
 def seed_database(db: Session = None):
     """
     Ingests and seeds the database using the CSV dataset files in data/
+    Populates Companies, Jobs, Swipes, and SavedJobs.
     """
     close_after = False
     if db is None:
@@ -42,12 +44,15 @@ def seed_database(db: Session = None):
                 reader = csv.DictReader(f)
                 for row in reader:
                     c_type = CompanyType(row["company_type"])
+                    is_new = row.get("is_newly_founded", "False").lower() == "true"
                     company = Company(
                         name=row["name"],
                         slug=row["slug"],
                         company_type=c_type,
+                        is_newly_founded=is_new,
                         industry=row["industry"],
                         headquarters=row["headquarters"],
+                        funding_stage=row.get("funding_stage", "Growth"),
                         website=row["website"],
                         founded_year=int(row["founded_year"]) if row["founded_year"] else None,
                         employee_count_range=row["employee_count_range"]
@@ -135,8 +140,23 @@ def seed_database(db: Session = None):
                 )
                 db.add(swipe)
 
+            # 4. Insert sample saved jobs (Milestone 2 SavedJob table)
+            sample_saved = [
+                {"user_id": "demo-user-1", "job_id": jobs_created[1].id, "notes": "High priority: Python backend role at scale-up startup"},
+                {"user_id": "demo-user-1", "job_id": jobs_created[5].id, "notes": "Generative AI role - review portfolio before applying"},
+                {"user_id": "candidate-jane", "job_id": jobs_created[2].id, "notes": "Check remote flexibility and relocation stipend"},
+            ]
+            for sv in sample_saved:
+                saved_job = SavedJob(
+                    user_id=sv["user_id"],
+                    job_id=sv["job_id"],
+                    notes=sv["notes"],
+                    saved_at=now - timedelta(hours=random.randint(1, 24))
+                )
+                db.add(saved_job)
+
             db.commit()
-            print(f"Inserted {len(sample_swipes)} sample swipe interactions.")
+            print(f"Inserted {len(sample_swipes)} swipes and {len(sample_saved)} saved jobs.")
 
         print("Dataset ingestion and database seeding completed successfully!")
 
