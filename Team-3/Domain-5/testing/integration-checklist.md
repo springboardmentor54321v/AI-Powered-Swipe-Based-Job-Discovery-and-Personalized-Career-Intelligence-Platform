@@ -1,22 +1,16 @@
-# Milestone 1 integration checklist
+# SwipeX Milestone 2 — Integration, E2E and Regression Checklist
 
-Run this checklist only with the real services available through the gateway. Record the result in the defect log; do not mark an unexecuted check as passed.
+Mark a check passed only with command or browser evidence. Use **Blocked** when an owner has not supplied the endpoint.
 
-| Check | Expected result | Status |
-| --- | --- | --- |
-| Compose dependencies | PostgreSQL and Redis are healthy | Pending service run |
-| Authentication | Register, login, refresh, and `/me` honour the contract | Pending Intern 1 |
-| RBAC | Anonymous requests are rejected; role-restricted actions return 403 | Pending Intern 1 |
-| Job discovery | Listings, details, and every documented filter work | Pending Intern 2 |
-| Swipe flow | Right/left actions persist and appear only in the actor's history | Pending Intern 2 |
-| Resume upload | A supported file returns an ID and extracted skills | Pending Intern 3 |
-| ATS/recommendations | Responses use `heuristic-v0` and match the frozen shapes | Pending Intern 3 |
-| Frontend journey | Login → job swipe → dashboard → resume/ATS view has no console/API error | Pending Intern 4 |
-| Regression | Contract and applicable module tests pass after fixes | Pending integrated build |
-
-## Required evidence
-
-- `docker compose -f docker-compose.dev.yml ps` output showing healthy dependencies.
-- Output from `scripts/verify.ps1`.
-- Output from `pytest testing/automated -m integration` with `SWIPEX_GATEWAY_URL` set.
-- A completed defect-log entry for every failed check and a retest result for each fix.
+| ID | Check | Expected result | Status |
+| --- | --- | --- | --- |
+| M2-01 | Compose baseline | PostgreSQL/Redis healthy; gateway/frontend reachable | Ready |
+| M2-02 | Job list + INR filter | Jobs return 200; salary_min=1000000 means ₹10 LPA | Ready |
+| M2-03 | Job search | jobs/search?keyword=python returns 200/results | Blocked — endpoint confirmation required |
+| M2-04 | Company directory | companies returns 200/filter/search results | Blocked — endpoint confirmation required |
+| M2-05 | Swipe security | Anonymous 401/403; one job-seeker swipe/history is user-scoped | Ready |
+| M2-06 | RBAC | Recruiter/Admin cannot use job-seeker swipes | Ready |
+| M2-07 | Matching | Authenticated recommendation response is available | Blocked — matching service confirmation required |
+| M2-08 | Frontend E2E | Login → filter/search → company → swipe → recommendation without error | Blocked until M2 APIs are live |
+| M2-09 | Regression | M1 auth/jobs/resume and M2 flows stay green after fixes | Ready after M2 delivery |
+| M2-10 | Quality | Contract tests and frontend production build pass | Ready |

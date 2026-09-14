@@ -1,0 +1,14 @@
+# Copy to docker-compose.m2.override.yml only after Intern 2/3 provides
+# a matching-engine Dockerfile or image. The profile avoids blocking the
+# existing local stack while the external M2 service is still in development.
+services:
+  matching-engine:
+    profiles: ["m2"]
+    image: \${MATCHING_ENGINE_IMAGE:-swipx-matching-engine:dev}
+    environment:
+      JOB_SERVICE_URL: http://job-service:8000
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      job-service: { condition: service_started }
+      redis: { condition: service_healthy }
+    ports: ["8004:8000"]
