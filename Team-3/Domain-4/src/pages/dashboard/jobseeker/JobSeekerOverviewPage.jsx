@@ -281,7 +281,13 @@ export default function JobSeekerOverviewPage() {
                   </div>
 
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-purple-950/40 text-purple-300 border border-purple-800/30 shrink-0">
-                    {rec.match_score ? `${Math.round(rec.match_score * 100)}% Match` : '92% Match'}
+                    {(() => {
+                      const rawScore = rec.match_score ?? rec.match_percentage;
+                      const score = typeof rawScore === 'number'
+                        ? Math.round(rawScore > 1 ? rawScore : rawScore * 100)
+                        : 92;
+                      return `${score}% Match`;
+                    })()}
                   </span>
                 </div>
               ))}

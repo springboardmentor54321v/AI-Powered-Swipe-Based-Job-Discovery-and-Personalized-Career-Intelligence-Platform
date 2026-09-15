@@ -9,6 +9,7 @@ import {
   Sparkles,
   User,
   Briefcase,
+  Building2,
   PlusCircle,
   Users,
   UserCheck,
@@ -66,6 +67,7 @@ export default function RoleDashboardShell() {
       items: [
         { path: '/dashboard/job-seeker', label: 'Dashboard Overview', icon: LayoutDashboard, end: true },
         { path: '/dashboard/job-seeker/discover', label: 'Discover Jobs', icon: Compass },
+        { path: '/dashboard/job-seeker/companies', label: 'Companies & Startups', icon: Building2 },
         { path: '/dashboard/job-seeker/saved', label: 'Saved Jobs', icon: Bookmark },
         { path: '/dashboard/job-seeker/applications', label: 'Applications', icon: Send },
         { path: '/dashboard/job-seeker/resume', label: 'Resume', icon: FileText },

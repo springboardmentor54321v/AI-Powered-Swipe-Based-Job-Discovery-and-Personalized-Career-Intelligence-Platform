@@ -58,7 +58,10 @@ export default function JobSeekerRecommendationsPage() {
       ) : recommendations.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {recommendations.map((job, idx) => {
-            const matchScore = job.match_score ? Math.round(job.match_score * 100) : 90 + (idx % 8);
+            const rawScore = job.match_score ?? job.match_percentage;
+            const matchScore = typeof rawScore === 'number'
+              ? Math.round(rawScore > 1 ? rawScore : rawScore * 100)
+              : 90 + (idx % 8);
 
             return (
               <div

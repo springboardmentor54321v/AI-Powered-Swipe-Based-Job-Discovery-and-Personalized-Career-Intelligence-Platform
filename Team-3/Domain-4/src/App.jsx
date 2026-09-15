@@ -10,6 +10,8 @@ import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import SwipeDiscoveryPage from './pages/SwipeDiscoveryPage';
 import ResumeUploadPage from './pages/ResumeUploadPage';
+import CompanyListPage from './pages/CompanyListPage';
+import CompanyDetailPage from './pages/CompanyDetailPage';
 
 // Job Seeker Sub-Pages
 import JobSeekerOverviewPage from './pages/dashboard/jobseeker/JobSeekerOverviewPage';
@@ -175,6 +177,22 @@ export default function App() {
           } 
         />
         <Route 
+          path="/companies" 
+          element={
+            <ProtectedRoute>
+              <Navigate to="/dashboard/job-seeker/companies" replace />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/companies/:id" 
+          element={
+            <ProtectedRoute>
+              <Navigate to="/dashboard/job-seeker/companies/:id" replace />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/profile" 
           element={
             <ProtectedRoute>
@@ -196,6 +214,8 @@ export default function App() {
         >
           <Route index element={<JobSeekerOverviewPage />} />
           <Route path="discover" element={<SwipeDiscoveryPage />} />
+          <Route path="companies" element={<CompanyListPage />} />
+          <Route path="companies/:id" element={<CompanyDetailPage />} />
           <Route path="saved" element={<JobSeekerSavedJobsPage />} />
           <Route path="applications" element={<JobSeekerApplicationsPage />} />
           <Route path="resume" element={<ResumeUploadPage />} />
