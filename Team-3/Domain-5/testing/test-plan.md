@@ -1,80 +1,39 @@
-# SwipeX - Test Plan
+# SwipeX Milestone 2 — Intern 5 Test Plan
 
-## 1. Objective
+## Purpose
 
-To validate the functionality, code quality, API behavior,
-and integration of the SwipeX application.
+Validate the M2 local platform: Job, Search, Company, Swipe, Matching/Recommendations, gateway permissions, frontend flow, and regression. Production packaging and deployment are excluded.
 
-## 2. Scope
+## Coverage
 
-Testing will cover:
+| Level | Intern 5 work | Evidence |
+| --- | --- | --- |
+| Contract | Maintain M2 endpoint/security expectations | milestone-2-api-contracts.md |
+| API automation | Job/filter/search/company/swipe smoke tests | test_m2_live_contracts.py |
+| Integration | Run services together through Docker Compose | integration-checklist.md |
+| E2E | Login → filter/search → company → swipe → recommendation | browser/API evidence |
+| RBAC | Anonymous, job seeker, recruiter, admin access rules | HTTP status evidence |
+| Regression | Re-run M1/M2 flows after fixes | quality report |
 
-- Authentication and RBAC
-- Job and Swipe Service
-- Resume and ATS Service
-- Frontend
-- API endpoints
-- Local Docker Compose integration
-- Regression testing
+## Entry criteria
 
-## 3. Testing Types
+1. Docker Desktop is running.
+2. Gateway, frontend, PostgreSQL, Redis, Job/Swipe/Company and Matching services are available locally.
+3. M2 API response shapes are confirmed by service owners.
+4. A disposable job-seeker token is available for protected tests.
 
-- Unit Testing
-- API Testing
-- Integration Testing
-- RBAC Testing
-- Regression Testing
-- Code Quality Testing
-- Smoke Testing
+## Exit criteria
 
-## 4. Testing Tools
+- Contract tests and frontend production build pass.
+- Every required live test passes, or has a defect record and approved exception.
+- No Critical or High defect remains open.
+- Regression, RBAC and E2E evidence is attached.
+- QA report records that no production deployment happened.
 
-### Backend
-- Pytest
-- Django Test Client
+## Commands
 
-### Frontend
-- Jest
-- React Testing Library
-
-### API
-- Postman
-- Pytest
-
-### Code Quality
-- Black
-- Flake8
-- ESLint
-
-### Integration
-- Docker Compose
-
-## 5. Pass / Fail Criteria
-
-### Pass
-- Expected result matches actual result
-- No critical defects
-- Required automated tests pass
-- Linting checks pass
-
-### Fail
-- Expected functionality does not work
-- Critical defect is found
-- Automated test fails
-- Required quality check fails
-
-## 6. Defect Management
-
-All discovered defects will be recorded,
-assigned a severity/priority, retested after fixing,
-and closed only after verification.
-
-## 7. Integration Validation
-
-The complete application will be validated
-inside the local Docker Compose environment.
-
-## 8. Regression Testing
-
-Previously working functionality will be retested
-after changes to ensure existing features are not broken.
+    python -m pytest testing\\automated -m "not integration"
+    $env:SWIPEX_M2_GATEWAY_URL = "http://localhost:8080"
+    python -m pytest testing\\automated\\test_m2_live_contracts.py -m integration
+    $env:SWIPEX_M2_ACCESS_TOKEN = "<temporary-job-seeker-token>"
+    python -m pytest testing\\automated\\test_m2_live_contracts.py -m integration

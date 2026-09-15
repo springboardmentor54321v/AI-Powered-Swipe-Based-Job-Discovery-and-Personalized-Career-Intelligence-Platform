@@ -143,3 +143,37 @@ class CurrentUserSerializer(serializers.ModelSerializer):
 
     def get_role(self, obj) -> str:
         return obj.role.name.lower() if obj.role else "job_seeker"
+
+
+class RegisterResponseSerializer(serializers.Serializer):
+    """Response serializer for POST /api/v1/auth/register"""
+    user_id = serializers.CharField(help_text="Unique identifier of newly registered user")
+
+
+class LoginResponseSerializer(serializers.Serializer):
+    """Response serializer for POST /api/v1/auth/login"""
+    access_token = serializers.CharField(help_text="JWT access token")
+    refresh_token = serializers.CharField(help_text="JWT refresh token")
+    role = serializers.CharField(help_text="User role (e.g. job_seeker, recruiter, admin)")
+
+
+class RefreshTokenResponseSerializer(serializers.Serializer):
+    """Response serializer for POST /api/v1/auth/refresh"""
+    access_token = serializers.CharField(help_text="Newly minted JWT access token")
+
+
+class MessageResponseSerializer(serializers.Serializer):
+    """Generic status/message response serializer for protected role endpoints"""
+    status = serializers.CharField(help_text="Status indicator (e.g. success)")
+    message = serializers.CharField(help_text="Informational message")
+    user_id = serializers.CharField(required=False, help_text="User ID")
+    role = serializers.CharField(required=False, help_text="User role")
+
+
+class GoogleOAuthResponseSerializer(serializers.Serializer):
+    """Response serializer for GET /api/v1/auth/oauth/google when unconfigured"""
+    message = serializers.CharField()
+    status = serializers.CharField()
+    detail = serializers.CharField()
+    configured_redirect_uri = serializers.CharField()
+    target_provider = serializers.CharField()

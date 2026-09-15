@@ -12,7 +12,7 @@ export default function RecruiterPostJobPage() {
   const [company, setCompany] = useState('Infosys Enterprise Partner');
   const [type, setType] = useState('Full-time');
   const [location, setLocation] = useState('Remote');
-  const [salary, setSalary] = useState('$130,000 - $160,000');
+  const [salary, setSalary] = useState('₹13,00,000 - ₹16,00,000 per year');
   const [skills, setSkills] = useState('React, TypeScript, Cloud, Docker');
   const [description, setDescription] = useState('');
 
@@ -171,7 +171,7 @@ export default function RecruiterPostJobPage() {
                 type="text"
                 value={salary}
                 onChange={(e) => setNewSalary ? setNewSalary(e.target.value) : setSalary(e.target.value)}
-                placeholder="e.g. $130,000 - $160,000"
+                placeholder="e.g. ₹13,00,000 - ₹16,00,000 per year"
                 className="w-full bg-surface-elevated border border-outline-variant rounded-xl px-3.5 py-2 text-content focus:outline-none focus:border-primary"
               />
             </div>

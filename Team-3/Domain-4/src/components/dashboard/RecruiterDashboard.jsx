@@ -42,7 +42,7 @@ export default function RecruiterDashboard({
   const [newCompany, setNewCompany] = useState('Infosys Enterprise Partner');
   const [newType, setNewType] = useState('Full-time');
   const [newLocation, setNewLocation] = useState('Remote');
-  const [newSalary, setNewSalary] = useState('$130,000 - $160,000');
+  const [newSalary, setNewSalary] = useState('₹13,00,000 - ₹16,00,000 per year');
   const [newSkills, setNewSkills] = useState('React, TypeScript, Cloud');
   const [newDescription, setNewDescription] = useState('');
 
@@ -498,7 +498,7 @@ export default function RecruiterDashboard({
                     type="text"
                     value={newSalary}
                     onChange={(e) => setNewSalary(e.target.value)}
-                    placeholder="e.g. $120,000 - $150,000"
+                    placeholder="e.g. ₹12,00,000 - ₹15,00,000 per year"
                     className="w-full bg-surface-elevated border border-outline-variant rounded-xl px-3 py-2 text-content focus:outline-none focus:border-primary"
                   />
                 </div>

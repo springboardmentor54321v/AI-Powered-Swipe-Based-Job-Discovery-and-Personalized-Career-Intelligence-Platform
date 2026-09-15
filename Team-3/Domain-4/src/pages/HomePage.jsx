@@ -311,7 +311,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <span className="text-content-subtle text-[11px]">Compensation</span>
-                    <p className="font-semibold text-emerald-400">$130,000 - $160,000</p>
+                    <p className="font-semibold text-emerald-400">₹13,00,000 - ₹16,00,000 per year</p>
                   </div>
                 </div>
 

@@ -1,0 +1,83 @@
+source_company_id,name,company_type,about,company_size,industry,is_newly_founded,review_count,aggregate_rating
+47,Alembic Pharmaceuticals,MNC,,,,False,3528,3.9
+717,Randstad,NEWLY_FOUNDED,,,,True,,
+1936,JBM Group,MNC,,,,False,4429,3.9
+2113,Orra Fine Jewellery,STARTUP,,,,False,491,3.4
+7053,Capgemini,MNC,,,,False,48684,3.7
+16512,Oracle,MNC,,,,False,5904,3.6
+16536,Comviva Technology,STARTUP,,,,False,907,2.9
+16564,Hexaware Technologies,MNC,,,,False,6931,3.5
+18735,IndiaMART,MNC,,,,False,5482,3.6
+30210,DMart,MNC,,,,False,5396,3.9
+32580,KPMG Assurance and Consulting Services LLP,MNC,,,,False,6568,3.4
+34535,Venus Remedies (VRL),STARTUP,,,,False,368,4.1
+43920,Hexaware Technologies,MNC,,,,False,6931,3.5
+49069,ICICI Lombard,MNC,,,,False,5221,3.6
+51811,Denave,STARTUP,,,,False,718,3.5
+57496,K Raheja Corp,STARTUP,,,,False,728,4.2
+79059,Talent Corner Hr Services,NEWLY_FOUNDED,,,,True,,
+86623,Paramatrix Technologies,STARTUP,,,,False,196,4.1
+89118,Flamingo Pharmaceuticals,STARTUP,,,,False,429,3.3
+98312,Technosoft Engineering,STARTUP,,,,False,306,3.9
+113161,MAS Financial Services,STARTUP,,,,False,758,3.7
+149232,Aditya Birla Health Insurance (ABHICL),MNC,,,,False,1729,3.8
+150494,Aparna Constructions And Estates,STARTUP,,,,False,999,3.9
+202650,Net Connect,STARTUP,,,,False,573,3.2
+210814,BMM ISPAT,STARTUP,,,,False,374,3.9
+222857,Shyam Dairy (Shyam Group),STARTUP,,,,False,65,3.9
+227561,The Digital Group Infotech,STARTUP,,,,False,112,3.4
+229001,Rane Group,STARTUP,,,,False,667,3.8
+270871,Muthoot FinCorp (MFL),MNC,,,,False,8952,4.5
+410527,Infosys,MNC,,,,False,44792,3.5
+444841,Yashoda Super Specialty Hospital,STARTUP,,,,False,835,3.8
+610735,Globaldata,STARTUP,,,,False,568,3.3
+689041,TEG India,NEWLY_FOUNDED,,,,True,3,4.0
+756525,K12 Techno Services,MNC,,,,False,1735,3.6
+843971,SMFG INDIA CREDIT COMPANY,MNC,,,,False,5158,3.9
+889970,MMF-Hospitals Association,NEWLY_FOUNDED,,,,True,6,4.2
+1130974,A One Salasar,STARTUP,,,,False,53,3.6
+1286236,Highrise Management,NEWLY_FOUNDED,,,,True,,
+1365528,ASG Eye Hospital,STARTUP,,,,False,642,3.4
+1374238,OYO,MNC,,,,False,3764,3.1
+1412850,Ang Placement And Staffing Solutions,NEWLY_FOUNDED,,,,True,,
+1453646,Bauer Corporate Services,NEWLY_FOUNDED,,,,True,13,3.0
+1547744,Experion,STARTUP,,,,False,152,4.0
+1704654,Niyukti Management,NEWLY_FOUNDED,,,,True,,
+1774104,Straive,MNC,,,,False,2106,3.3
+2544036,Mazda Consultancy Services,NEWLY_FOUNDED,,,,True,24,3.7
+2737280,Tracxn,STARTUP,,,,False,510,3.0
+3133320,Cliantha Research,STARTUP,,,,False,272,4.1
+3171770,Qentelli,STARTUP,,,,False,324,3.9
+3386918,Appitsimple Infotek,STARTUP,,,,False,55,3.1
+3467328,PlanetSpark,MNC,,,,False,2275,3.9
+3626434,Cars24,MNC,,,,False,4148,3.5
+3665344,Provana,MNC,,,,False,1536,4.0
+3921250,Alekhya Homes,NEWLY_FOUNDED,,,,True,42,4.3
+4063588,Outpace Consulting Services,NEWLY_FOUNDED,,,,True,,
+4362734,Expert Staffing Solutions New Delhi,NEWLY_FOUNDED,,,,True,,
+4383002,GR Recruitments,NEWLY_FOUNDED,,,,True,,
+4409450,Dealsdray Online,STARTUP,,,,False,88,3.0
+4414032,Pandaje Web Services,NEWLY_FOUNDED,,,,True,46,4.1
+4424508,Turning Point Consultants,NEWLY_FOUNDED,,,,True,,
+5440626,Bhatia Corporation Pvt Ltd,NEWLY_FOUNDED,,,,True,5,3.7
+5709226,Kiash Solution,NEWLY_FOUNDED,,,,True,,
+5752882,Zclus India,NEWLY_FOUNDED,,,,True,24,3.6
+5839874,Blue Bells Group Of Schools,NEWLY_FOUNDED,,,,True,9,4.0
+5858414,Gryphon Hytech Services,NEWLY_FOUNDED,,,,True,,
+6249114,Hotel Oleander Farms,NEWLY_FOUNDED,,,,True,4,3.6
+6435230,Southern Trading Co,NEWLY_FOUNDED,,,,True,8,3.0
+6507992,Choice Capital,NEWLY_FOUNDED,,,,True,3,4.7
+6769057,SAFE Refrigerations,NEWLY_FOUNDED,,,,True,23,3.1
+123458785,Redserv Global Solutions,STARTUP,,,,False,71,3.1
+123591869,Balkrishna Industries (BKT),STARTUP,,,,False,462,4.1
+123624767,The Emprego Consultants,NEWLY_FOUNDED,,,,True,6,4.8
+123805621,Doehler,STARTUP,,,,False,98,3.3
+123958025,GIG Education Trust,NEWLY_FOUNDED,,,,True,,
+123963551,Vee Healthtek,STARTUP,,,,False,153,3.8
+123990158,MG Motor India,STARTUP,,,,False,957,3.8
+124044894,Satguru Holidays,STARTUP,,,,False,71,2.7
+124079772,Kansara Bearings,NEWLY_FOUNDED,,,,True,3,5.0
+124093700,Cryogenic Concern,NEWLY_FOUNDED,,,,True,18,2.5
+124185098,Metaltech Motor Bodies,NEWLY_FOUNDED,,,,True,24,3.3
+124269780,Infosys,MNC,,,,False,44792,3.5
+124446806,Scoop Services,NEWLY_FOUNDED,,,,True,,

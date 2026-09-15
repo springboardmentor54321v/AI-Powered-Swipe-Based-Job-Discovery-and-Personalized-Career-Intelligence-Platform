@@ -1,0 +1,280 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "SwipeX Milestone 2 — Unified Gateway API",
+    "dateExported": "2026-09-15T22:15:00Z",
+    "version": "1.2",
+    "folders": [
+        { "name": "System", "_id": "f-system" },
+        { "name": "Auth Service", "_id": "f-auth" },
+        { "name": "Job Service", "_id": "f-jobs" },
+        { "name": "Company Service", "_id": "f-companies" },
+        { "name": "Swipe Service", "_id": "f-swipes" },
+        { "name": "Resume & ATS", "_id": "f-resume" },
+        { "name": "Recommendations & Matching", "_id": "f-matching" }
+    ],
+    "requests": [
+        {
+            "_id": "r-health",
+            "name": "Health Check",
+            "url": "http://127.0.0.1:8000/health",
+            "method": "GET",
+            "containerId": "f-system"
+        },
+        {
+            "_id": "r-swagger",
+            "name": "Swagger UI",
+            "url": "http://127.0.0.1:8000/api/docs/",
+            "method": "GET",
+            "containerId": "f-system"
+        },
+        {
+            "_id": "r-schema",
+            "name": "OpenAPI Schema",
+            "url": "http://127.0.0.1:8000/api/schema/",
+            "method": "GET",
+            "containerId": "f-system"
+        },
+        {
+            "_id": "r-register-seeker",
+            "name": "Register (Job Seeker)",
+            "url": "http://127.0.0.1:8000/api/v1/auth/register",
+            "method": "POST",
+            "headers": [
+                { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"candidate@example.com\",\n  \"name\": \"Sai Candidate\",\n  \"password\": \"SecurePassword123!\",\n  \"role\": \"job_seeker\"\n}"
+            },
+            "containerId": "f-auth"
+        },
+        {
+            "_id": "r-register-recruiter",
+            "name": "Register (Recruiter)",
+            "url": "http://127.0.0.1:8000/api/v1/auth/register",
+            "method": "POST",
+            "headers": [
+                { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"recruiter@example.com\",\n  \"name\": \"Alice Recruiter\",\n  \"password\": \"SecurePassword123!\",\n  \"role\": \"recruiter\"\n}"
+            },
+            "containerId": "f-auth"
+        },
+        {
+            "_id": "r-login",
+            "name": "Login",
+            "url": "http://127.0.0.1:8000/api/v1/auth/login",
+            "method": "POST",
+            "headers": [
+                { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"candidate@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "containerId": "f-auth"
+        },
+        {
+            "_id": "r-refresh",
+            "name": "Refresh Token",
+            "url": "http://127.0.0.1:8000/api/v1/auth/token/refresh",
+            "method": "POST",
+            "headers": [
+                { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"refresh\": \"PASTE_REFRESH_TOKEN_HERE\"\n}"
+            },
+            "containerId": "f-auth"
+        },
+        {
+            "_id": "r-me",
+            "name": "Get My Profile",
+            "url": "http://127.0.0.1:8000/api/v1/auth/me",
+            "method": "GET",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+            ],
+            "containerId": "f-auth"
+        },
+        {
+            "_id": "r-jobs-list",
+            "name": "List Jobs (Public)",
+            "url": "http://127.0.0.1:8000/api/v1/jobs/",
+            "method": "GET",
+            "containerId": "f-jobs"
+        },
+        {
+            "_id": "r-jobs-detail",
+            "name": "Job Detail (Public)",
+            "url": "http://127.0.0.1:8000/api/v1/jobs/101",
+            "method": "GET",
+            "containerId": "f-jobs"
+        },
+        {
+            "_id": "r-jobs-search",
+            "name": "Search Jobs (Public)",
+            "url": "http://127.0.0.1:8000/api/v1/jobs/search?keyword=Python&page=1&page_size=20",
+            "method": "GET",
+            "containerId": "f-jobs"
+        },
+        {
+            "_id": "r-jobs-create",
+            "name": "Create Job (Recruiter)",
+            "url": "http://127.0.0.1:8000/api/v1/jobs/",
+            "method": "POST",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_RECRUITER_TOKEN_HERE" },
+                { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"title\": \"Senior Backend Engineer\",\n  \"company\": \"SwipeX Corp\",\n  \"location\": \"Bengaluru\",\n  \"is_remote\": true,\n  \"salary_min\": 1500000,\n  \"salary_max\": 2500000,\n  \"skills\": [\"python\", \"django\", \"postgresql\"],\n  \"description\": \"Lead backend architecture.\",\n  \"job_type\": \"Full-time\",\n  \"experience_level\": \"Senior\"\n}"
+            },
+            "containerId": "f-jobs"
+        },
+        {
+            "_id": "r-jobs-update",
+            "name": "Update Job (Recruiter)",
+            "url": "http://127.0.0.1:8000/api/v1/jobs/101",
+            "method": "PUT",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_RECRUITER_TOKEN_HERE" },
+                { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"title\": \"Updated Full Stack Developer\",\n  \"salary_max\": 1800000\n}"
+            },
+            "containerId": "f-jobs"
+        },
+        {
+            "_id": "r-jobs-delete",
+            "name": "Delete Job (Recruiter)",
+            "url": "http://127.0.0.1:8000/api/v1/jobs/101",
+            "method": "DELETE",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_RECRUITER_TOKEN_HERE" }
+            ],
+            "containerId": "f-jobs"
+        },
+        {
+            "_id": "r-companies-list",
+            "name": "List Companies (Public)",
+            "url": "http://127.0.0.1:8000/api/v1/companies/",
+            "method": "GET",
+            "containerId": "f-companies"
+        },
+        {
+            "_id": "r-companies-detail",
+            "name": "Company Detail (Public)",
+            "url": "http://127.0.0.1:8000/api/v1/companies/1",
+            "method": "GET",
+            "containerId": "f-companies"
+        },
+        {
+            "_id": "r-swipe-apply",
+            "name": "Swipe Apply",
+            "url": "http://127.0.0.1:8000/api/v1/swipes/",
+            "method": "POST",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" },
+                { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"job_id\": 101,\n  \"action\": \"apply\"\n}"
+            },
+            "containerId": "f-swipes"
+        },
+        {
+            "_id": "r-swipe-save",
+            "name": "Swipe Save",
+            "url": "http://127.0.0.1:8000/api/v1/swipes/",
+            "method": "POST",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" },
+                { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"job_id\": 102,\n  \"action\": \"save\"\n}"
+            },
+            "containerId": "f-swipes"
+        },
+        {
+            "_id": "r-swipe-skip",
+            "name": "Swipe Skip",
+            "url": "http://127.0.0.1:8000/api/v1/swipes/",
+            "method": "POST",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" },
+                { "name": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"job_id\": 103,\n  \"action\": \"skip\"\n}"
+            },
+            "containerId": "f-swipes"
+        },
+        {
+            "_id": "r-swipe-history",
+            "name": "Swipe History",
+            "url": "http://127.0.0.1:8000/api/v1/swipes/history",
+            "method": "GET",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+            ],
+            "containerId": "f-swipes"
+        },
+        {
+            "_id": "r-resume-upload",
+            "name": "Upload Resume (PDF)",
+            "url": "http://127.0.0.1:8000/api/v1/resume/upload",
+            "method": "POST",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+            ],
+            "body": {
+                "type": "formdata",
+                "form": [
+                    { "name": "file", "value": "", "type": "file" }
+                ]
+            },
+            "containerId": "f-resume"
+        },
+        {
+            "_id": "r-ats-score",
+            "name": "Get ATS Score",
+            "url": "http://127.0.0.1:8000/api/v1/resume/PASTE_RESUME_ID_HERE/ats-score?job_id=290925001457",
+            "method": "GET",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+            ],
+            "containerId": "f-resume"
+        },
+        {
+            "_id": "r-recommendations",
+            "name": "Get Recommendations",
+            "url": "http://127.0.0.1:8000/api/v1/recommendations/?resume_id=PASTE_RESUME_ID_HERE",
+            "method": "GET",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+            ],
+            "containerId": "f-matching"
+        },
+        {
+            "_id": "r-matching",
+            "name": "Matching Engine",
+            "url": "http://127.0.0.1:8000/api/v1/matching/?resume_id=PASTE_RESUME_ID_HERE",
+            "method": "GET",
+            "headers": [
+                { "name": "Authorization", "value": "Bearer PASTE_ACCESS_TOKEN_HERE" }
+            ],
+            "containerId": "f-matching"
+        }
+    ]
+}
