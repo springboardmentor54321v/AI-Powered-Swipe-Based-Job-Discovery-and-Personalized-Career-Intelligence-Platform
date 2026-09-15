@@ -441,7 +441,7 @@ class JobServiceHandler(BaseHTTPRequestHandler):
 
         # GET /api/v1/swipes/history
         if path.startswith("/api/v1/swipes/history"):
-            user_id = self.headers.get("X-User-Id", "anonymous")
+            user_id = str(self.headers.get("X-User-Id", "anonymous"))
             user_swipes = [
                 {
                     "job_id": s["job_id"],
@@ -451,6 +451,7 @@ class JobServiceHandler(BaseHTTPRequestHandler):
                     "company": s.get("company", ""),
                 }
                 for s in SWIPES_STORE
+                if str(s.get("user_id")) == user_id
             ]
             self._send_json({
                 "user_id": user_id,
@@ -486,8 +487,21 @@ class JobServiceHandler(BaseHTTPRequestHandler):
                 self._send_json({"detail": "Job not found"}, status_code=404)
                 return
 
-            user_id = self.headers.get("X-User-Id", "anonymous")
+            user_id = str(self.headers.get("X-User-Id", "anonymous"))
             user_role = self.headers.get("X-User-Role", "anonymous")
+
+            # Check if user already swiped on this job (upsert behavior)
+            existing_swipe = next((s for s in SWIPES_STORE if str(s.get("user_id")) == user_id and str(s.get("job_id")) == str(job["id"])), None)
+            if existing_swipe:
+                existing_swipe["direction"] = payload.get("direction", "right")
+                self._send_json({
+                    "swipe_id": existing_swipe["swipe_id"],
+                    "job_id": job["id"],
+                    "direction": existing_swipe["direction"],
+                    "status": "recorded"
+                }, status_code=201)
+                return
+
             swipe_id = len(SWIPES_STORE) + 1
             swipe_record = {
                 "swipe_id": swipe_id,
@@ -508,6 +522,7 @@ class JobServiceHandler(BaseHTTPRequestHandler):
                 "status": "recorded"
             }, status_code=201)
             return
+
 
         # POST /api/v1/jobs (Recruiter job creation)
         if path in ["/api/v1/jobs", "/api/v1/jobs/"]:
