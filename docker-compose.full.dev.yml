@@ -37,9 +37,14 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: "6379"
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-only-change-me}
+      JOB_SERVICE_URL: http://job-service:8000
+      RESUME_SERVICE_URL: http://resume-service:8000
+      MATCHING_ENGINE_URL: http://resume-service:8000
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
+      job-service: { condition: service_started }
+      resume-service: { condition: service_started }
 
   job-service:
     build: ./Team-3/Domain-2/SwipeX_Job_Data_Intelligence_Milestone1
