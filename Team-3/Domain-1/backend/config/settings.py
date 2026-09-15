@@ -146,3 +146,9 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "")
+
+# Downstream Microservices URLs (API Gateway routing)
+JOB_SERVICE_URL = os.getenv("JOB_SERVICE_URL", "http://127.0.0.1:8001")
+RESUME_SERVICE_URL = os.getenv("RESUME_SERVICE_URL", "http://127.0.0.1:8002")
+MATCHING_ENGINE_URL = os.getenv("MATCHING_ENGINE_URL", os.getenv("RESUME_SERVICE_URL", "http://127.0.0.1:8002"))
+

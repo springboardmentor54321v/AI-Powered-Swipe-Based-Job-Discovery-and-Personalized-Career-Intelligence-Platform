@@ -96,7 +96,11 @@ SAMPLE_JOBS = [
         "skills": ["c#", "azure", "react", "sql", "docker"],
         "description": "Create cloud-native services used by customers worldwide.",
         "industry": "Technology",
-        "applicant_count": 102
+        "applicant_count": 102,
+        "competition_level": "HIGH",
+        "freshness": "JUST_POSTED",
+        "posted_at": "2026-09-14T10:00:00Z",
+        "posted_time": "2026-09-14T10:00:00Z",
     },
     {
         "id": 2,
@@ -116,7 +120,11 @@ SAMPLE_JOBS = [
         "skills": ["javascript", "typescript", "react", "css", "rest api"],
         "description": "Build beautiful developer experiences for API teams.",
         "industry": "Developer Tools",
-        "applicant_count": 29
+        "applicant_count": 29,
+        "competition_level": "MEDIUM",
+        "freshness": "RECENT",
+        "posted_at": "2026-09-13T10:00:00Z",
+        "posted_time": "2026-09-13T10:00:00Z",
     },
     {
         "id": 3,
@@ -136,7 +144,11 @@ SAMPLE_JOBS = [
         "skills": ["python", "nlp", "pytorch", "transformers", "pandas"],
         "description": "Evaluate Indian-language language models and data pipelines.",
         "industry": "Artificial Intelligence",
-        "applicant_count": 18
+        "applicant_count": 18,
+        "competition_level": "LOW",
+        "freshness": "JUST_POSTED",
+        "posted_at": "2026-09-14T11:00:00Z",
+        "posted_time": "2026-09-14T11:00:00Z",
     },
     {
         "id": 4,
@@ -156,7 +168,11 @@ SAMPLE_JOBS = [
         "skills": ["docker", "kubernetes", "aws", "linux", "github actions"],
         "description": "Maintain CI/CD systems and container infrastructure.",
         "industry": "FinTech",
-        "applicant_count": 40
+        "applicant_count": 40,
+        "competition_level": "MEDIUM",
+        "freshness": "THIS_WEEK",
+        "posted_at": "2026-09-11T10:00:00Z",
+        "posted_time": "2026-09-11T10:00:00Z",
     },
     {
         "id": 101,
@@ -176,7 +192,11 @@ SAMPLE_JOBS = [
         "skills": ["python", "django", "react"],
         "description": "Develop full-stack web applications using Django REST Framework and React.",
         "industry": "IT Services",
-        "applicant_count": 14
+        "applicant_count": 14,
+        "competition_level": "LOW",
+        "freshness": "JUST_POSTED",
+        "posted_at": "2026-09-14T09:30:00Z",
+        "posted_time": "2026-09-14T09:30:00Z",
     },
     {
         "id": 102,
@@ -196,7 +216,11 @@ SAMPLE_JOBS = [
         "skills": ["python", "postgresql", "redis", "docker"],
         "description": "Scale high-throughput API gateway and microservice architecture.",
         "industry": "FinTech",
-        "applicant_count": 65
+        "applicant_count": 65,
+        "competition_level": "MEDIUM",
+        "freshness": "RECENT",
+        "posted_at": "2026-09-12T14:00:00Z",
+        "posted_time": "2026-09-12T14:00:00Z",
     },
     {
         "id": 103,
@@ -216,7 +240,11 @@ SAMPLE_JOBS = [
         "skills": ["python", "fastapi", "sql", "git", "rest api"],
         "description": "Build reliable APIs and automation workflows for quick commerce operations.",
         "industry": "Quick Commerce",
-        "applicant_count": 48
+        "applicant_count": 48,
+        "competition_level": "MEDIUM",
+        "freshness": "OLDER",
+        "posted_at": "2026-09-08T10:00:00Z",
+        "posted_time": "2026-09-08T10:00:00Z",
     }
 ]
 
@@ -481,7 +509,117 @@ class JobServiceHandler(BaseHTTPRequestHandler):
             }, status_code=201)
             return
 
+        # POST /api/v1/jobs (Recruiter job creation)
+        if path in ["/api/v1/jobs", "/api/v1/jobs/"]:
+            title = payload.get("title")
+            if not title:
+                self._send_json({"detail": "title is required"}, status_code=400)
+                return
+
+            new_id = max((j["id"] for j in SAMPLE_JOBS), default=100) + 1
+            s_min = payload.get("salary_min", payload.get("salary_range", {}).get("min", 500000))
+            s_max = payload.get("salary_max", payload.get("salary_range", {}).get("max", 1000000))
+            is_rem = payload.get("is_remote", payload.get("remote", False))
+            user_id = self.headers.get("X-User-Id", "anonymous")
+
+            created_job = {
+                "id": new_id,
+                "job_id": new_id,
+                "title": title,
+                "company": payload.get("company", "Independent Recruiter"),
+                "company_id": payload.get("company_id", 1),
+                "company_type": payload.get("company_type", "Startup"),
+                "location": payload.get("location", "Remote"),
+                "remote": is_rem,
+                "is_remote": is_rem,
+                "salary_range": {"min": s_min, "max": s_max},
+                "salary_min": s_min,
+                "salary_max": s_max,
+                "job_type": payload.get("job_type", "Full-time"),
+                "experience_level": payload.get("experience_level", "Mid-Level"),
+                "skills": payload.get("skills", ["python"]),
+                "description": payload.get("description", "Exciting career opportunity."),
+                "industry": payload.get("industry", "Technology"),
+                "applicant_count": 0,
+                "competition_level": "LOW",
+                "freshness": "JUST_POSTED",
+                "posted_at": "2026-09-15T09:00:00Z",
+                "posted_time": "2026-09-15T09:00:00Z",
+                "created_by": user_id,
+            }
+            SAMPLE_JOBS.append(created_job)
+            self._send_json(created_job, status_code=201)
+            return
+
         self._send_json({"error": "Route not found in Job Service"}, status_code=404)
+
+    def do_PUT(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else "{}"
+        try:
+            payload = json.loads(body)
+        except Exception:
+            payload = {}
+
+        # PUT /api/v1/jobs/{job_id}
+        if path.startswith("/api/v1/jobs/"):
+            job_id_str = path.rstrip("/").split("/")[-1]
+            job = next((j for j in SAMPLE_JOBS if str(j["id"]) == job_id_str or str(j.get("job_id")) == job_id_str), None)
+            if not job:
+                self._send_json({"detail": "Job not found"}, status_code=404)
+                return
+
+            if "title" in payload:
+                job["title"] = payload["title"]
+            if "company" in payload:
+                job["company"] = payload["company"]
+            if "location" in payload:
+                job["location"] = payload["location"]
+            if "is_remote" in payload or "remote" in payload:
+                is_rem = payload.get("is_remote", payload.get("remote"))
+                job["is_remote"] = is_rem
+                job["remote"] = is_rem
+            if "salary_min" in payload:
+                job["salary_min"] = payload["salary_min"]
+                job.setdefault("salary_range", {})["min"] = payload["salary_min"]
+            if "salary_max" in payload:
+                job["salary_max"] = payload["salary_max"]
+                job.setdefault("salary_range", {})["max"] = payload["salary_max"]
+            if "skills" in payload:
+                job["skills"] = payload["skills"]
+            if "description" in payload:
+                job["description"] = payload["description"]
+            if "job_type" in payload:
+                job["job_type"] = payload["job_type"]
+            if "experience_level" in payload:
+                job["experience_level"] = payload["experience_level"]
+
+            self._send_json(job, status_code=200)
+            return
+
+        self._send_json({"error": "Route not found in Job Service"}, status_code=404)
+
+    def do_DELETE(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+
+        # DELETE /api/v1/jobs/{job_id}
+        if path.startswith("/api/v1/jobs/"):
+            job_id_str = path.rstrip("/").split("/")[-1]
+            job = next((j for j in SAMPLE_JOBS if str(j["id"]) == job_id_str or str(j.get("job_id")) == job_id_str), None)
+            if not job:
+                self._send_json({"detail": "Job not found"}, status_code=404)
+                return
+
+            SAMPLE_JOBS.remove(job)
+            self._send_json({"status": "deleted", "job_id": int(job_id_str) if job_id_str.isdigit() else job_id_str, "detail": "Job successfully deleted"}, status_code=200)
+            return
+
+        self._send_json({"error": "Route not found in Job Service"}, status_code=404)
+
 
 
 if __name__ == "__main__":

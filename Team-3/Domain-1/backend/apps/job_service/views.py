@@ -19,8 +19,72 @@ from rest_framework import status, serializers
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 from apps.auth_service.authentication import JWTAuthentication
-from apps.auth_service.permissions import IsJobSeeker
+from apps.auth_service.permissions import IsJobSeeker, IsRecruiterOrAdmin
 from gateway.proxy import forward_to_downstream
+
+
+def _normalize_job_freshness(job: dict) -> dict:
+    """Ensure both posted_at and posted_time are exposed on job objects without recalculating."""
+    if isinstance(job, dict):
+        if "posted_at" in job and "posted_time" not in job:
+            job["posted_time"] = job["posted_at"]
+        elif "posted_time" in job and "posted_at" not in job:
+            job["posted_at"] = job["posted_time"]
+    return job
+
+
+def _normalize_jobs_payload(data):
+    """Normalize freshness and competition fields across list and dict responses."""
+    if isinstance(data, dict):
+        if "jobs" in data and isinstance(data["jobs"], list):
+            for j in data["jobs"]:
+                _normalize_job_freshness(j)
+        elif "results" in data and isinstance(data["results"], list):
+            for j in data["results"]:
+                _normalize_job_freshness(j)
+        else:
+            _normalize_job_freshness(data)
+    elif isinstance(data, list):
+        for j in data:
+            _normalize_job_freshness(j)
+    return data
+
+
+# ============================================================
+# Serializers for Recruiter Job Management
+# ============================================================
+
+class JobCreateSerializer(serializers.Serializer):
+    """Validates job requisition creation payload submitted by Recruiters."""
+    title = serializers.CharField(required=True, max_length=255, help_text="Position title (e.g. Senior Backend Engineer)")
+    company = serializers.CharField(required=False, default="Independent Recruiter", max_length=255)
+    company_id = serializers.IntegerField(required=False, default=1)
+    company_type = serializers.CharField(required=False, default="Startup")
+    location = serializers.CharField(required=False, default="Remote")
+    is_remote = serializers.BooleanField(required=False, default=False)
+    remote = serializers.BooleanField(required=False, default=False)
+    salary_min = serializers.IntegerField(required=False, default=500000, min_value=0)
+    salary_max = serializers.IntegerField(required=False, default=1000000, min_value=0)
+    skills = serializers.ListField(child=serializers.CharField(), required=False, default=list)
+    description = serializers.CharField(required=False, default="Exciting career opportunity.")
+    job_type = serializers.CharField(required=False, default="Full-time")
+    experience_level = serializers.CharField(required=False, default="Mid-Level")
+    industry = serializers.CharField(required=False, default="Technology")
+
+
+class JobUpdateSerializer(serializers.Serializer):
+    """Validates job posting update payload submitted by Recruiters."""
+    title = serializers.CharField(required=False, max_length=255)
+    company = serializers.CharField(required=False, max_length=255)
+    location = serializers.CharField(required=False)
+    is_remote = serializers.BooleanField(required=False)
+    remote = serializers.BooleanField(required=False)
+    salary_min = serializers.IntegerField(required=False, min_value=0)
+    salary_max = serializers.IntegerField(required=False, min_value=0)
+    skills = serializers.ListField(child=serializers.CharField(), required=False)
+    description = serializers.CharField(required=False)
+    job_type = serializers.CharField(required=False)
+    experience_level = serializers.CharField(required=False)
 
 
 # ============================================================
@@ -32,8 +96,19 @@ class ListJobsView(APIView):
     GET /api/v1/jobs/
     Public endpoint for paginated job listings with optional filtering.
     Forwards to Intern 3's Job Service at JOB_SERVICE_URL/api/v1/jobs.
+
+    POST /api/v1/jobs/
+    Protected endpoint. Allows Recruiters to create a new job posting.
+    Requires JWT authentication and RECRUITER or ADMIN role.
     """
-    permission_classes = [AllowAny]
+    serializer_class = JobCreateSerializer
+    authentication_classes = [JWTAuthentication]
+
+    def get_permissions(self):
+
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsRecruiterOrAdmin()]
 
     @extend_schema(
         parameters=[
@@ -103,17 +178,51 @@ class ListJobsView(APIView):
         ],
         operation_id="list_jobs",
         summary="List Job Postings",
-        description="Public endpoint. Fetches paginated job listings with optional multi-criteria filtering from the downstream Job Service.",
+        description="Public endpoint. Fetches paginated job listings with optional multi-criteria filtering and freshness/competition fields from the downstream Job Service.",
         responses={200: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
         tags=["Jobs"],
     )
     def get(self, request):
-        return forward_to_downstream(
+        resp = forward_to_downstream(
             request=request,
             target_base_url=getattr(settings, "JOB_SERVICE_URL", "http://127.0.0.1:8001"),
             subpath="api/v1/jobs",
             service_name="Job Service",
         )
+        if resp.status_code < 400 and hasattr(resp, "data"):
+            _normalize_jobs_payload(resp.data)
+        return resp
+
+    @extend_schema(
+        operation_id="create_job_posting",
+        request=JobCreateSerializer,
+        summary="Create Job Posting (Recruiter)",
+        description="Protected endpoint for RECRUITER and ADMIN roles. Creates a new job posting in the downstream Job Service.",
+        responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
+        tags=["Jobs"],
+    )
+    def post(self, request):
+        serializer = JobCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "error": "Validation Error",
+                    "detail": serializer.errors,
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        resp = forward_to_downstream(
+            request=request,
+            target_base_url=getattr(settings, "JOB_SERVICE_URL", "http://127.0.0.1:8001"),
+            subpath="api/v1/jobs",
+            service_name="Job Service",
+        )
+        if resp.status_code < 400 and hasattr(resp, "data"):
+            _normalize_jobs_payload(resp.data)
+        return resp
+
 
 
 class JobSearchView(APIView):
@@ -206,12 +315,15 @@ class JobSearchView(APIView):
         tags=["Jobs"],
     )
     def get(self, request):
-        return forward_to_downstream(
+        resp = forward_to_downstream(
             request=request,
             target_base_url=getattr(settings, "JOB_SERVICE_URL", "http://127.0.0.1:8001"),
             subpath="api/v1/jobs/search",
             service_name="Job Service",
         )
+        if resp.status_code < 400 and hasattr(resp, "data"):
+            _normalize_jobs_payload(resp.data)
+        return resp
 
 
 class JobDetailView(APIView):
@@ -219,8 +331,22 @@ class JobDetailView(APIView):
     GET /api/v1/jobs/{job_id}
     Public endpoint for retrieving detailed information about a specific job posting.
     Forwards to Intern 3's Job Service at JOB_SERVICE_URL/api/v1/jobs/{job_id}.
+
+    PUT /api/v1/jobs/{job_id}
+    Protected endpoint. Allows Recruiters to update an existing job posting.
+    Requires JWT authentication and RECRUITER or ADMIN role.
+
+    DELETE /api/v1/jobs/{job_id}
+    Protected endpoint. Allows Recruiters to delete an existing job posting.
+    Requires JWT authentication and RECRUITER or ADMIN role.
     """
-    permission_classes = [AllowAny]
+    serializer_class = JobUpdateSerializer
+    authentication_classes = [JWTAuthentication]
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsRecruiterOrAdmin()]
 
     @extend_schema(
         parameters=[
@@ -234,17 +360,77 @@ class JobDetailView(APIView):
         ],
         operation_id="get_job_detail",
         summary="Get Job Details by ID",
-        description="Public endpoint. Fetches comprehensive job details including description, company info, and compensation from the downstream Job Service.",
+        description="Public endpoint. Fetches comprehensive job details including description, company info, compensation, and freshness/competition fields from the downstream Job Service.",
         responses={200: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
         tags=["Jobs"],
     )
     def get(self, request, job_id):
+        resp = forward_to_downstream(
+            request=request,
+            target_base_url=getattr(settings, "JOB_SERVICE_URL", "http://127.0.0.1:8001"),
+            subpath=f"api/v1/jobs/{job_id}",
+            service_name="Job Service",
+        )
+        if resp.status_code < 400 and hasattr(resp, "data"):
+            _normalize_jobs_payload(resp.data)
+        return resp
+
+    @extend_schema(
+        operation_id="update_job_posting",
+        request=JobUpdateSerializer,
+        summary="Update Job Posting (Recruiter)",
+        description="Protected endpoint for RECRUITER and ADMIN roles. Updates fields on an existing job posting in the downstream Job Service.",
+        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
+        tags=["Jobs"],
+    )
+    def put(self, request, job_id):
+        serializer = JobUpdateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "error": "Validation Error",
+                    "detail": serializer.errors,
+                    "status_code": status.HTTP_400_BAD_REQUEST,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        resp = forward_to_downstream(
+            request=request,
+            target_base_url=getattr(settings, "JOB_SERVICE_URL", "http://127.0.0.1:8001"),
+            subpath=f"api/v1/jobs/{job_id}",
+            service_name="Job Service",
+        )
+        if resp.status_code < 400 and hasattr(resp, "data"):
+            _normalize_jobs_payload(resp.data)
+        return resp
+
+    @extend_schema(
+        operation_id="partial_update_job_posting",
+        request=JobUpdateSerializer,
+        summary="Partially Update Job Posting (Recruiter)",
+        description="Protected endpoint for RECRUITER and ADMIN roles. Partially updates fields on an existing job posting.",
+        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
+        tags=["Jobs"],
+    )
+    def patch(self, request, job_id):
+        return self.put(request, job_id)
+
+
+    @extend_schema(
+        operation_id="delete_job_posting",
+        summary="Delete Job Posting (Recruiter)",
+        description="Protected endpoint for RECRUITER and ADMIN roles. Deletes a job posting in the downstream Job Service.",
+        responses={200: OpenApiTypes.OBJECT, 204: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
+        tags=["Jobs"],
+    )
+    def delete(self, request, job_id):
         return forward_to_downstream(
             request=request,
             target_base_url=getattr(settings, "JOB_SERVICE_URL", "http://127.0.0.1:8001"),
             subpath=f"api/v1/jobs/{job_id}",
             service_name="Job Service",
         )
+
 
 
 # ============================================================

@@ -42,5 +42,7 @@ urlpatterns = [
     path("api/v1/swipes/", include("apps.job_service.swipes_urls")),
     path("api/v1/resume/", include("apps.resume_service.urls")),
     path("api/v1/recommendations/", include("apps.resume_service.recommendations_urls")),
+    path("api/v1/matching/", include("apps.resume_service.matching_urls")),
 ]
+
 

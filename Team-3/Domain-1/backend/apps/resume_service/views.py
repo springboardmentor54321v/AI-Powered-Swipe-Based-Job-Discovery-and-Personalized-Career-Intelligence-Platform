@@ -150,3 +150,47 @@ class RecommendationsView(APIView):
             subpath="api/v1/recommendations",
             service_name="Recommendation Service",
         )
+
+
+class MatchingEngineView(APIView):
+    """
+    GET /api/v1/matching
+    Gateway endpoint for the Career Intelligence Matching Engine.
+    Protected Route: Requires valid JWT and JOB_SEEKER role.
+    Routes to Intern 4's Matching Engine in Domain-3 at MATCHING_ENGINE_URL/api/v1/recommendations.
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsJobSeeker]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="resume_id",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Uploaded Resume UUID to generate heuristic or AI matching scores for"
+            ),
+            OpenApiParameter(
+                name="user_id",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Candidate User ID"
+            ),
+        ],
+        operation_id="get_matching_recommendations",
+        summary="Run Matching Engine",
+        description="Gateway endpoint connecting to Intern 4's Domain-3 Matching Engine. Returns ranked job recommendations with heuristic match percentages.",
+        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
+        tags=["Matching Engine"],
+    )
+    def get(self, request):
+        target_url = getattr(settings, "MATCHING_ENGINE_URL", getattr(settings, "RESUME_SERVICE_URL", "http://127.0.0.1:8002"))
+        return forward_to_downstream(
+            request=request,
+            target_base_url=target_url,
+            subpath="api/v1/recommendations",
+            service_name="Matching Engine",
+        )
+
