@@ -116,6 +116,104 @@ class ListJobsView(APIView):
         )
 
 
+class JobSearchView(APIView):
+    """
+    GET /api/v1/jobs/search
+    Public endpoint for multi-criteria job search.
+    Supports keyword matching across title & description, location, job type,
+    salary min/max, experience level, skills, remote filtering, and pagination.
+    Forwards to Intern 3's Job Service at JOB_SERVICE_URL/api/v1/jobs/search.
+    """
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="keyword",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Free-text search term matched against job title and description"
+            ),
+            OpenApiParameter(
+                name="location",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="City, region, or location string"
+            ),
+            OpenApiParameter(
+                name="job_type",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Employment contract type (Full-time, Part-time, Internship, Contract)"
+            ),
+            OpenApiParameter(
+                name="salary_min",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Minimum annual compensation"
+            ),
+            OpenApiParameter(
+                name="salary_max",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Maximum annual compensation"
+            ),
+            OpenApiParameter(
+                name="experience_level",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Required experience band (Fresher, Junior, Mid-Level, Senior, Lead)"
+            ),
+            OpenApiParameter(
+                name="skills",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Comma-separated required skill tokens"
+            ),
+            OpenApiParameter(
+                name="is_remote",
+                type=bool,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filter for remote positions only"
+            ),
+            OpenApiParameter(
+                name="page",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Page number for paginated search results (default: 1)"
+            ),
+            OpenApiParameter(
+                name="page_size",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Number of items returned per page (default: 20, max: 100)"
+            ),
+        ],
+        operation_id="search_jobs",
+        summary="Search and Filter Jobs",
+        description="Advanced search endpoint matching jobs across multiple dimensions: keyword search across title/description, location, experience level, salary brackets, and required skills.",
+        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
+        tags=["Jobs"],
+    )
+    def get(self, request):
+        return forward_to_downstream(
+            request=request,
+            target_base_url=getattr(settings, "JOB_SERVICE_URL", "http://127.0.0.1:8001"),
+            subpath="api/v1/jobs/search",
+            service_name="Job Service",
+        )
+
+
 class JobDetailView(APIView):
     """
     GET /api/v1/jobs/{job_id}
@@ -150,18 +248,120 @@ class JobDetailView(APIView):
 
 
 # ============================================================
+# Company Service Views
+# ============================================================
+
+class ListCompaniesView(APIView):
+    """
+    GET /api/v1/companies/
+    Public directory endpoint. Retrieves list of employer companies, industry sectors,
+    headquarters, and company metadata.
+    Forwards to Intern 3's Service at JOB_SERVICE_URL/api/v1/companies.
+    """
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="page",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Page number for pagination (default: 1)"
+            ),
+            OpenApiParameter(
+                name="page_size",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Number of companies per page (default: 20, max: 100)"
+            ),
+            OpenApiParameter(
+                name="industry",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filter by industry sector (e.g. Software, Financial Services, Healthcare)"
+            ),
+            OpenApiParameter(
+                name="company_type",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filter by organizational tier (e.g. Startup, Enterprise, MNC)"
+            ),
+            OpenApiParameter(
+                name="search",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Keyword search across company name"
+            ),
+        ],
+        operation_id="list_companies",
+        summary="List Companies",
+        description="Public directory endpoint. Retrieves list of employer companies, industry sectors, headquarters, and company metadata.",
+        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
+        tags=["Companies"],
+    )
+    def get(self, request):
+        return forward_to_downstream(
+            request=request,
+            target_base_url=getattr(settings, "JOB_SERVICE_URL", "http://127.0.0.1:8001"),
+            subpath="api/v1/companies",
+            service_name="Company Service",
+        )
+
+
+class CompanyDetailView(APIView):
+    """
+    GET /api/v1/companies/{company_id}
+    Public endpoint for retrieving detailed profile of a specific company.
+    Forwards to Intern 3's Service at JOB_SERVICE_URL/api/v1/companies/{company_id}.
+    """
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="company_id",
+                type=str,
+                location=OpenApiParameter.PATH,
+                required=True,
+                description="Unique identifier of the company (e.g. 1)"
+            ),
+        ],
+        operation_id="get_company_detail",
+        summary="Get Company Details by ID",
+        description="Public endpoint. Fetches detailed profile of a specific company including industry, headquarters, and active jobs count.",
+        responses={200: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
+        tags=["Companies"],
+    )
+    def get(self, request, company_id):
+        return forward_to_downstream(
+            request=request,
+            target_base_url=getattr(settings, "JOB_SERVICE_URL", "http://127.0.0.1:8001"),
+            subpath=f"api/v1/companies/{company_id}",
+            service_name="Company Service",
+        )
+
+
+
+# ============================================================
 # Swipe Service Views
 # ============================================================
 
 # Milestone 2 action → Domain-2 direction mapping
+# Domain-2 Pydantic validator strictly requires direction in {"left", "right"}
 ACTION_TO_DIRECTION = {
     "apply": "right",
-    "save": "save",
+    "save": "right",
     "skip": "left",
     # Backward compatibility with Milestone 1 vocabulary
     "right": "right",
     "left": "left",
 }
+
 
 VALID_ACTIONS = list(ACTION_TO_DIRECTION.keys())
 

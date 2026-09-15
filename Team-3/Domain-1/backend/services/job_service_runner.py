@@ -14,87 +14,214 @@ import urllib.parse
 
 PORT = 8001
 
-SAMPLE_JOBS = [
+COMPANIES = [
     {
         "id": 1,
-        "title": "Software Engineer",
-        "company": "Microsoft India",
-        "location": "Hyderabad",
-        "remote": True,
-        "salary_min": 1200000,
-        "salary_max": 2000000,
-        "skills": ["c#", "azure", "react", "sql", "docker"],
-        "description": "Create cloud-native services used by customers worldwide."
+        "name": "Tata Consultancy Services",
+        "company_type": "MNC",
+        "industry": "IT Services",
+        "headquarters": "Mumbai",
+        "founded_year": 1968,
+        "website": "https://www.tcs.com",
+        "active_jobs_count": 2,
     },
     {
         "id": 2,
-        "title": "Frontend Developer",
-        "company": "Postman",
-        "location": "Bengaluru",
-        "remote": True,
-        "salary_min": 800000,
-        "salary_max": 1300000,
-        "skills": ["javascript", "typescript", "react", "css", "rest api"],
-        "description": "Build beautiful developer experiences for API teams."
+        "name": "Razorpay",
+        "company_type": "Startup",
+        "industry": "FinTech",
+        "headquarters": "Bengaluru",
+        "founded_year": 2014,
+        "website": "https://razorpay.com",
+        "active_jobs_count": 2,
     },
     {
         "id": 3,
-        "title": "AI Research Intern",
-        "company": "Sarvam AI",
-        "location": "Bengaluru",
-        "remote": True,
-        "salary_min": 300000,
-        "salary_max": 480000,
-        "skills": ["python", "nlp", "pytorch", "transformers", "pandas"],
-        "description": "Evaluate Indian-language language models and data pipelines."
+        "name": "Zepto",
+        "company_type": "New Startup",
+        "industry": "Quick Commerce",
+        "headquarters": "Mumbai",
+        "founded_year": 2021,
+        "website": "https://zeptonow.com",
+        "active_jobs_count": 1,
     },
     {
         "id": 4,
+        "name": "Microsoft",
+        "company_type": "MNC",
+        "industry": "Technology",
+        "headquarters": "Hyderabad",
+        "founded_year": 1975,
+        "website": "https://microsoft.com",
+        "active_jobs_count": 1,
+    },
+    {
+        "id": 5,
+        "name": "Postman",
+        "company_type": "Startup",
+        "industry": "Developer Tools",
+        "headquarters": "Bengaluru",
+        "founded_year": 2014,
+        "website": "https://postman.com",
+        "active_jobs_count": 1,
+    },
+    {
+        "id": 6,
+        "name": "Sarvam AI",
+        "company_type": "New Startup",
+        "industry": "Artificial Intelligence",
+        "headquarters": "Bengaluru",
+        "founded_year": 2023,
+        "website": "https://sarvam.ai",
+        "active_jobs_count": 1,
+    },
+]
+
+SAMPLE_JOBS = [
+    {
+        "id": 1,
+        "job_id": 1,
+        "title": "Software Engineer",
+        "company": "Microsoft",
+        "company_id": 4,
+        "company_type": "MNC",
+        "location": "Hyderabad",
+        "remote": True,
+        "is_remote": True,
+        "salary_range": {"min": 1200000, "max": 2000000},
+        "salary_min": 1200000,
+        "salary_max": 2000000,
+        "job_type": "Full-time",
+        "experience_level": "Mid-Level",
+        "skills": ["c#", "azure", "react", "sql", "docker"],
+        "description": "Create cloud-native services used by customers worldwide.",
+        "industry": "Technology",
+        "applicant_count": 102
+    },
+    {
+        "id": 2,
+        "job_id": 2,
+        "title": "Frontend Developer",
+        "company": "Postman",
+        "company_id": 5,
+        "company_type": "Startup",
+        "location": "Bengaluru",
+        "remote": True,
+        "is_remote": True,
+        "salary_range": {"min": 800000, "max": 1300000},
+        "salary_min": 800000,
+        "salary_max": 1300000,
+        "job_type": "Full-time",
+        "experience_level": "Fresher",
+        "skills": ["javascript", "typescript", "react", "css", "rest api"],
+        "description": "Build beautiful developer experiences for API teams.",
+        "industry": "Developer Tools",
+        "applicant_count": 29
+    },
+    {
+        "id": 3,
+        "job_id": 3,
+        "title": "AI Research Intern",
+        "company": "Sarvam AI",
+        "company_id": 6,
+        "company_type": "New Startup",
+        "location": "Bengaluru",
+        "remote": True,
+        "is_remote": True,
+        "salary_range": {"min": 300000, "max": 480000},
+        "salary_min": 300000,
+        "salary_max": 480000,
+        "job_type": "Internship",
+        "experience_level": "Fresher",
+        "skills": ["python", "nlp", "pytorch", "transformers", "pandas"],
+        "description": "Evaluate Indian-language language models and data pipelines.",
+        "industry": "Artificial Intelligence",
+        "applicant_count": 18
+    },
+    {
+        "id": 4,
+        "job_id": 4,
         "title": "DevOps Engineer",
         "company": "Razorpay",
+        "company_id": 2,
+        "company_type": "Startup",
         "location": "Pune",
         "remote": True,
+        "is_remote": True,
+        "salary_range": {"min": 850000, "max": 1400000},
         "salary_min": 850000,
         "salary_max": 1400000,
+        "job_type": "Full-time",
+        "experience_level": "Mid-Level",
         "skills": ["docker", "kubernetes", "aws", "linux", "github actions"],
-        "description": "Maintain CI/CD systems and container infrastructure."
+        "description": "Maintain CI/CD systems and container infrastructure.",
+        "industry": "FinTech",
+        "applicant_count": 40
     },
     {
         "id": 101,
+        "job_id": 101,
         "title": "Full Stack Python Developer",
-        "company": "Tech Corp",
+        "company": "Tata Consultancy Services",
+        "company_id": 1,
+        "company_type": "MNC",
         "location": "Hyderabad",
         "remote": True,
+        "is_remote": True,
+        "salary_range": {"min": 800000, "max": 1400000},
         "salary_min": 800000,
         "salary_max": 1400000,
-        "skills": ["Python", "Django", "React"],
-        "description": "Develop full-stack web applications using Django REST Framework and React."
+        "job_type": "Full-time",
+        "experience_level": "Mid-Level",
+        "skills": ["python", "django", "react"],
+        "description": "Develop full-stack web applications using Django REST Framework and React.",
+        "industry": "IT Services",
+        "applicant_count": 14
     },
     {
         "id": 102,
+        "job_id": 102,
         "title": "Backend Systems Engineer",
-        "company": "SwipeX Labs",
-        "location": "Bangalore",
+        "company": "Razorpay",
+        "company_id": 2,
+        "company_type": "Startup",
+        "location": "Bengaluru",
         "remote": False,
+        "is_remote": False,
+        "salary_range": {"min": 1200000, "max": 2000000},
         "salary_min": 1200000,
         "salary_max": 2000000,
-        "skills": ["Python", "PostgreSQL", "Redis", "Docker"],
-        "description": "Scale high-throughput API gateway and microservice architecture."
+        "job_type": "Full-time",
+        "experience_level": "Senior",
+        "skills": ["python", "postgresql", "redis", "docker"],
+        "description": "Scale high-throughput API gateway and microservice architecture.",
+        "industry": "FinTech",
+        "applicant_count": 65
     },
     {
         "id": 103,
-        "title": "Frontend Engineer (React)",
-        "company": "Innovate Ltd",
-        "location": "Hyderabad",
-        "remote": True,
-        "salary_min": 700000,
-        "salary_max": 1200000,
-        "skills": ["JavaScript", "TypeScript", "React", "CSS"],
-        "description": "Build interactive swipe cards and career intelligence dashboards."
+        "job_id": 103,
+        "title": "Junior Python Developer",
+        "company": "Zepto",
+        "company_id": 3,
+        "company_type": "New Startup",
+        "location": "Mumbai",
+        "remote": False,
+        "is_remote": False,
+        "salary_range": {"min": 450000, "max": 700000},
+        "salary_min": 450000,
+        "salary_max": 700000,
+        "job_type": "Full-time",
+        "experience_level": "Fresher",
+        "skills": ["python", "fastapi", "sql", "git", "rest api"],
+        "description": "Build reliable APIs and automation workflows for quick commerce operations.",
+        "industry": "Quick Commerce",
+        "applicant_count": 48
     }
 ]
 
 SWIPES_STORE = []
+
 
 class JobServiceHandler(BaseHTTPRequestHandler):
     def _send_json(self, data, status_code=200):
@@ -109,6 +236,97 @@ class JobServiceHandler(BaseHTTPRequestHandler):
         path = parsed.path
         query = urllib.parse.parse_qs(parsed.query)
 
+        # GET /api/v1/jobs/search
+        if path in ["/api/v1/jobs/search", "/api/v1/jobs/search/"]:
+            results = list(SAMPLE_JOBS)
+
+            # Keyword filter (in title or description)
+            if "keyword" in query:
+                kw = query["keyword"][0].lower()
+                results = [
+                    j for j in results
+                    if kw in j["title"].lower() or kw in j.get("description", "").lower()
+                ]
+
+            # Location filter
+            if "location" in query:
+                loc = query["location"][0].lower()
+                results = [j for j in results if loc in j["location"].lower()]
+
+            # Job type filter (job_type or type)
+            job_type_query = query.get("job_type", query.get("type", None))
+            if job_type_query:
+                jt = job_type_query[0].lower()
+                results = [j for j in results if jt in j.get("job_type", "").lower()]
+
+            # Remote filter (is_remote or remote)
+            remote_query = query.get("is_remote", query.get("remote", None))
+            if remote_query:
+                is_rem = remote_query[0].lower() in ["true", "1"]
+                results = [j for j in results if j.get("is_remote", j.get("remote", False)) == is_rem]
+
+            # Salary min filter (annual salary)
+            if "salary_min" in query:
+                try:
+                    s_min = int(query["salary_min"][0])
+                    results = [j for j in results if j.get("salary_max", j.get("salary_min", 0)) >= s_min]
+                except ValueError:
+                    self._send_json({"error": "Bad Request", "detail": "salary_min must be an integer", "status_code": 400}, status_code=400)
+                    return
+
+            # Salary max filter
+            if "salary_max" in query:
+                try:
+                    s_max = int(query["salary_max"][0])
+                    results = [j for j in results if j.get("salary_min", 0) <= s_max]
+                except ValueError:
+                    self._send_json({"error": "Bad Request", "detail": "salary_max must be an integer", "status_code": 400}, status_code=400)
+                    return
+
+            # Experience level filter
+            if "experience_level" in query:
+                exp = query["experience_level"][0].lower()
+                results = [j for j in results if exp in j.get("experience_level", "").lower()]
+
+            # Skills filter (comma-separated or pipe-separated)
+            if "skills" in query:
+                req_skills = [s.strip().lower() for s in query["skills"][0].replace("|", ",").split(",") if s.strip()]
+                filtered_by_skills = []
+                for j in results:
+                    job_skills = [s.lower() for s in j.get("skills", [])]
+                    # match if any or all requested skill tokens match
+                    if any(req in job_skills or any(req in js for js in job_skills) for req in req_skills):
+                        filtered_by_skills.append(j)
+                results = filtered_by_skills
+
+            # Pagination
+            try:
+                page = int(query.get("page", ["1"])[0])
+                page_size = min(int(query.get("page_size", ["20"])[0]), 100)
+            except ValueError:
+                self._send_json({"error": "Bad Request", "detail": "Invalid page or page_size", "status_code": 400}, status_code=400)
+                return
+
+            total_count = len(results)
+            total_pages = max(1, (total_count + page_size - 1) // page_size) if total_count > 0 else 1
+            start_idx = (page - 1) * page_size
+            end_idx = start_idx + page_size
+            paged_jobs = results[start_idx:end_idx]
+
+            self._send_json({
+                "count": total_count,
+                "pagination": {
+                    "total_count": total_count,
+                    "page": page,
+                    "page_size": page_size,
+                    "total_pages": total_pages,
+                    "has_next": page < total_pages,
+                    "has_prev": page > 1,
+                },
+                "results": paged_jobs,
+            })
+            return
+
         # GET /api/v1/jobs
         if path in ["/api/v1/jobs", "/api/v1/jobs/"]:
             results = list(SAMPLE_JOBS)
@@ -121,32 +339,100 @@ class JobServiceHandler(BaseHTTPRequestHandler):
             # Filter by remote
             if "remote" in query:
                 is_remote = query["remote"][0].lower() == "true"
-                results = [j for j in results if j["remote"] == is_remote]
+                results = [j for j in results if j.get("remote", j.get("is_remote", False)) == is_remote]
 
             self._send_json({"jobs": results, "count": len(results)})
             return
 
         # GET /api/v1/jobs/{job_id}
         if path.startswith("/api/v1/jobs/"):
-            job_id = path.split("/")[-1]
+            job_id = path.rstrip("/").split("/")[-1]
             for job in SAMPLE_JOBS:
-                if str(job["id"]) == str(job_id):
+                if str(job["id"]) == str(job_id) or str(job.get("job_id")) == str(job_id):
                     self._send_json(job)
                     return
-            self._send_json({"detail": f"Job {job_id} not found"}, status_code=404)
+            self._send_json({"detail": "Job not found"}, status_code=404)
+            return
+
+        # GET /api/v1/companies
+        if path in ["/api/v1/companies", "/api/v1/companies/"]:
+            results = list(COMPANIES)
+
+            # Industry filter
+            if "industry" in query:
+                ind = query["industry"][0].lower()
+                results = [c for c in results if ind in c.get("industry", "").lower()]
+
+            # Company type filter
+            if "company_type" in query:
+                ct = query["company_type"][0].lower()
+                results = [c for c in results if ct in c.get("company_type", "").lower()]
+
+            # Search keyword (company name)
+            if "search" in query:
+                q = query["search"][0].lower()
+                results = [c for c in results if q in c.get("name", "").lower()]
+
+            # Pagination
+            try:
+                page = int(query.get("page", ["1"])[0])
+                page_size = min(int(query.get("page_size", ["20"])[0]), 100)
+            except ValueError:
+                self._send_json({"error": "Bad Request", "detail": "Invalid page or page_size", "status_code": 400}, status_code=400)
+                return
+
+            total_count = len(results)
+            total_pages = max(1, (total_count + page_size - 1) // page_size) if total_count > 0 else 1
+            start_idx = (page - 1) * page_size
+            end_idx = start_idx + page_size
+            paged_companies = results[start_idx:end_idx]
+
+            self._send_json({
+                "count": total_count,
+                "pagination": {
+                    "total_count": total_count,
+                    "page": page,
+                    "page_size": page_size,
+                    "total_pages": total_pages,
+                    "has_next": page < total_pages,
+                    "has_prev": page > 1,
+                },
+                "results": paged_companies,
+            })
+            return
+
+        # GET /api/v1/companies/{company_id}
+        if path.startswith("/api/v1/companies/"):
+            company_id = path.rstrip("/").split("/")[-1]
+            for comp in COMPANIES:
+                if str(comp["id"]) == str(company_id):
+                    self._send_json(comp)
+                    return
+            self._send_json({"detail": f"Company {company_id} not found"}, status_code=404)
             return
 
         # GET /api/v1/swipes/history
         if path.startswith("/api/v1/swipes/history"):
             user_id = self.headers.get("X-User-Id", "anonymous")
+            user_swipes = [
+                {
+                    "job_id": s["job_id"],
+                    "direction": s["direction"],
+                    "swiped_at": s.get("swiped_at", "2026-09-15T09:00:00Z"),
+                    "job_title": s.get("job_title", ""),
+                    "company": s.get("company", ""),
+                }
+                for s in SWIPES_STORE
+            ]
             self._send_json({
                 "user_id": user_id,
-                "history": SWIPES_STORE,
-                "count": len(SWIPES_STORE)
+                "history": user_swipes,
+                "count": len(user_swipes)
             })
             return
 
         self._send_json({"detail": "Route not found in Job Service"}, status_code=404)
+
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -167,25 +453,36 @@ class JobServiceHandler(BaseHTTPRequestHandler):
                 return
 
             # Check if job exists in database
-            job = next((j for j in SAMPLE_JOBS if str(j["id"]) == str(target_job_id)), None)
+            job = next((j for j in SAMPLE_JOBS if str(j["id"]) == str(target_job_id) or str(j.get("job_id")) == str(target_job_id)), None)
             if not job:
-                self._send_json({"detail": f"Job {target_job_id} not found"}, status_code=404)
+                self._send_json({"detail": "Job not found"}, status_code=404)
                 return
 
             user_id = self.headers.get("X-User-Id", "anonymous")
             user_role = self.headers.get("X-User-Role", "anonymous")
+            swipe_id = len(SWIPES_STORE) + 1
             swipe_record = {
+                "swipe_id": swipe_id,
                 "user_id": user_id,
                 "user_role": user_role,
                 "job_id": job["id"],
                 "direction": payload.get("direction", "right"),
-                "status": "recorded"
+                "status": "recorded",
+                "job_title": job.get("title", ""),
+                "company": job.get("company", ""),
+                "swiped_at": "2026-09-15T09:00:00Z"
             }
             SWIPES_STORE.append(swipe_record)
-            self._send_json(swipe_record, status_code=201)
+            self._send_json({
+                "swipe_id": swipe_id,
+                "job_id": job["id"],
+                "direction": swipe_record["direction"],
+                "status": "recorded"
+            }, status_code=201)
             return
 
         self._send_json({"error": "Route not found in Job Service"}, status_code=404)
+
 
 if __name__ == "__main__":
     server = HTTPServer(("127.0.0.1", PORT), JobServiceHandler)

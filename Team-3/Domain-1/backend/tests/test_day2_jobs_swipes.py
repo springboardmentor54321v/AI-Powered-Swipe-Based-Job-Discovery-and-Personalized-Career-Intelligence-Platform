@@ -14,9 +14,11 @@ the gateway returns 503. These tests verify the gateway behavior
 itself, not the downstream service data.
 """
 
+from unittest.mock import patch, MagicMock
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 from rest_framework import status as http_status
+
 
 from apps.users.models import User, Role, RoleEnum
 from apps.auth_service.jwt_utils import generate_access_token
@@ -247,6 +249,23 @@ class SwipeActionsTests(Day2BaseTestCase):
         """Legacy action 'left' should be accepted for backward compatibility."""
         res = self._swipe("left")
         self.assertNotEqual(res.status_code, http_status.HTTP_400_BAD_REQUEST)
+
+    @patch("gateway.proxy.requests.request")
+    def test_20b_swipe_save_maps_to_right_direction(self, mock_request):
+        """Action 'save' should translate to direction 'right' for Domain-2."""
+        import json
+        mock_resp = MagicMock()
+        mock_resp.status_code = 201
+        mock_resp.json.return_value = {"swipe_id": 1, "job_id": 101, "direction": "right"}
+        mock_request.return_value = mock_resp
+
+        res = self._swipe("save")
+        self.assertEqual(res.status_code, http_status.HTTP_201_CREATED)
+        called_args, called_kwargs = mock_request.call_args
+        forwarded_data = json.loads(called_kwargs.get("data", "{}"))
+        self.assertEqual(forwarded_data.get("direction"), "right")
+        self.assertEqual(forwarded_data.get("job_id"), 101)
+
 
 
 class MilestoneOneRegressionTests(Day2BaseTestCase):

@@ -146,19 +146,21 @@ class Swipe(Base):
 
 ---
 
-## 5. Items for Confirmation with Intern 3 (Day 2 Alignment)
+## 5. Alignment Confirmations with Intern 3 (Domain-2 Resolution)
 
-The following items are documented for confirmation during Day 2 coordination:
+Following inspection and integration with Intern 3's completed Domain-2 implementation (`app/main.py`, `app/models.py`, `app/schemas.py`, `app/seed.py`):
 
-| Item | Current Assumption | Question for Intern 3 | Status |
+| Item | Contract Specification | Domain-2 Implementation | Gateway Resolution & Status |
 | :--- | :--- | :--- | :--- |
-| **Swipe Action Field** | Request accepts `"action"` (`apply`, `save`, `skip`) | Will Domain-2's database column remain `direction` with mapping or migrate to `action`? | Pending confirmation |
-| **Search Endpoint Path** | `GET /api/v1/jobs/search` | Is search handled within the same Job Service process on port `8001` or a dedicated search daemon? (Assumed port `8001`). | Pending confirmation |
-| **Company Details** | `GET /api/v1/companies` | Does Intern 3 require a single company lookup (`GET /api/v1/companies/{id}`) in Milestone 2? | Proposed for Day 2 |
-| **Pagination Standardization**| `{ count, pagination: {...}, results: [...] }` | Will Domain-2 adopt the standardized pagination wrapper, or continue returning raw lists? (Standardized wrapper recommended). | Pending confirmation |
+| **Swipe Action Field** | Client requests `"action"` (`apply`, `save`, `skip`, `right`, `left`) | Pydantic validator strictly requires `direction in {"left", "right"}` | **Resolved**: Gateway translates `apply` $\to$ `"right"`, `save` $\to$ `"right"`, `skip` $\to$ `"left"`, `right` $\to$ `"right"`, `left` $\to$ `"left"` before forwarding. |
+| **User Identity Injection** | Client identity headers stripped; trusted `X-User-Id` injected | `user_id_from_gateway` requires `X-User-Id` header (digits $\ge 1$) | **Resolved**: Gateway automatically injects authenticated user's ID as `X-User-Id` header from validated JWT token. |
+| **Job Schema Output** | `JobOut` schema with `job_id`, `remote`, `salary_range` | `job_id`, `company`, `company_type`, `location`, `remote`, `salary_range: {min, max}`, `skills: list[str]` | **Resolved**: Domain-1 models and mock runner aligned with `JobOut` and `JobDetail` representations. |
+| **Swipe History Schema** | Direct list of swipe interactions | Returns `list[SwipeHistoryItem]` with `job_id`, `direction`, `swiped_at`, `job_title`, `company` | **Resolved**: Domain-1 proxy transparently streams Domain-2 swipe history list. |
+| **Search & Companies** | `GET /api/v1/jobs/search`, `GET /api/v1/companies`, `GET /api/v1/companies/{id}` | Modeled on `companies` and `jobs` tables with seed data | **Resolved**: Gateway proxies search and directory routes directly, backed by Domain-2 data schema. |
 
 ---
 
 ## 6. Summary & Sign-off
 
-The proposed API contract (`docs/api/milestone-2-api-contract.yaml`) matches the discovered Domain-2 data models while extending them to satisfy Milestone 2 requirements. Domain-1 is fully aligned and ready for Day 2 integration.
+The API contract and Gateway routing layers in Domain-1 are now completely aligned with the live Domain-2 implementation. Payload translation, header injection, and schema compatibility are fully verified.
+

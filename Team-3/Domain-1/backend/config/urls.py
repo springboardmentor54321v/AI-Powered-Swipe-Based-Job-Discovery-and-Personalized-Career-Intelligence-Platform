@@ -38,7 +38,9 @@ urlpatterns = [
     # Microservices routing under /api/v1 prefix
     path("api/v1/auth/", include("apps.auth_service.urls")),
     path("api/v1/jobs/", include("apps.job_service.urls")),
+    path("api/v1/companies/", include("apps.job_service.companies_urls")),
     path("api/v1/swipes/", include("apps.job_service.swipes_urls")),
     path("api/v1/resume/", include("apps.resume_service.urls")),
     path("api/v1/recommendations/", include("apps.resume_service.recommendations_urls")),
 ]
+

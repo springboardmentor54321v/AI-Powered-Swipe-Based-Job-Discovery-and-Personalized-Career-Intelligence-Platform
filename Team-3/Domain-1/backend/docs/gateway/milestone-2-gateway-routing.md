@@ -101,13 +101,14 @@ Gateway (Port 8000)
     • Verifies user role: `IsJobSeeker` (rejects `recruiter` or `admin` with 403 Forbidden)
     • Sanitizes incoming headers to prevent identity spoofing
     • Injects verified header: `X-User-Id: <user_id>`, `X-User-Role: job_seeker`
-    • Forwards JSON payload: {"job_id": 101, "action": "apply"}
+    • Translates swipe action payload (`apply`/`save` → `direction: "right"`, `skip` → `direction: "left"`)
+    • Forwards translated JSON payload: {"job_id": 101, "direction": "right"}
     ↓
 Target Service: Swipe Service (Port 8001)
     • URL: http://127.0.0.1:8001/api/v1/swipes
     • Reads authenticated `X-User-Id` header
     • Enforces one active swipe per user & job (creates or updates)
-    • Response: 201 Created (SwipeResponse)
+    • Response: 201 Created ({"swipe_id": int, "job_id": int, "direction": str})
 ```
 
 ### 3.5 Company Directory Route
