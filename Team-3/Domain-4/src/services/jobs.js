@@ -55,6 +55,14 @@ export function normalizeJob(raw) {
   };
 }
 
+function extractList(response, key = 'jobs') {
+  if (Array.isArray(response)) return response;
+  if (response && Array.isArray(response[key])) return response[key];
+  if (response && Array.isArray(response.results)) return response.results;
+  if (response && Array.isArray(response.data)) return response.data;
+  return [];
+}
+
 export const jobService = {
   /**
    * Check if mock mode is forced
@@ -75,10 +83,8 @@ export const jobService = {
 
     try {
       const liveData = await realJobService.listJobs(filters);
-      if (Array.isArray(liveData)) {
-        return liveData.map(normalizeJob);
-      }
-      return [];
+      const list = extractList(liveData, 'jobs');
+      return list.map(normalizeJob);
     } catch (err) {
       // If live backend is unreachable during dev, fall back to mock data
       console.warn('Live Job Service unreachable, using fallback dataset:', err.message);
@@ -99,10 +105,8 @@ export const jobService = {
 
     try {
       const liveData = await realJobService.searchJobs(filters);
-      if (Array.isArray(liveData)) {
-        return liveData.map(normalizeJob);
-      }
-      return [];
+      const list = extractList(liveData, 'jobs');
+      return list.map(normalizeJob);
     } catch (err) {
       console.warn('Live Job Search unreachable, using fallback search:', err.message);
       const fallbackData = await mockJobService.listJobs(filters);

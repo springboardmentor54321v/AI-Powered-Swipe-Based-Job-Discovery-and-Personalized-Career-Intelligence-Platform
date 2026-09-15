@@ -20,7 +20,10 @@ export const realCompanyService = {
         if (key === 'company_type' || key === 'type') {
           queryParams.append('company_type', String(value));
         } else if (key === 'search' || key === 'q') {
+          queryParams.append('search', String(value));
           queryParams.append('q', String(value));
+        } else if (key === 'industry') {
+          queryParams.append('industry', String(value));
         } else {
           queryParams.append(key, String(value));
         }

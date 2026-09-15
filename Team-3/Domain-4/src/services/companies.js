@@ -42,6 +42,14 @@ export function normalizeCompany(raw) {
   };
 }
 
+function extractList(response, key = 'companies') {
+  if (Array.isArray(response)) return response;
+  if (response && Array.isArray(response[key])) return response[key];
+  if (response && Array.isArray(response.results)) return response.results;
+  if (response && Array.isArray(response.data)) return response.data;
+  return [];
+}
+
 export const companyService = {
   /**
    * Fetch company listings (supporting company_type and search filters)
@@ -55,10 +63,8 @@ export const companyService = {
 
     try {
       const liveData = await realCompanyService.listCompanies(filters);
-      if (Array.isArray(liveData)) {
-        return liveData.map(normalizeCompany);
-      }
-      return [];
+      const list = extractList(liveData, 'companies');
+      return list.map(normalizeCompany);
     } catch (err) {
       console.warn('Live Company API unreachable, using fallback dataset:', err.message);
       const fallback = await mockCompanyService.listCompanies(filters);

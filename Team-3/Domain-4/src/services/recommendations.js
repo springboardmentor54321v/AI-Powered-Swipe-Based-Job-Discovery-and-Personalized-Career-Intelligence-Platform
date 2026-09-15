@@ -24,12 +24,16 @@ export const recommendationService = {
       const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
       const response = await api.get(`/recommendations${query}`);
 
-      // Handle both array response and { recommendations: [] } wrapper
+      // Handle array response, { recommendations: [] }, { results: [] }, or { data: [] }
       let list = [];
       if (Array.isArray(response)) {
         list = response;
       } else if (response && Array.isArray(response.recommendations)) {
         list = response.recommendations;
+      } else if (response && Array.isArray(response.results)) {
+        list = response.results;
+      } else if (response && Array.isArray(response.data)) {
+        list = response.data;
       }
 
       return list.map((item) => {
