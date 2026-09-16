@@ -122,9 +122,10 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "SwipeX Backend API",
     "DESCRIPTION": (
         "SwipeX: Swipe-Based Intelligent Job Discovery and Career Assistance Platform.\n"
-        "Milestone 1 — Authentication, Identity & RBAC API."
+        "Milestone 1 — Authentication, Identity & RBAC API.\n"
+        "Milestone 2 — Authentication, RBAC, Jobs, Search, Companies, Swipe, Recruiter CRUD, Matching Engine & Resume/ATS Gateway."
     ),
-    "VERSION": "1.0.0",
+    "VERSION": "2.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
