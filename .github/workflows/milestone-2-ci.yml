@@ -1,0 +1,45 @@
+name: Milestone 2 Quality Checks
+
+on:
+  push:
+    branches: [Team-3]
+  pull_request:
+    branches: [Team-3]
+
+permissions:
+  contents: read
+
+jobs:
+  contract-tests:
+    name: Domain 5 contract tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test runner
+        run: python -m pip install --upgrade pip pytest
+      - name: Run static API contract tests
+        run: python -m pytest Team-3/Domain-5/testing/automated -m "not integration"
+
+  frontend-build:
+    name: Domain 4 production build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: Team-3/Domain-4/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: Team-3/Domain-4
+        run: npm ci
+      - name: Build frontend
+        working-directory: Team-3/Domain-4
+        run: npm run build
