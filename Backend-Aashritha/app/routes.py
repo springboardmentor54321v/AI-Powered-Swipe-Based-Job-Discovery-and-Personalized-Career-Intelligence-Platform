@@ -11,8 +11,9 @@ that main.py includes with the "/api/v1" prefix:
     /api/v1/companies/*       -> Company Service
     /api/v1/swipes/*          -> Swipe Service
     /api/v1/recommendations/* -> Matching Engine / Recommendation Gateway
+    /api/v1/resumes/*         -> Resume Service
+    /api/v1/ats/*             -> ATS Scoring Service
 """
-
 from fastapi import APIRouter
 
 from app.controllers import (
@@ -21,6 +22,8 @@ from app.controllers import (
     company_controller,
     swipe_controller,
     recommendation_controller,
+    resume_controller,
+    ats_controller,
 )
 
 api_router = APIRouter()
@@ -53,4 +56,16 @@ api_router.include_router(
     recommendation_controller.router,
     prefix="/recommendations",
     tags=["Recommendations"],
+)
+
+api_router.include_router(
+    resume_controller.router,
+    prefix="/resumes",
+    tags=["Resumes"],
+)
+
+api_router.include_router(
+    ats_controller.router,
+    prefix="/ats",
+    tags=["ATS Scoring"],
 )
