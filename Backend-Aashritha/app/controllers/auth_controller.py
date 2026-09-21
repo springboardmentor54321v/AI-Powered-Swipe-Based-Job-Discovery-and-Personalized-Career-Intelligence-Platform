@@ -55,7 +55,11 @@ def register(payload: UserRegisterRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    access_token = create_access_token(subject=str(user.id), role=user.role.value)
+    access_token = create_access_token(
+        subject=str(user.id),
+        role=user.role.value,
+        extra_claims={"id": str(user.id), "email": user.email, "skills": user.skills or []},
+    )
     refresh_token = create_refresh_token(subject=str(user.id))
 
     return TokenResponse(
@@ -83,7 +87,11 @@ def login(payload: UserLoginRequest, db: Session = Depends(get_db)):
             detail="This account has been disabled. Contact an administrator.",
         )
 
-    access_token = create_access_token(subject=str(user.id), role=user.role.value)
+    access_token = create_access_token(
+        subject=str(user.id),
+        role=user.role.value,
+        extra_claims={"id": str(user.id), "email": user.email, "skills": user.skills or []},
+    )
     refresh_token = create_refresh_token(subject=str(user.id))
 
     return TokenResponse(
@@ -108,13 +116,21 @@ def refresh_token(payload: RefreshTokenRequest, db: Session = Depends(get_db)):
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account has been disabled")
 
-    new_access_token = create_access_token(subject=str(user.id), role=user.role.value)
+    new_access_token = create_access_token(
+        subject=str(user.id),
+        role=user.role.value,
+        extra_claims={"id": str(user.id), "email": user.email, "skills": user.skills or []},
+    )
     return AccessTokenResponse(access_token=new_access_token)
 
 
 @router.get(
     "/me",
     response_model=UserOut,
+    responses={
+        200: {"description": "Current authenticated user"},
+        401: {"model": dict, "description": "Authentication required"},
+    },
     summary="Get the currently authenticated user's profile",
 )
 def get_me(current_user: User = Depends(get_current_user)):
