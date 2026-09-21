@@ -1,0 +1,111 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
+rootdir: D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana
+plugins: anyio-4.14.1, langsmith-0.11.0
+collected 20 items / 9 errors
+
+=================================== ERRORS ====================================
+_____________________ ERROR collecting test_day2_day3.py ______________________
+ImportError while importing test module 'D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana\test_day2_day3.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_day2_day3.py:6: in <module>
+    from reportlab.pdfgen import canvas
+E   ModuleNotFoundError: No module named 'reportlab'
+_____________________ ERROR collecting test_day4_day5.py ______________________
+ImportError while importing test module 'D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana\test_day4_day5.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_day4_day5.py:6: in <module>
+    from reportlab.pdfgen import canvas
+E   ModuleNotFoundError: No module named 'reportlab'
+_________________ ERROR collecting tests/test_day2_intern4.py _________________
+ImportError while importing test module 'D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana\tests\test_day2_intern4.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_day2_intern4.py:13: in <module>
+    from src.parser import extract_text_from_pdf, extract_text_from_docx, extract_text
+src\parser.py:3: in <module>
+    import pdfplumber
+E   ModuleNotFoundError: No module named 'pdfplumber'
+_________________ ERROR collecting tests/test_day5_gateway.py _________________
+ImportError while importing test module 'D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana\tests\test_day5_gateway.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_day5_gateway.py:21: in <module>
+    from reportlab.pdfgen import canvas
+E   ModuleNotFoundError: No module named 'reportlab'
+_____________________ ERROR collecting tests/test_day6.py _____________________
+ImportError while importing test module 'D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana\tests\test_day6.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_day6.py:13: in <module>
+    import pandas as pd
+E   ModuleNotFoundError: No module named 'pandas'
+_______________ ERROR collecting tests/test_day6_extraction.py ________________
+ImportError while importing test module 'D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana\tests\test_day6_extraction.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_day6_extraction.py:4: in <module>
+    import pandas as pd
+E   ModuleNotFoundError: No module named 'pandas'
+_________________ ERROR collecting tests/test_day6_intern4.py _________________
+ImportError while importing test module 'D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana\tests\test_day6_intern4.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_day6_intern4.py:26: in <module>
+    import pandas as pd
+E   ModuleNotFoundError: No module named 'pandas'
+_______________ ERROR collecting tests/test_day6_recs_vector.py _______________
+ImportError while importing test module 'D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana\tests\test_day6_recs_vector.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_day6_recs_vector.py:4: in <module>
+    import pandas as pd
+E   ModuleNotFoundError: No module named 'pandas'
+__________________ ERROR collecting tests/test_intern4_m2.py __________________
+ImportError while importing test module 'D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana\tests\test_intern4_m2.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_intern4_m2.py:22: in <module>
+    import pandas as pd
+E   ModuleNotFoundError: No module named 'pandas'
+=========================== short test summary info ===========================
+ERROR test_day2_day3.py
+ERROR test_day4_day5.py
+ERROR tests/test_day2_intern4.py
+ERROR tests/test_day5_gateway.py
+ERROR tests/test_day6.py
+ERROR tests/test_day6_extraction.py
+ERROR tests/test_day6_intern4.py
+ERROR tests/test_day6_recs_vector.py
+ERROR tests/test_intern4_m2.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 9 errors during collection !!!!!!!!!!!!!!!!!!!
+============================= 9 errors in 15.88s ==============================

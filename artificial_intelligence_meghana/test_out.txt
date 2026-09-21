@@ -1,0 +1,117 @@
+
+D:\SwipeXProjectAI\AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform\artificial_intelligence_meghana\venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_01_extract_text_from_docx (tests.test_day2_intern4.TestDay2Extractors.test_01_extract_text_from_docx)
+Test DOCX extraction on the sample generated file ... ok
+test_02_extract_text_from_empty_docx (tests.test_day2_intern4.TestDay2Extractors.test_02_extract_text_from_empty_docx)
+Verify empty DOCX gracefully fails with ValueError ... ok
+test_03_extract_text_from_pdf_mocked (tests.test_day2_intern4.TestDay2Extractors.test_03_extract_text_from_pdf_mocked)
+Test PDF logic accurately extracts and cleans text ... ok
+test_04_supported_extensions_router (tests.test_day2_intern4.TestDay2Extractors.test_04_supported_extensions_router)
+Test extract_text router correctly distinguishes file types based on filename ... ok
+test_05_unsupported_extensions (tests.test_day2_intern4.TestDay2Extractors.test_05_unsupported_extensions)
+Test extract_text throws clear ValueError on unsupported extensions ... ok
+test_06_skill_extraction_empty (tests.test_day2_intern4.TestDay2Extractors.test_06_skill_extraction_empty)
+Test skill extraction gracefully handles empty text ... ok
+test_07_skill_extraction_cases (tests.test_day2_intern4.TestDay2Extractors.test_07_skill_extraction_cases)
+Test skill extraction deduplication and casing normalization ... ok
+test_08_skill_extraction_duplicate (tests.test_day2_intern4.TestDay2Extractors.test_08_skill_extraction_duplicate)
+Test skill extraction deduplicates repeating skills ... ok
+test_09_skill_extraction_no_match (tests.test_day2_intern4.TestDay2Extractors.test_09_skill_extraction_no_match)
+Test skill extraction cleanly returns empty list for unrelated text ... ok
+test_10_skill_extraction_full (tests.test_day2_intern4.TestDay2Extractors.test_10_skill_extraction_full)
+Test skill extraction on the docx file text ... ok
+test_01_all_matched_100_percent (tests.test_day3_intern4.TestDay3ATS.test_01_all_matched_100_percent) ... ok
+test_02_missing_detected_below_threshold (tests.test_day3_intern4.TestDay3ATS.test_02_missing_detected_below_threshold)
+When score < 80, missing lists should populate ... ok
+test_03_no_missing_returned_above_threshold (tests.test_day3_intern4.TestDay3ATS.test_03_no_missing_returned_above_threshold)
+When score >= 80%, missing lists should be explicitly empty ... ok
+test_04_casing_and_duplicates_normalized (tests.test_day3_intern4.TestDay3ATS.test_04_casing_and_duplicates_normalized)
+Ensure duplicated/weird-cased targets match appropriately ... ok
+test_05_empty_input_graceful (tests.test_day3_intern4.TestDay3ATS.test_05_empty_input_graceful) ... ok
+test_06_backwards_compatible_calculate_ats_score (tests.test_day3_intern4.TestDay3ATS.test_06_backwards_compatible_calculate_ats_score) ... ok
+test_01_blended_ats_score (tests.test_day4_intern4.TestDay4SemanticAndBlended.test_01_blended_ats_score)
+Test the integration between SemanticEngine and ATS engine blending weights ... ERROR
+test_02_chromadb_storage_and_query (tests.test_day4_intern4.TestDay4SemanticAndBlended.test_02_chromadb_storage_and_query)
+Ensure ChromaDB interface wrapper accurately encapsulates storage functionality ... ERROR
+test_01_skill_matching (tests.test_intern4_m2.TestIntern4Milestone2.test_01_skill_matching)
+1. Skill matching: Candidate matching required skills receives skill points & reason tag. ... ok
+test_02_location_matching (tests.test_intern4_m2.TestIntern4Milestone2.test_02_location_matching)
+2. Location matching: Job in candidate's city receives location score & reason tag. ... ok
+test_03_experience_matching (tests.test_intern4_m2.TestIntern4Milestone2.test_03_experience_matching)
+3. Experience matching: Candidate experience level matching job range receives experience tag. ... ok
+test_04_remote_matching (tests.test_intern4_m2.TestIntern4Milestone2.test_04_remote_matching)
+4. Remote matching: Remote jobs receive Remote job reason tag. ... ok
+test_05_freshness (tests.test_intern4_m2.TestIntern4Milestone2.test_05_freshness)
+5. Freshness: Job in first 25% of dataset receives Recently posted tag. ... ok
+test_06_competition (tests.test_intern4_m2.TestIntern4Milestone2.test_06_competition)
+6. Competition: Startup company receives Low competition tag. ... ok
+test_07_positive_swipe_influence (tests.test_intern4_m2.TestIntern4Milestone2.test_07_positive_swipe_influence)
+7. Positive swipe influence: RIGHT/APPLY/SAVE swipe increases score & adds swipe history reason. ... ok
+test_08_negative_swipe_influence (tests.test_intern4_m2.TestIntern4Milestone2.test_08_negative_swipe_influence)
+8. Negative swipe influence: LEFT/SKIP swipe decreases score for similar jobs. ... ok
+test_09_multiple_factors_combined (tests.test_intern4_m2.TestIntern4Milestone2.test_09_multiple_factors_combined)
+9. Multiple factors combined: Skills + Location + Remote + Experience + Swipes combine deterministically. ... ok
+test_10_missing_empty_fields (tests.test_intern4_m2.TestIntern4Milestone2.test_10_missing_empty_fields)
+10. Missing/empty fields: Gracefully handles missing job or profile fields without throwing errors. ... ok
+test_11_recommendation_ranking (tests.test_intern4_m2.TestIntern4Milestone2.test_11_recommendation_ranking)
+11. Recommendation ranking: Jobs are ranked strictly from highest to lowest match score. ... ok
+test_12_reason_generation (tests.test_intern4_m2.TestIntern4Milestone2.test_12_reason_generation)
+12. Reason generation: Reasons only contain valid tags corresponding to actual score contributions. ... ok
+test_13_api_recommendation_endpoint (tests.test_intern4_m2.TestIntern4Milestone2.test_13_api_recommendation_endpoint)
+Test GET /api/v1/recommendations?user_id=U_M2 returns valid M2 response format. ... ok
+test_14_api_swipe_recording_endpoint (tests.test_intern4_m2.TestIntern4Milestone2.test_14_api_swipe_recording_endpoint)
+Test POST /api/v1/swipes records swipe and alters recommendation ranking. ... ok
+
+======================================================================
+ERROR: test_01_blended_ats_score (tests.test_day4_intern4.TestDay4SemanticAndBlended.test_01_blended_ats_score)
+Test the integration between SemanticEngine and ATS engine blending weights
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1375, in patched
+    with self.decoration_helper(patched,
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 137, in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1357, in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 517, in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1430, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\pkgutil.py", line 715, in resolve_name
+    result = getattr(result, p)
+             ^^^^^^^^^^^^^^^^^^
+AttributeError: module 'src' has no attribute 'semantic'
+
+======================================================================
+ERROR: test_02_chromadb_storage_and_query (tests.test_day4_intern4.TestDay4SemanticAndBlended.test_02_chromadb_storage_and_query)
+Ensure ChromaDB interface wrapper accurately encapsulates storage functionality
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1375, in patched
+    with self.decoration_helper(patched,
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 137, in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1357, in decoration_helper
+    arg = exit_stack.enter_context(patching)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 517, in enter_context
+    result = _enter(cm)
+             ^^^^^^^^^^
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1430, in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+  File "C:\Users\megha\AppData\Local\Programs\Python\Python311\Lib\pkgutil.py", line 715, in resolve_name
+    result = getattr(result, p)
+             ^^^^^^^^^^^^^^^^^^
+AttributeError: module 'src' has no attribute 'semantic'
+
+----------------------------------------------------------------------
+Ran 32 tests in 2.582s
+
+FAILED (errors=2)

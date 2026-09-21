@@ -5,3 +5,6 @@ pdfplumber
 fastapi
 uvicorn
 python-multipart
+python-docx
+sentence-transformers
+chromadb
