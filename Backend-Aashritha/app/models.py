@@ -19,6 +19,7 @@ from sqlalchemy import (
     Integer,
     ForeignKey,
     DateTime,
+    Boolean,
     Enum,
     JSON,
     UniqueConstraint,
@@ -152,12 +153,16 @@ class Job(Base):
         default=JobType.FULL_TIME,
         server_default=JobType.FULL_TIME.value,
     )
+    experience_level = Column(String(100), nullable=True, index=True)
     salary_min = Column(Numeric(12, 2), nullable=True)
     salary_max = Column(Numeric(12, 2), nullable=True)
     skills_required = Column(JSON, nullable=False, default=list)  # e.g. ["Python", "SQL"]
+    fresher_friendly = Column(Boolean, nullable=False, default=False, server_default="false", index=True)
+    low_competition = Column(Boolean, nullable=False, default=False, server_default="false", index=True)
     applicant_count = Column(Integer, nullable=False, default=0, server_default="0")
     is_active = Column(Integer, nullable=False, default=1)  # 1 = open, 0 = closed
     posted_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
 
     company = relationship("Company", back_populates="jobs")
     swipes = relationship("Swipe", back_populates="job", cascade="all, delete-orphan")
