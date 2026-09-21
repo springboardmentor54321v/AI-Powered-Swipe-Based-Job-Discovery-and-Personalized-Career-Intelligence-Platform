@@ -36,6 +36,13 @@ router = APIRouter()
     "",
     response_model=SwipeOut,
     status_code=status.HTTP_201_CREATED,
+    responses={
+        400: {"model": dict, "description": "Inactive job"},
+        401: {"model": dict, "description": "Authentication required"},
+        403: {"model": dict, "description": "Job Seeker role required"},
+        404: {"model": dict, "description": "Job not found"},
+        409: {"model": dict, "description": "Concurrent duplicate swipe"},
+    },
     summary="Record a swipe action (apply / save / skip) on a job — Job Seeker only",
     dependencies=[Depends(require_job_seeker)],
 )
@@ -53,6 +60,7 @@ def create_swipe(
     existing = (
         db.query(Swipe)
         .filter(Swipe.user_id == current_user.id, Swipe.job_id == payload.job_id)
+        .with_for_update()
         .first()
     )
 
@@ -132,19 +140,25 @@ def get_swipe(
 
 
 @router.delete(
-    "/{swipe_id}",
+    "/{job_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Undo/delete a swipe (Job Seeker only, own swipes only)",
+    responses={
+        401: {"model": dict, "description": "Authentication required"},
+        403: {"model": dict, "description": "Job Seeker role required"},
+        404: {"model": dict, "description": "Swipe not found"},
+    },
+    summary="Undo/delete the current user's swipe for a job",
     dependencies=[Depends(require_job_seeker)],
 )
 def delete_swipe(
-    swipe_id: uuid.UUID,
+    job_id: uuid.UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     swipe = (
         db.query(Swipe)
-        .filter(Swipe.id == swipe_id, Swipe.user_id == current_user.id)
+        .filter(Swipe.job_id == job_id, Swipe.user_id == current_user.id)
+        .with_for_update()
         .first()
     )
     if swipe is None:
