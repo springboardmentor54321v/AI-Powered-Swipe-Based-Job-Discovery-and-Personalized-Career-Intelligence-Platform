@@ -33,6 +33,10 @@ router = APIRouter()
 @router.get(
     "",
     response_model=list[CompanyOut],
+    responses={
+        200: {"description": "Company summaries"},
+        401: {"model": dict, "description": "Authentication required"},
+    },
     summary="List all companies (any authenticated user)",
 )
 def list_companies(
@@ -64,6 +68,11 @@ def list_companies(
 @router.get(
     "/{company_id}",
     response_model=CompanyDetailOut,
+    responses={
+        200: {"description": "Company profile with active jobs"},
+        401: {"model": dict, "description": "Authentication required"},
+        404: {"model": dict, "description": "Company not found"},
+    },
     summary="Get a company's profile along with its active job listings",
 )
 def get_company(
