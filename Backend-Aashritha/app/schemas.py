@@ -74,6 +74,15 @@ class TokenResponse(BaseModel):
     user: UserOut
 
 
+class JWTClaims(BaseModel):
+    """Claims included in an access token (in addition to standard JWT claims)."""
+
+    id: uuid.UUID
+    email: EmailStr
+    role: UserRole
+    skills: List[str] = Field(default_factory=list)
+
+
 class AccessTokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -129,9 +138,12 @@ class JobCreateRequest(BaseModel):
     description: str = Field(..., min_length=1)
     location: str = Field(..., min_length=1, max_length=255)
     job_type: JobType = JobType.FULL_TIME
+    experience_level: Optional[str] = Field(None, max_length=100)
     salary_min: Optional[Decimal] = Field(None, ge=0)
     salary_max: Optional[Decimal] = Field(None, ge=0)
     skills_required: List[str] = Field(default_factory=list)
+    fresher_friendly: bool = False
+    low_competition: bool = False
 
     @field_validator("salary_max")
     @classmethod
@@ -147,9 +159,12 @@ class JobUpdateRequest(BaseModel):
     description: Optional[str] = None
     location: Optional[str] = Field(None, min_length=1, max_length=255)
     job_type: Optional[JobType] = None
+    experience_level: Optional[str] = Field(None, max_length=100)
     salary_min: Optional[Decimal] = Field(None, ge=0)
     salary_max: Optional[Decimal] = Field(None, ge=0)
     skills_required: Optional[List[str]] = None
+    fresher_friendly: Optional[bool] = None
+    low_competition: Optional[bool] = None
     is_active: Optional[bool] = None
 
 
@@ -163,12 +178,16 @@ class JobOut(BaseModel):
     description: str
     location: str
     job_type: JobType
+    experience_level: Optional[str] = None
     salary_min: Optional[Decimal] = None
     salary_max: Optional[Decimal] = None
     skills_required: List[str] = Field(default_factory=list)
+    fresher_friendly: bool = False
+    low_competition: bool = False
     applicant_count: int
     is_active: bool
     posted_at: datetime
+    created_at: datetime
 
     # Dynamic, computed-on-the-fly intelligence metrics (not stored columns)
     posted_time: str
