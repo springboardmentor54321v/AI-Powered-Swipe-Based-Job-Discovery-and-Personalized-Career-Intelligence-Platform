@@ -16,6 +16,7 @@ returned to the client includes two fields computed on the fly:
 
 import math
 import uuid
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Optional, List
 
@@ -35,6 +36,11 @@ router = APIRouter()
 @router.get(
     "",
     response_model=PaginatedJobsResponse,
+    responses={
+        200: {"description": "Paginated active job cards"},
+        400: {"model": dict, "description": "Invalid query parameters"},
+        401: {"model": dict, "description": "Authentication required"},
+    },
     summary="List / search jobs with pagination and multi-parameter filters",
 )
 def list_jobs(
@@ -107,8 +113,72 @@ def list_jobs(
 
 
 @router.get(
+    "/search",
+    response_model=PaginatedJobsResponse,
+    responses={
+        200: {"description": "Filtered and paginated job cards"},
+        400: {"model": dict, "description": "Invalid filter combination"},
+        401: {"model": dict, "description": "Authentication required"},
+    },
+    summary="Search jobs with advanced frontend filter chips",
+)
+def search_jobs(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    keyword: Optional[str] = Query(None, description="Search title, description, or company name"),
+    salary_min: Optional[Decimal] = Query(None, ge=0),
+    salary_max: Optional[Decimal] = Query(None, ge=0),
+    job_type: Optional[JobType] = Query(None),
+    experience_level: Optional[str] = Query(None),
+    fresher_friendly: Optional[bool] = Query(None),
+    low_competition: Optional[bool] = Query(None),
+    recently_posted: Optional[bool] = Query(None, description="Only jobs created in the last 30 days"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if salary_min is not None and salary_max is not None and salary_min > salary_max:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="salary_min cannot exceed salary_max")
+
+    query = db.query(Job).options(joinedload(Job.company)).filter(Job.is_active == 1)
+    if keyword:
+        like_pattern = f"%{keyword.strip()}%"
+        query = query.join(Company).filter(
+            or_(Job.title.ilike(like_pattern), Job.description.ilike(like_pattern), Company.name.ilike(like_pattern))
+        )
+    if salary_min is not None:
+        query = query.filter(or_(Job.salary_max.is_(None), Job.salary_max >= salary_min))
+    if salary_max is not None:
+        query = query.filter(or_(Job.salary_min.is_(None), Job.salary_min <= salary_max))
+    if job_type is not None:
+        query = query.filter(Job.job_type == job_type)
+    if experience_level:
+        query = query.filter(Job.experience_level.ilike(experience_level.strip()))
+    if fresher_friendly is not None:
+        query = query.filter(Job.fresher_friendly == fresher_friendly)
+    if low_competition is not None:
+        query = query.filter(Job.low_competition == low_competition)
+    if recently_posted:
+        query = query.filter(Job.created_at >= datetime.now(timezone.utc) - timedelta(days=30))
+
+    total = query.count()
+    jobs = query.order_by(Job.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return PaginatedJobsResponse(
+        total=total,
+        page=page,
+        page_size=page_size,
+        total_pages=math.ceil(total / page_size) if total else 0,
+        results=[serialize_job(job) for job in jobs],
+    )
+
+
+@router.get(
     "/{job_id}",
     response_model=JobOut,
+    responses={
+        200: {"description": "Job card"},
+        401: {"model": dict, "description": "Authentication required"},
+        404: {"model": dict, "description": "Job not found"},
+    },
     summary="Get a single job's details with dynamic intelligence metrics",
 )
 def get_job(
@@ -159,9 +229,12 @@ def create_job(
         description=payload.description,
         location=payload.location,
         job_type=payload.job_type,
+        experience_level=payload.experience_level,
         salary_min=payload.salary_min,
         salary_max=payload.salary_max,
         skills_required=payload.skills_required or [],
+        fresher_friendly=payload.fresher_friendly,
+        low_competition=payload.low_competition,
         applicant_count=0,
     )
     db.add(job)
