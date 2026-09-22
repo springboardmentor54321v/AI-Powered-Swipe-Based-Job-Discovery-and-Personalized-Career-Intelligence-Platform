@@ -113,3 +113,41 @@ export interface SavedJobItem {
   saved_at: string;
   job?: JobSummary;
 }
+
+/**
+ * Milestone 3: Resume Management & Versions
+ */
+export type ParsedStatus = "pending" | "processing" | "done" | "failed";
+
+export interface ResumeVersion {
+  id: string;
+  user_id: string;
+  file_name: string;
+  file_type: "pdf" | "docx";
+  file_size?: number;
+  version_number: number;
+  is_active_version: boolean;
+  parsed_status: ParsedStatus;
+  parsed_text: string | null;
+  extracted_skills: string[] | null;
+  uploaded_at: string;
+  parsed_at?: string | null;
+}
+
+/**
+ * Milestone 3: ATS Compatibility Scoring
+ */
+export interface ATSScorePayload {
+  resume_id: string;
+  job_id: string | number;
+}
+
+export interface ATSScoreResponse {
+  resume_id: string;
+  job_id: string;
+  match_score: number;
+  missing_skills: string[];
+  missing_keywords: string[];
+  scored_at: string;
+}
+

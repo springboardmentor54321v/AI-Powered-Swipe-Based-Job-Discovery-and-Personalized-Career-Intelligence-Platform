@@ -1,21 +1,23 @@
-# 📖 SwipeX — Data Dictionary & Schema Documentation (Milestone 2)
+# 📖 SwipeX — Data Dictionary & Schema Documentation (Milestone 3)
 
 > **Module:** Job & Data Intelligence Service  
-> **Author:** Shubham Ugale (`Data & Job Intelligence`)  
-> **Status:** Milestone 2 Production-Ready  
-> **Database:** PostgreSQL / SQLite (Development) with Redis Cache  
+> **Author:** Shubham Ugale (`Job & Data Intelligence`)  
+> **Status:** Milestone 3 Production-Ready  
+> **Database:** PostgreSQL / SQLite (Development) with Redis Caching Layer  
 
 ---
 
 ## 1. Database Architecture Overview
 
-The SwipeX data layer is designed for high-throughput swipe recording, rapid faceted job discovery, and sub-millisecond feed delivery.
+The SwipeX data layer is designed for high-throughput swipe recording, rapid faceted job discovery, multi-version resume management, and real-time ATS compatibility scoring.
 
 ```mermaid
 erDiagram
     COMPANIES ||--o{ JOBS : "publishes (1:N)"
     JOBS ||--o{ SWIPES : "receives (1:N)"
     JOBS ||--o{ SAVED_JOBS : "bookmarked_in (1:N)"
+    USERS ||--o{ RESUMES : "uploads_versions (1:N)"
+    RESUMES ||--o{ RESUME_SKILLS : "contains (1:N)"
 
     COMPANIES {
         int id PK
@@ -42,6 +44,8 @@ erDiagram
         text responsibilities
         text requirements
         text skills "JSON Array of skills"
+        text required_skills "JSON Array for ATS matching"
+        text keywords "JSON Array of domain keywords"
         enum job_type "Full-time, Part-time, Internship, Contract"
         enum workplace_type "Remote, On-site, Hybrid"
         string location
@@ -60,12 +64,39 @@ erDiagram
         datetime expires_at
     }
 
+    RESUMES {
+        string id PK "UUID string"
+        string user_id FK "User UUID"
+        string file_name
+        string file_type "pdf, docx"
+        int file_size "in bytes, max 10MB"
+        string file_path "local/cloud path"
+        int version_number "incremental per user"
+        boolean is_active_version "current default resume"
+        string parsed_status "pending, processing, done, failed"
+        text parsed_text "clean text extracted"
+        text extracted_skills "JSON Array of skills"
+        datetime uploaded_at
+        datetime parsed_at
+    }
+
+    RESUME_SKILLS {
+        int id PK
+        string resume_id FK "References resumes.id"
+        string skill_name
+        string category
+        string proficiency_level
+        float years_experience
+        float confidence_score
+        datetime extracted_at
+    }
+
     SWIPES {
         int id PK
         string user_id
         int job_id FK
-        enum direction "right, left"
-        enum action_type "apply, save, skip"
+        string direction "right, left"
+        string action_type "apply, save, skip"
         string notes
         datetime created_at
     }
@@ -83,120 +114,129 @@ erDiagram
 
 ## 2. Table Specifications
 
-### 2.1 `companies` Table
-Stores registered employers across global MNCs, high-growth startups, and early-stage AI ventures.
+### 2.1 `resumes` Table (Milestone 3 Core)
+Stores user resume uploads with complete multi-version history, status lifecycle, and parsed skill summaries.
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
-| `id` | `INTEGER` | Primary Key, Auto-increment | Unique identifier for the company |
-| `name` | `VARCHAR(255)` | Not Null, Indexed | Official company name |
-| `slug` | `VARCHAR(255)` | Unique, Not Null, Indexed | URL-friendly unique identifier |
-| `company_type` | `VARCHAR(50)` | Not Null, Indexed | Enum: `MNC`, `Startup`, `Newly Founded` |
-| `is_newly_founded` | `BOOLEAN` | Not Null, Default `False`, Indexed | Quick flag for early-stage startup discovery |
-| `industry` | `VARCHAR(100)` | Not Null, Indexed | Primary sector (e.g. Fintech, AI, E-commerce) |
-| `headquarters` | `VARCHAR(255)` | Not Null | Primary corporate or regional hub |
-| `funding_stage` | `VARCHAR(50)` | Nullable | Funding bracket (e.g., Seed, Series A, Public) |
-| `website` | `VARCHAR(500)` | Nullable | Corporate URL or careers portal |
-| `description` | `TEXT` | Nullable | Company background and engineering mission |
-| `founded_year` | `INTEGER` | Nullable | Year of inception |
-| `employee_count_range` | `VARCHAR(50)` | Nullable | Size bracket: `1-20`, `50-200`, `10000+` |
-| `created_at` | `DATETIME` | Not Null, Default `UTC_NOW` | Timestamp of record creation |
+| `id` | `VARCHAR(36)` | Primary Key, UUID | Unique resume identifier (e.g. `b1a2c3d4-0000-4444-8888-abcdefabcdef`) |
+| `user_id` | `VARCHAR(36)` | Not Null, Indexed | Foreign key referencing authenticated Job Seeker |
+| `file_name` | `VARCHAR(255)` | Not Null | Original filename (e.g. `asha_resume_v3.pdf`) |
+| `file_type` | `VARCHAR(50)` | Not Null | File extension: `pdf` or `docx` |
+| `file_size` | `INTEGER` | Not Null, Default 0 | File size in bytes (max 10MB enforced) |
+| `file_path` | `VARCHAR(500)` | Not Null | File system location (`uploads/resumes/{user_id}/...`) |
+| `version_number` | `INTEGER` | Not Null, Default 1 | Auto-incrementing version number for this user |
+| `is_active_version`| `BOOLEAN` | Not Null, Indexed | `True` if this is the active default resume |
+| `parsed_status` | `VARCHAR(50)` | Not Null, Indexed | Lifecycle status: `pending`, `processing`, `done`, `failed` |
+| `parsed_text` | `TEXT` | Nullable | Full extracted plain text of the resume |
+| `extracted_skills`| `TEXT` | Nullable, JSON String | Array of skills (e.g. `["Python", "FastAPI", "SQL"]`) |
+| `uploaded_at` | `DATETIME` | Not Null, Indexed | UTC upload timestamp |
+| `parsed_at` | `DATETIME` | Nullable | UTC timestamp when NLP parsing completed |
+
+**Indexes & Performance:**
+- `ix_resumes_user_version`: Composite index on `(user_id, version_number)` for fast version timeline lookups.
+- `ix_resumes_user_active`: Composite index on `(user_id, is_active_version)` for instant default resume resolution.
 
 ---
 
-### 2.2 `jobs` Table
-Stores detailed job descriptions, compensation, required skills, and competition metrics.
+### 2.2 `resume_skills` Table (Milestone 3 Normalized Entity)
+Stores normalized extracted skills per resume version for relational queries, skill aggregation, and inverted index lookups.
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
-| `id` | `INTEGER` | Primary Key, Auto-increment | Unique job posting ID |
-| `company_id` | `INTEGER` | Foreign Key (`companies.id`), Indexed | Employer publishing this opening |
-| `title` | `VARCHAR(255)` | Not Null, Indexed | Job title (e.g., "Full Stack Developer") |
-| `role_category` | `VARCHAR(100)` | Nullable, Indexed | Functional department (`Backend`, `Frontend`, `AI/ML`) |
-| `description` | `TEXT` | Not Null | Complete role overview |
-| `responsibilities` | `TEXT` | Nullable | Bulleted day-to-day deliverables |
-| `requirements` | `TEXT` | Nullable | Qualifications and prerequisite experience |
-| `skills` | `TEXT` | Not Null, Default `'[]'` | JSON serialized list of skills |
-| `job_type` | `VARCHAR(50)` | Not Null, Indexed | Enum: `Full-time`, `Part-time`, `Internship`, `Contract` |
-| `workplace_type` | `VARCHAR(50)` | Not Null, Indexed | Enum: `Remote`, `On-site`, `Hybrid` |
-| `location` | `VARCHAR(255)` | Not Null, Indexed | Job city / country |
-| `salary_min` | `INTEGER` | Nullable, Indexed | Lower bound salary in currency unit |
-| `salary_max` | `INTEGER` | Nullable, Indexed | Upper bound salary in currency unit |
-| `salary_currency` | `VARCHAR(10)` | Not Null, Default `'INR'` | ISO Currency code (`INR`, `USD`) |
-| `salary_period` | `VARCHAR(20)` | Not Null, Default `'Per Annum'` | Frequency (`Per Annum`, `Per Month`) |
-| `experience_level` | `VARCHAR(50)` | Not Null, Indexed | Enum: `Fresher`, `Entry-level`, `Mid-level`, `Senior` |
-| `experience_years_min` | `INTEGER` | Not Null, Default `0` | Minimum required experience in years |
-| `experience_years_max` | `INTEGER` | Not Null, Default `2` | Maximum target experience in years |
-| `competition_level` | `VARCHAR(50)` | Not Null, Indexed | Enum: `Low`, `Medium`, `High` |
-| `applicant_count` | `INTEGER` | Not Null, Default `0`, Indexed | Number of candidates who swiped right / applied |
-| `is_fresher_friendly` | `BOOLEAN` | Not Null, Default `True`, Indexed | Flag for 0-1 yr experience / college graduates |
-| `is_active` | `BOOLEAN` | Not Null, Default `True`, Indexed | Visibility status |
-| `posted_at` | `DATETIME` | Not Null, Indexed | Publication timestamp |
-| `expires_at` | `DATETIME` | Nullable | Auto-closure date |
+| `id` | `INTEGER` | Primary Key, Auto-increment | Unique skill entry ID |
+| `resume_id` | `VARCHAR(36)` | Foreign Key (`resumes.id`), Cascade Delete | Target resume |
+| `skill_name` | `VARCHAR(100)` | Not Null, Indexed | Name of recognized skill (e.g. `Docker`, `Python`) |
+| `category` | `VARCHAR(100)` | Nullable, Indexed | Category: Programming, Cloud, Frameworks, etc. |
+| `proficiency_level`| `VARCHAR(50)` | Nullable | `Beginner`, `Intermediate`, `Expert` |
+| `years_experience` | `FLOAT` | Nullable | Estimated years of experience |
+| `confidence_score` | `FLOAT` | Not Null, Default 1.0 | NER / model confidence score (0.0 to 1.0) |
+| `extracted_at` | `DATETIME` | Not Null | Extraction timestamp |
 
-**Composite Indexes Built for High Query Velocity:**
-- `ix_jobs_type_location` ON `(job_type, location)`
-- `ix_jobs_salary_range` ON `(salary_min, salary_max)`
-- `ix_jobs_exp_competition` ON `(experience_level, competition_level)`
+**Indexes & Performance:**
+- `ix_resume_skills_name`: Index on `skill_name` for aggregate skill queries and market demand analytics.
+- `ix_resume_skills_resume_skill`: Composite index on `(resume_id, skill_name)` for fast deduplication.
 
 ---
 
-### 2.3 `swipes` Table
-Captures user swipe deck gestures.
+### 2.3 `jobs` Table (Extended for Milestone 3)
+Stores rich job postings with structured required skills and domain keywords for ATS scoring.
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
-| `id` | `INTEGER` | Primary Key, Auto-increment | Unique swipe record ID |
-| `user_id` | `VARCHAR(100)` | Not Null, Indexed | Candidate identity |
-| `job_id` | `INTEGER` | Foreign Key (`jobs.id`), Indexed | Swiped job card |
-| `direction` | `VARCHAR(20)` | Not Null | `right` (Apply/Save) or `left` (Skip) |
-| `action_type` | `VARCHAR(20)` | Not Null | `apply`, `save`, `skip` |
-| `notes` | `VARCHAR(500)` | Nullable | Optional candidate notes |
-| `created_at` | `DATETIME` | Not Null, Indexed | Timestamp of swipe |
-
-**Constraints:** Unique constraint on `(user_id, job_id)`. Re-swiping updates the direction and timestamp.
+| `id` | `INTEGER` | Primary Key, Auto-increment | Unique job ID |
+| `company_id` | `INTEGER` | Foreign Key (`companies.id`), Indexed | Employer reference |
+| `title` | `VARCHAR(255)` | Not Null, Indexed | Job title |
+| `role_category` | `VARCHAR(100)` | Nullable, Indexed | Category: Backend, Frontend, AI/ML, Design, etc. |
+| `description` | `TEXT` | Not Null | Full job overview |
+| `skills` | `TEXT` | Not Null, JSON Array | All associated skills |
+| `required_skills` | `TEXT` | Nullable, JSON Array | **[M3]** Core mandatory skills for ATS scoring |
+| `keywords` | `TEXT` | Nullable, JSON Array | **[M3]** Domain keywords (e.g. `Microservices`, `CI/CD`) |
+| `job_type` | `VARCHAR(50)` | Not Null, Indexed | `Full-time`, `Part-time`, `Internship`, `Contract` |
+| `workplace_type` | `VARCHAR(50)` | Not Null, Indexed | `Remote`, `On-site`, `Hybrid` |
+| `location` | `VARCHAR(255)` | Not Null, Indexed | Job location |
+| `salary_min` | `INTEGER` | Nullable, Indexed | Minimum salary |
+| `salary_max` | `INTEGER` | Nullable, Indexed | Maximum salary |
+| `experience_level`| `VARCHAR(50)` | Not Null, Indexed | `Fresher`, `Entry-level`, `Mid-level`, `Senior`, `Lead` |
+| `competition_level`| `VARCHAR(50)`| Not Null, Indexed | `Low`, `Medium`, `High` |
+| `applicant_count` | `INTEGER` | Not Null, Default 0 | Total applicants count |
+| `is_fresher_friendly`| `BOOLEAN` | Not Null, Indexed | Fresher suitable |
+| `is_active` | `BOOLEAN` | Not Null, Indexed | Active job listing status |
+| `posted_at` | `DATETIME` | Not Null, Indexed | Timestamp of job posting |
 
 ---
 
-### 2.4 `saved_jobs` Table
-Stores candidates' bookmarked roles.
+### 2.4 `companies` Table
+Stores enterprise employer and startup profiles.
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
-| `id` | `INTEGER` | Primary Key, Auto-increment | Unique saved job ID |
-| `user_id` | `VARCHAR(100)` | Not Null, Indexed | Candidate ID |
-| `job_id` | `INTEGER` | Foreign Key (`jobs.id`), Indexed | Bookmarked job ID |
-| `notes` | `VARCHAR(500)` | Nullable | User private notes |
-| `saved_at` | `DATETIME` | Not Null, Indexed | Bookmark timestamp |
+| `id` | `INTEGER` | Primary Key, Auto-increment | Unique company ID |
+| `name` | `VARCHAR(255)` | Not Null, Indexed | Organization name |
+| `slug` | `VARCHAR(255)` | Unique, Not Null | URL slug (e.g. `google`, `novaai-labs`) |
+| `company_type` | `VARCHAR(50)` | Not Null, Indexed | `MNC`, `Startup`, `Newly Founded` |
+| `is_newly_founded` | `BOOLEAN` | Not Null, Indexed | Startup flag for new ventures |
+| `industry` | `VARCHAR(255)` | Not Null, Indexed | Industry classification |
+| `funding_stage` | `VARCHAR(100)` | Nullable | Funding round |
+| `headquarters` | `VARCHAR(255)` | Nullable | Primary office location |
 
 ---
 
-## 3. Freshness & Competition Intelligence Rules
-
-Implemented in `app/core/intelligence.py`:
-
-### Job Freshness Rules
-- `<= 24 Hours`: **"Just Posted"** (`is_fresh = True`)
-- `<= 3 Days`: **"Recently Posted"** (`is_fresh = True`)
-- `<= 7 Days`: **"This Week"** (`is_fresh = True`)
-- `> 7 Days`: **"Active"** (`is_fresh = False`)
-
-### Competition Level Rules
-- `< 25 Applicants`: **"Low"** (`is_early_applicant = True` if `< 15 applicants`)
-- `25 to 100 Applicants`: **"Medium"**
-- `> 100 Applicants`: **"High"**
-- **Competition Score:** `min(100.0, round((applicant_count / 150.0) * 100.0, 1))`
+### 2.5 `swipes` and `saved_jobs` Tables
+Stores candidate interactions and bookmarked roles with unique candidate-job constraints.
 
 ---
 
-## 4. Milestone 3 Handoff Notes (For Intern 4: AI/ML & Resume ATS Engine)
+## 3. ATS Scoring & FR-04 Compatibility Logic
 
-1. **Feature Vectors for Embedding / TF-IDF:**
-   - Text fields to vectorize: `Job.title` + `Job.role_category` + `Job.description` + `Job.skills`.
-   - `Job.skills` is structured JSON array (e.g. `["Python", "FastAPI", "Docker"]`).
-2. **Implicit User Preference Feedback:**
-   - Query `swipes` table where `user_id = :target` and `direction = 'right'` for positive training samples.
-   - Query `direction = 'left'` as negative training samples for collaborative filtering.
-3. **Hard Constraint Filtering:**
-   - Filter jobs on `Job.experience_years_min <= candidate.experience_years`.
-   - Consider `Job.workplace_type` against candidate's remote preferences.
+Implemented in `app/core/resume_service.py` (`ResumeService.compute_ats_score`):
+
+1. **Required Skill Overlap (70% weight):**
+   $$\text{skill\_ratio} = \frac{|\text{resume\_skills} \cap \text{job\_required\_skills}|}{|\text{job\_required\_skills}|}$$
+
+2. **Domain Keyword Relevance (30% weight):**
+   $$\text{keyword\_ratio} = \frac{|\text{resume\_keywords} \cap \text{job\_keywords}|}{|\text{job\_keywords}|}$$
+
+3. **Blended ATS Score (0 - 100):**
+   $$\text{match\_score} = \text{round}((\text{skill\_ratio} \times 70.0) + (\text{keyword\_ratio} \times 30.0), 1)$$
+
+4. **FR-04 Threshold Rule:**
+   - If $\text{match\_score} < 80.0\%$: Identifies and populates `missing_skills` and `missing_keywords`.
+   - If $\text{match\_score} \ge 80.0\%$: Both `missing_skills` and `missing_keywords` return as empty arrays `[]` (never omitted or null).
+
+---
+
+## 4. Milestone 4 Handoff Notes (Analytics, Notifications & Dashboards)
+
+As defined in SRS Section 9.3 (Day 7 Handoff), Milestone 4 modules (Modules 8–10: Notification Service, Candidate Application Tracking, Recruiter Analytics) will consume the following data assets:
+
+1. **Candidate Application Pipeline (Module 8):**
+   - When a candidate swipes right (`SwipeActionType.APPLY`), the application record can link directly to the candidate's active `Resume.id` (`is_active_version = True`) and store the snapshot `match_score` from `POST /api/v1/ats/score`.
+   - Recruiters can view applicant rankings sorted by `match_score` descending.
+
+2. **Skill Gap Notifications (Module 9):**
+   - The Notification Service can query resumes with `match_score < 80%` on saved jobs (`saved_jobs`) and send actionable alerts: *"Add Docker or AWS to your resume to increase your ATS score for Role X from 74% to 88%"*.
+
+3. **Recruiter Talent Analytics (Module 10):**
+   - Aggregate `resume_skills` across applicants to produce hiring velocity and skill availability curves.
+   - Correlate `Job.applicant_count` against `Job.competition_level` to recommend salary adjustments.

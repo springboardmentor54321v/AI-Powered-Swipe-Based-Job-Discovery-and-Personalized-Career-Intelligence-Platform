@@ -1,10 +1,14 @@
 import os
+import sys
 import json
 import argparse
 from datetime import datetime
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
 from sqlalchemy.orm import Session
-from app.core.database import SessionLocal, engine, Base
-from app.models import Company, Job, Swipe, SavedJob
+from app.core.database import SessionLocal, engine, Base, run_migrations
+from app.models import Company, Job, Swipe, SavedJob, Resume, ResumeSkill
 
 BACKUP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "backups"))
 os.makedirs(BACKUP_DIR, exist_ok=True)
@@ -13,12 +17,13 @@ os.makedirs(BACKUP_DIR, exist_ok=True)
 def backup_database(output_file: str = None):
     """
     Exports full database contents to a JSON snapshot backup file.
+    Covers Companies, Jobs, Swipes, SavedJobs, Resumes, and ResumeSkills (SRS Day 5).
     """
     db: Session = SessionLocal()
     try:
         if not output_file:
             timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-            output_file = os.path.join(BACKUP_DIR, f"swipex_backup_{timestamp}.json")
+            output_file = os.path.join(BACKUP_DIR, f"swipex_backup_m3_{timestamp}.json")
 
         print(f"Creating database snapshot backup to: {output_file}")
 
@@ -26,17 +31,21 @@ def backup_database(output_file: str = None):
         jobs = db.query(Job).all()
         swipes = db.query(Swipe).all()
         saved_jobs = db.query(SavedJob).all()
+        resumes = db.query(Resume).all()
+        resume_skills = db.query(ResumeSkill).all()
 
         backup_payload = {
             "metadata": {
                 "created_at": datetime.utcnow().isoformat(),
                 "service": "SwipeX Job & Data Intelligence Service",
-                "version": "Milestone 2",
+                "version": "Milestone 3",
                 "counts": {
                     "companies": len(companies),
                     "jobs": len(jobs),
                     "swipes": len(swipes),
-                    "saved_jobs": len(saved_jobs)
+                    "saved_jobs": len(saved_jobs),
+                    "resumes": len(resumes),
+                    "resume_skills": len(resume_skills)
                 }
             },
             "companies": [
@@ -66,6 +75,8 @@ def backup_database(output_file: str = None):
                     "responsibilities": j.responsibilities,
                     "requirements": j.requirements,
                     "skills": j.skills,
+                    "required_skills": j.required_skills,
+                    "keywords": j.keywords,
                     "job_type": j.job_type.value,
                     "workplace_type": j.workplace_type.value,
                     "location": j.location,
@@ -105,13 +116,44 @@ def backup_database(output_file: str = None):
                     "saved_at": sj.saved_at.isoformat()
                 }
                 for sj in saved_jobs
+            ],
+            "resumes": [
+                {
+                    "id": r.id,
+                    "user_id": r.user_id,
+                    "file_name": r.file_name,
+                    "file_type": r.file_type,
+                    "file_size": r.file_size,
+                    "file_path": r.file_path,
+                    "version_number": r.version_number,
+                    "is_active_version": r.is_active_version,
+                    "parsed_status": r.parsed_status,
+                    "parsed_text": r.parsed_text,
+                    "extracted_skills": r.extracted_skills,
+                    "uploaded_at": r.uploaded_at.isoformat(),
+                    "parsed_at": r.parsed_at.isoformat() if r.parsed_at else None
+                }
+                for r in resumes
+            ],
+            "resume_skills": [
+                {
+                    "id": rs.id,
+                    "resume_id": rs.resume_id,
+                    "skill_name": rs.skill_name,
+                    "category": rs.category,
+                    "proficiency_level": rs.proficiency_level,
+                    "years_experience": rs.years_experience,
+                    "confidence_score": rs.confidence_score,
+                    "extracted_at": rs.extracted_at.isoformat()
+                }
+                for rs in resume_skills
             ]
         }
 
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(backup_payload, f, indent=2)
 
-        print(f"Backup created successfully! Saved {len(jobs)} jobs, {len(companies)} companies, {len(swipes)} swipes, {len(saved_jobs)} saved jobs.")
+        print(f"Backup created successfully! Saved {len(jobs)} jobs, {len(companies)} companies, {len(swipes)} swipes, {len(saved_jobs)} saved jobs, {len(resumes)} resumes, {len(resume_skills)} resume skills.")
         return output_file
     finally:
         db.close()
@@ -130,10 +172,12 @@ def restore_database(backup_file: str):
 
     db: Session = SessionLocal()
     try:
-        # Recreate tables
-        Base.metadata.create_all(bind=engine)
+        # Recreate tables and columns
+        run_migrations()
 
         # Clear existing records
+        db.query(ResumeSkill).delete()
+        db.query(Resume).delete()
         db.query(SavedJob).delete()
         db.query(Swipe).delete()
         db.query(Job).delete()
@@ -141,7 +185,7 @@ def restore_database(backup_file: str):
         db.commit()
 
         # Restore companies
-        for c in data["companies"]:
+        for c in data.get("companies", []):
             company = Company(
                 id=c["id"],
                 name=c["name"],
@@ -160,7 +204,7 @@ def restore_database(backup_file: str):
         db.commit()
 
         # Restore jobs
-        for j in data["jobs"]:
+        for j in data.get("jobs", []):
             job = Job(
                 id=j["id"],
                 company_id=j["company_id"],
@@ -186,11 +230,13 @@ def restore_database(backup_file: str):
                 posted_at=datetime.fromisoformat(j["posted_at"])
             )
             job.skills = j.get("skills", [])
+            job.required_skills = j.get("required_skills", j.get("skills", []))
+            job.keywords = j.get("keywords", [])
             db.add(job)
         db.commit()
 
         # Restore swipes
-        for s in data["swipes"]:
+        for s in data.get("swipes", []):
             swipe = Swipe(
                 id=s["id"],
                 user_id=s["user_id"],
@@ -203,7 +249,7 @@ def restore_database(backup_file: str):
             db.add(swipe)
 
         # Restore saved jobs
-        for sj in data["saved_jobs"]:
+        for sj in data.get("saved_jobs", []):
             saved = SavedJob(
                 id=sj["id"],
                 user_id=sj["user_id"],
@@ -213,8 +259,42 @@ def restore_database(backup_file: str):
             )
             db.add(saved)
 
+        # Restore resumes
+        for r in data.get("resumes", []):
+            resume = Resume(
+                id=r["id"],
+                user_id=r["user_id"],
+                file_name=r["file_name"],
+                file_type=r["file_type"],
+                file_size=r.get("file_size", 0),
+                file_path=r["file_path"],
+                version_number=r.get("version_number", 1),
+                is_active_version=r.get("is_active_version", True),
+                parsed_status=r.get("parsed_status", "pending"),
+                parsed_text=r.get("parsed_text"),
+                uploaded_at=datetime.fromisoformat(r["uploaded_at"]),
+                parsed_at=datetime.fromisoformat(r["parsed_at"]) if r.get("parsed_at") else None
+            )
+            resume.extracted_skills = r.get("extracted_skills", [])
+            db.add(resume)
         db.commit()
-        print("Database restored successfully from snapshot!")
+
+        # Restore resume skills
+        for rs in data.get("resume_skills", []):
+            r_skill = ResumeSkill(
+                id=rs.get("id"),
+                resume_id=rs["resume_id"],
+                skill_name=rs["skill_name"],
+                category=rs.get("category"),
+                proficiency_level=rs.get("proficiency_level"),
+                years_experience=rs.get("years_experience"),
+                confidence_score=rs.get("confidence_score", 1.0),
+                extracted_at=datetime.fromisoformat(rs["extracted_at"])
+            )
+            db.add(r_skill)
+
+        db.commit()
+        print("Database restored successfully from snapshot with Milestone 3 tables!")
     except Exception as e:
         db.rollback()
         print(f"Error during restore: {e}")

@@ -273,6 +273,20 @@ def generate_datasets():
                 "responsibilities": tmpl["responsibilities"],
                 "requirements": tmpl["requirements"],
                 "skills_required": json.dumps(tmpl["skills"]),
+                "required_skills": json.dumps(tmpl["skills"]),
+                "keywords": json.dumps(
+                    {
+                        "Backend": ["RESTful APIs", "Microservices", "Docker", "CI/CD", "PostgreSQL", "Database Optimization", "Scalability"],
+                        "Frontend": ["Responsive Design", "State Management", "Component Architecture", "Accessibility", "Tailwind CSS", "TypeScript"],
+                        "Full Stack": ["REST APIs", "Full Stack Architecture", "Docker", "SQL", "Frontend Integration", "System Design"],
+                        "AI/ML": ["Machine Learning", "NLP", "Vector Search", "Embeddings", "LLMs", "Deep Learning", "Transformers"],
+                        "Data Analytics": ["Data Analysis", "SQL Queries", "ETL", "Dashboarding", "Statistical Analysis", "Business Intelligence"],
+                        "QA/Testing": ["Test Automation", "Pytest", "Integration Testing", "Regression Testing", "API Testing", "CI/CD"],
+                        "Design": ["User Research", "Wireframing", "Interactive Prototyping", "Design Systems", "Figma", "Usability Testing"],
+                        "Mobile": ["Mobile Architecture", "iOS", "Android", "Cross-Platform", "App Performance", "Offline Storage"],
+                        "DevOps": ["Kubernetes", "Docker", "CI/CD Pipelines", "Terraform", "Infrastructure as Code", "Monitoring"]
+                    }.get(tmpl["role_category"], ["Agile", "Git", "Problem Solving", "Collaboration", "Software Engineering"])
+                ),
                 "job_type": tmpl["job_type"],
                 "workplace_type": workplace,
                 "location": loc,

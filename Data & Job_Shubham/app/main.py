@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.core.database import Base, engine, SessionLocal
+from app.core.database import Base, engine, SessionLocal, run_migrations
 from app.api.v1.router import api_router
 from app.scripts.seed_data import seed_database
 from app.core.cache import cache_manager
@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """
     Application startup and shutdown lifecycle handler.
-    Auto-creates database tables and seeds initial realistic dataset if needed.
+    Auto-creates database tables, runs migrations, and seeds initial realistic dataset if needed.
     """
     logger.info("Initializing SwipeX Job & Data Intelligence Service...")
-    Base.metadata.create_all(bind=engine)
+    run_migrations()
     
     # Auto-seed database if empty
     db = SessionLocal()

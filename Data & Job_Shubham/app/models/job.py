@@ -51,6 +51,10 @@ class Job(Base):
     # Skills stored as JSON serialized string
     _skills = Column("skills", Text, nullable=False, default="[]")
     
+    # Milestone 3: Structured required_skills & domain keywords for ATS scoring & matching
+    _required_skills = Column("required_skills", Text, nullable=True, default="[]")
+    _keywords = Column("keywords", Text, nullable=True, default="[]")
+    
     job_type = Column(
         SQLEnum(JobType, values_callable=lambda x: [e.value for e in x], native_enum=False),
         default=JobType.FULL_TIME,
@@ -116,6 +120,28 @@ class Job(Base):
     @skills.setter
     def skills(self, val: List[str]):
         self._skills = json.dumps(val)
+
+    @property
+    def required_skills(self) -> List[str]:
+        try:
+            return json.loads(self._required_skills) if self._required_skills else self.skills
+        except Exception:
+            return self.skills
+
+    @required_skills.setter
+    def required_skills(self, val: List[str]):
+        self._required_skills = json.dumps(val if val is not None else [])
+
+    @property
+    def keywords(self) -> List[str]:
+        try:
+            return json.loads(self._keywords) if self._keywords else []
+        except Exception:
+            return []
+
+    @keywords.setter
+    def keywords(self, val: List[str]):
+        self._keywords = json.dumps(val if val is not None else [])
 
     @property
     def freshness_info(self) -> dict:

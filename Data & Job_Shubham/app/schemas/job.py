@@ -13,6 +13,8 @@ class JobBase(BaseModel):
     responsibilities: Optional[str] = None
     requirements: Optional[str] = None
     skills: List[str] = Field(default_factory=list)
+    required_skills: List[str] = Field(default_factory=list)
+    keywords: List[str] = Field(default_factory=list)
     job_type: JobType = JobType.FULL_TIME
     workplace_type: WorkplaceType = WorkplaceType.HYBRID
     location: str
@@ -52,6 +54,8 @@ class JobSummaryOut(BaseModel):
     salary_max: Optional[int] = None
     salary_currency: str = "INR"
     skills: List[str]
+    required_skills: List[str] = Field(default_factory=list)
+    keywords: List[str] = Field(default_factory=list)
     experience_level: str
     competition_level: str
     applicant_count: int
