@@ -1,0 +1,1128 @@
+openapi: 3.0.3
+info:
+  title: SwipeX Milestone 3 — Resume, ATS, AI-Suggestions & Recommendation API Contract
+  version: 3.0.0
+  description: >-
+    OpenAPI 3.0 contract for SwipeX Milestone 3 covering Resume Management
+    (upload, list, versioning), ATS Scoring, AI-Powered Suggestions, and
+    upgraded Recommendation services.
+
+    Maintained by Intern 2 (Backend & Identity Management, Domain-1).
+
+    All endpoints are routed through the SwipeX API Gateway (/api/v1/).
+
+    This is a DAY-1 CONTRACT ONLY — no implementation has been performed.
+
+    Source of truth for schema: Intern 3's Day-1 SQL schema in
+    Team-3/Domain-2/SwipeX_Job_Data_Intelligence_Milestone1/sql/
+  contact:
+    name: Intern 2 — Backend & Identity Management
+  license:
+    name: MIT
+
+servers:
+  - url: http://127.0.0.1:8000/api/v1
+    description: Local API Gateway (Django / DRF — Port 8000)
+  - url: http://localhost:8000/api/v1
+    description: Localhost API Gateway
+
+tags:
+  - name: Resume
+    description: >-
+      Resume upload, listing, and version management.
+      All endpoints require JOB_SEEKER role.
+      Resume data is ownership-restricted to the uploading user.
+  - name: ATS
+    description: >-
+      ATS (Applicant Tracking System) scoring service.
+      Compares a candidate's resume skills against a target job's requirements.
+  - name: AI Suggestions
+    description: >-
+      AI-powered resume optimization suggestions.
+      Supports both LLM-generated and rule-based fallback modes.
+  - name: Recommendations
+    description: >-
+      Upgraded job recommendation service.
+      Milestone 3 adds semantic similarity, ATS-aware scoring,
+      and swipe-history integration on top of the existing M2 heuristic engine.
+
+security:
+  - jwtAuth: []
+
+paths:
+  # ============================================================
+  # RESUME SERVICE
+  # ============================================================
+
+  /resumes/upload:
+    post:
+      tags:
+        - Resume
+      summary: Upload Candidate Resume
+      operationId: uploadResume
+      description: >-
+        Upload a candidate's resume file (PDF or DOCX). The system creates a new
+        resume record (or adds a new version to an existing resume for the user).
+        The uploaded file is stored, and the system returns identifiers for the
+        resume and version. Skill extraction may be triggered asynchronously.
+
+
+        **Authentication**: Required (Bearer JWT)
+
+        **Authorization**: JOB_SEEKER role only
+
+        **Ownership**: The resume is automatically associated with the
+        authenticated user's `owner_user_id`.
+      security:
+        - jwtAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: >-
+                    Resume file to upload. Accepted formats: PDF (.pdf),
+                    DOCX (.docx). Maximum file size: 5 MB.
+                label:
+                  type: string
+                  description: >-
+                    Optional human-readable label for this resume version
+                    (e.g. "Backend Developer Resume v2").
+                  example: "Backend Developer Resume v2"
+              required:
+                - file
+      responses:
+        "201":
+          description: Resume uploaded and version created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResumeUploadResponse"
+        "400":
+          description: >-
+            Validation error — file missing, unsupported format, file too large,
+            or duplicate file (same sha256 hash already exists for this resume).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                unsupported_format:
+                  summary: Unsupported file format
+                  value:
+                    error: "Validation Error"
+                    detail: "Unsupported file format. Accepted: .pdf, .docx"
+                    status_code: 400
+                duplicate_file:
+                  summary: Duplicate file upload
+                  value:
+                    error: "Validation Error"
+                    detail: "This exact file has already been uploaded as a previous version."
+                    status_code: 400
+        "401":
+          description: Missing or invalid JWT access token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                detail: "Access token has expired."
+        "403":
+          description: User does not have the JOB_SEEKER role.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                detail: "Permission denied: Requires JOB_SEEKER role."
+        "503":
+          description: Downstream Resume Service is unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayErrorResponse"
+
+  /resumes/:
+    get:
+      tags:
+        - Resume
+      summary: List My Resumes
+      operationId: listResumes
+      description: >-
+        Retrieve all resumes owned by the authenticated user. Returns resume
+        metadata including the current (active) version information and a count
+        of total versions.
+
+
+        **Authentication**: Required (Bearer JWT)
+
+        **Authorization**: JOB_SEEKER role only
+
+        **Ownership**: Only resumes belonging to the authenticated user are
+        returned. A user cannot view another user's resumes.
+      security:
+        - jwtAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: "Page number for paginated results (default: 1)"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          description: "Number of items per page (default: 10, max: 50)"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        "200":
+          description: List of resumes owned by the authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResumeListResponse"
+        "401":
+          description: Missing or invalid JWT access token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have the JOB_SEEKER role.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /resumes/{resume_id}/versions/{version_id}:
+    get:
+      tags:
+        - Resume
+      summary: Get Resume Version Detail
+      operationId: getResumeVersion
+      description: >-
+        Retrieve detailed information about a specific resume version, including
+        file metadata, extracted skills, and extraction confidence scores.
+
+
+        **Authentication**: Required (Bearer JWT)
+
+        **Authorization**: JOB_SEEKER role only
+
+        **Ownership**: Only the owning user can access their resume versions.
+        Attempting to access another user's resume version returns 404 (not 403)
+        to prevent user enumeration.
+      security:
+        - jwtAuth: []
+      parameters:
+        - name: resume_id
+          in: path
+          required: true
+          description: UUID of the resume record.
+          schema:
+            type: string
+            format: uuid
+            example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        - name: version_id
+          in: path
+          required: true
+          description: UUID of the specific resume version.
+          schema:
+            type: string
+            format: uuid
+            example: "f9e8d7c6-b5a4-3210-fedc-ba9876543210"
+      responses:
+        "200":
+          description: Resume version details with extracted skills.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResumeVersionDetailResponse"
+        "401":
+          description: Missing or invalid JWT access token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have the JOB_SEEKER role.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: >-
+            Resume or version not found, or the resume does not belong
+            to the authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Not Found"
+                detail: "Resume version not found."
+                status_code: 404
+
+  # ============================================================
+  # ATS SCORING SERVICE
+  # ============================================================
+
+  /ats/score:
+    post:
+      tags:
+        - ATS
+      summary: Compute ATS Match Score
+      operationId: computeATSScore
+      description: >-
+        Compare a candidate's resume against a specific job posting and return
+        an ATS (Applicant Tracking System) match score. The scoring engine
+        analyzes skill overlap, keyword matching, and (in M3) semantic
+        similarity between the resume and job requirements.
+
+
+        **Authentication**: Required (Bearer JWT)
+
+        **Authorization**: JOB_SEEKER role only
+
+        **Ownership**: The resume_id must belong to the authenticated user.
+
+
+        **Note**: The scoring algorithm is implemented by Intern 4 (Domain-3).
+        This contract defines only the API interface, not the scoring formula.
+      security:
+        - jwtAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ATSScoreRequest"
+      responses:
+        "200":
+          description: ATS score computed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ATSScoreResponse"
+        "400":
+          description: Validation error — missing or invalid resume_id / job_id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Validation Error"
+                detail:
+                  resume_id: ["This field is required."]
+                status_code: 400
+        "401":
+          description: Missing or invalid JWT access token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have the JOB_SEEKER role.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Resume or job not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Not Found"
+                detail: "Resume not found or does not belong to authenticated user."
+                status_code: 404
+        "503":
+          description: Downstream ATS Scoring Service is unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayErrorResponse"
+
+  # ============================================================
+  # AI SUGGESTIONS SERVICE
+  # ============================================================
+
+  /suggestions/:
+    post:
+      tags:
+        - AI Suggestions
+      summary: Get AI Resume Optimization Suggestions
+      operationId: getAISuggestions
+      description: >-
+        Generate resume optimization suggestions for a candidate's resume,
+        optionally targeted at a specific job posting. The system attempts
+        to use an AI/LLM engine first; if the LLM is unavailable or
+        rate-limited, it falls back to rule-based suggestions.
+
+
+        **Authentication**: Required (Bearer JWT)
+
+        **Authorization**: JOB_SEEKER role only
+
+        **Ownership**: The resume_id must belong to the authenticated user.
+
+
+        **Fallback behavior**: The response includes a `source` field indicating
+        whether suggestions were generated by `ai_generated` (LLM) or
+        `rule_based` (fallback). Clients MUST NOT assume LLM availability.
+
+
+        **Note**: The suggestion engine is implemented by Intern 4 (Domain-3).
+        This contract defines only the API interface.
+      security:
+        - jwtAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SuggestionsRequest"
+      responses:
+        "200":
+          description: Suggestions generated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuggestionsResponse"
+        "400":
+          description: Validation error — missing or invalid resume_id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid JWT access token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have the JOB_SEEKER role.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Resume not found or does not belong to authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Downstream Suggestions Service is unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayErrorResponse"
+
+  # ============================================================
+  # RECOMMENDATION SERVICE (UPGRADE)
+  # ============================================================
+
+  /recommendations/:
+    get:
+      tags:
+        - Recommendations
+      summary: Get Personalized Job Recommendations
+      operationId: getRecommendations
+      description: >-
+        Retrieve personalized job recommendations for the authenticated user.
+        In Milestone 3, the recommendation engine is upgraded from a pure
+        heuristic scorer (M2) to incorporate:
+
+        - Semantic skill matching (embedding-based similarity)
+
+        - ATS-aware scoring (resume content analysis)
+
+        - Swipe history behavioral signals
+
+        - Learned weights (replacing fixed M2 weights)
+
+
+        The response is backward-compatible with M2: all existing fields are
+        preserved. New fields (`match_type`, `ats_score`, `semantic_similarity`)
+        are added alongside the existing `match_score` and `reason_tags`.
+
+
+        **Authentication**: Required (Bearer JWT)
+
+        **Authorization**: JOB_SEEKER role only
+
+
+        **Note**: The recommendation algorithm is implemented by Intern 4
+        (Domain-3). This contract defines only the API interface.
+      security:
+        - jwtAuth: []
+      parameters:
+        - name: resume_id
+          in: query
+          required: false
+          description: >-
+            UUID of the resume to use for ATS-aware matching.
+            If omitted, the system uses the user's most recent resume
+            (current_version_id from the resume table).
+          schema:
+            type: string
+            format: uuid
+        - name: user_id
+          in: query
+          required: false
+          description: >-
+            Candidate User ID (preserved for backward compatibility with M2).
+            If omitted, the authenticated user's ID from JWT is used.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: "Maximum number of recommendations to return (default: 10, max: 50)"
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+        - name: include_ats
+          in: query
+          required: false
+          description: >-
+            If true, include ATS score breakdown for each recommended job.
+            Default: false (for performance — ATS scoring adds latency).
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Personalized job recommendations.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationResponse"
+        "401":
+          description: Missing or invalid JWT access token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have the JOB_SEEKER role.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Downstream Recommendation Service is unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayErrorResponse"
+
+# ============================================================
+# COMPONENT SCHEMAS
+# ============================================================
+
+components:
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >-
+        JWT access token issued by POST /api/v1/auth/login.
+        Include as: Authorization: Bearer <access_token>
+
+  schemas:
+    # ----------------------------------------------------------
+    # Resume Schemas
+    # ----------------------------------------------------------
+
+    ResumeUploadResponse:
+      type: object
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+          description: UUID of the resume record.
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        version_id:
+          type: string
+          format: uuid
+          description: UUID of the newly created resume version.
+          example: "f9e8d7c6-b5a4-3210-fedc-ba9876543210"
+        original_filename:
+          type: string
+          description: Original filename of the uploaded file.
+          example: "sai_resume_v2.pdf"
+        mime_type:
+          type: string
+          description: MIME type of the uploaded file.
+          example: "application/pdf"
+        file_size_bytes:
+          type: integer
+          format: int64
+          description: Size of the uploaded file in bytes.
+          example: 245760
+        uploaded_at:
+          type: string
+          format: date-time
+          description: Timestamp of the upload (ISO 8601).
+          example: "2026-09-22T10:30:00Z"
+        parsed_skills:
+          type: array
+          items:
+            type: string
+          description: >-
+            Skills extracted from the resume during upload processing.
+            May be empty if extraction is asynchronous and not yet complete.
+          example: ["Python", "Django", "REST API", "PostgreSQL"]
+        extraction_status:
+          type: string
+          enum: [completed, pending, failed]
+          description: >-
+            Status of skill extraction. "completed" if skills were extracted
+            synchronously. "pending" if extraction is queued asynchronously.
+            "failed" if extraction encountered an error.
+          example: "completed"
+      required:
+        - resume_id
+        - version_id
+        - original_filename
+        - uploaded_at
+        - extraction_status
+
+    ResumeListResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Total number of resumes owned by the user.
+          example: 2
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResumeSummary"
+      required:
+        - count
+        - results
+
+    ResumeSummary:
+      type: object
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+          description: UUID of the resume record.
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        current_version_id:
+          type: string
+          format: uuid
+          description: UUID of the current (active) version.
+          example: "f9e8d7c6-b5a4-3210-fedc-ba9876543210"
+        original_filename:
+          type: string
+          description: Filename of the current version.
+          example: "sai_resume_v2.pdf"
+        version_count:
+          type: integer
+          description: Total number of versions for this resume.
+          example: 3
+        created_at:
+          type: string
+          format: date-time
+          description: When the resume record was first created.
+          example: "2026-09-20T08:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: When the resume record was last updated.
+          example: "2026-09-22T10:30:00Z"
+        skills_summary:
+          type: array
+          items:
+            type: string
+          description: >-
+            Top extracted skills from the current version
+            (convenience field for list display).
+          example: ["Python", "Django", "PostgreSQL"]
+      required:
+        - resume_id
+        - current_version_id
+        - original_filename
+        - version_count
+        - created_at
+        - updated_at
+
+    ResumeVersionDetailResponse:
+      type: object
+      properties:
+        version_id:
+          type: string
+          format: uuid
+          description: UUID of this version.
+          example: "f9e8d7c6-b5a4-3210-fedc-ba9876543210"
+        resume_id:
+          type: string
+          format: uuid
+          description: UUID of the parent resume record.
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        original_filename:
+          type: string
+          description: Original filename of the uploaded file.
+          example: "sai_resume_v2.pdf"
+        mime_type:
+          type: string
+          description: MIME type of the file.
+          example: "application/pdf"
+        file_size_bytes:
+          type: integer
+          format: int64
+          description: File size in bytes.
+          example: 245760
+        sha256_hash:
+          type: string
+          description: SHA-256 hash of the file for integrity/deduplication.
+          example: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        uploaded_at:
+          type: string
+          format: date-time
+          description: Timestamp of the upload.
+          example: "2026-09-22T10:30:00Z"
+        is_current:
+          type: boolean
+          description: Whether this version is the current (active) version.
+          example: true
+        extracted_skills:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExtractedSkill"
+          description: Skills extracted from this version.
+        metadata:
+          type: object
+          additionalProperties: true
+          description: >-
+            Extensible metadata associated with this version (from JSONB
+            column in Intern 3's schema). May include page count, language,
+            or other extraction metadata.
+          example:
+            page_count: 2
+            language: "en"
+      required:
+        - version_id
+        - resume_id
+        - original_filename
+        - uploaded_at
+        - is_current
+        - extracted_skills
+
+    ExtractedSkill:
+      type: object
+      description: >-
+        A skill extracted from a resume version. Maps to the `resume_skill`
+        table in Intern 3's schema.
+      properties:
+        skill_name:
+          type: string
+          description: Raw skill name as extracted.
+          example: "Python"
+        normalized_name:
+          type: string
+          nullable: true
+          description: >-
+            Normalized/canonical skill name (e.g. "python" lowercase,
+            or mapped to a taxonomy). Null if normalization has not been applied.
+          example: "python"
+        source:
+          type: string
+          nullable: true
+          description: >-
+            How this skill was extracted (e.g. "pdf_parser", "nlp_ner",
+            "manual"). Maps to `resume_skill.source`.
+          example: "pdf_parser"
+        confidence:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 100
+          description: >-
+            Extraction confidence score (0–100). Null for rule-based extraction
+            where confidence is not applicable.
+          example: 95.5
+      required:
+        - skill_name
+
+    # ----------------------------------------------------------
+    # ATS Scoring Schemas
+    # ----------------------------------------------------------
+
+    ATSScoreRequest:
+      type: object
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+          description: >-
+            UUID of the resume to score. Must belong to the authenticated user.
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        job_id:
+          type: string
+          description: >-
+            Identifier of the target job posting to score against.
+            Accepts UUID (M3 schema) or legacy string ID (M2 compatibility).
+          example: "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+      required:
+        - resume_id
+        - job_id
+
+    ATSScoreResponse:
+      type: object
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+          description: UUID of the scored resume.
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        job_id:
+          type: string
+          description: ID of the target job.
+          example: "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+        match_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: >-
+            Overall ATS match score (0–100). Higher is better.
+          example: 78.5
+        matched_skills:
+          type: array
+          items:
+            type: string
+          description: Skills from the resume that match the job requirements.
+          example: ["Python", "Django", "REST API"]
+        missing_skills:
+          type: array
+          items:
+            type: string
+          description: >-
+            Job-required skills not found in the resume.
+          example: ["Kubernetes", "AWS"]
+        suggestions:
+          type: array
+          items:
+            type: string
+          description: >-
+            Brief improvement suggestions based on the ATS analysis
+            (e.g. "Add Kubernetes certification to your resume").
+          example:
+            - "Consider adding experience with Kubernetes to your resume."
+            - "Mention any AWS cloud project experience."
+        generated_by:
+          type: string
+          enum: [heuristic-v0, heuristic-v1, semantic-v1]
+          description: >-
+            Identifies the scoring engine version used. Allows clients
+            to distinguish between heuristic (M2-compatible) and
+            semantic (M3 upgrade) scoring.
+          example: "semantic-v1"
+        scored_at:
+          type: string
+          format: date-time
+          description: Timestamp when the score was computed.
+          example: "2026-09-22T10:35:00Z"
+      required:
+        - resume_id
+        - job_id
+        - match_score
+        - matched_skills
+        - missing_skills
+        - generated_by
+
+    # ----------------------------------------------------------
+    # AI Suggestions Schemas
+    # ----------------------------------------------------------
+
+    SuggestionsRequest:
+      type: object
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+          description: >-
+            UUID of the resume to generate suggestions for.
+            Must belong to the authenticated user.
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        job_id:
+          type: string
+          nullable: true
+          description: >-
+            Optional. Target job ID to generate job-specific suggestions.
+            If omitted, general resume improvement suggestions are returned.
+          example: "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+      required:
+        - resume_id
+
+    SuggestionsResponse:
+      type: object
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+          description: UUID of the analyzed resume.
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        job_id:
+          type: string
+          nullable: true
+          description: Target job ID if job-specific suggestions were requested.
+          example: "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+        source:
+          type: string
+          enum: [ai_generated, rule_based]
+          description: >-
+            Indicates whether suggestions were generated by an AI/LLM engine
+            ("ai_generated") or by the rule-based fallback ("rule_based").
+            Clients MUST handle both values — LLM availability is NOT guaranteed.
+          example: "rule_based"
+        suggestions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Suggestion"
+          description: List of optimization suggestions.
+        generated_at:
+          type: string
+          format: date-time
+          description: Timestamp when suggestions were generated.
+          example: "2026-09-22T10:40:00Z"
+      required:
+        - resume_id
+        - source
+        - suggestions
+        - generated_at
+
+    Suggestion:
+      type: object
+      properties:
+        category:
+          type: string
+          enum: [skills, experience, formatting, keywords, education, summary, general]
+          description: Category of the suggestion.
+          example: "skills"
+        priority:
+          type: string
+          enum: [high, medium, low]
+          description: >-
+            Priority/impact level of the suggestion.
+          example: "high"
+        title:
+          type: string
+          description: Short title summarizing the suggestion.
+          example: "Add cloud computing skills"
+        detail:
+          type: string
+          description: >-
+            Detailed explanation or actionable advice.
+          example: >-
+            Your resume does not mention any cloud platforms. Consider
+            adding AWS, Azure, or GCP experience if applicable, as 78%
+            of matched jobs require cloud skills.
+        related_skills:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: >-
+            Skills related to this suggestion, if applicable.
+          example: ["AWS", "Azure", "GCP"]
+      required:
+        - category
+        - priority
+        - title
+        - detail
+
+    # ----------------------------------------------------------
+    # Recommendation Schemas (Upgrade from M2)
+    # ----------------------------------------------------------
+
+    RecommendationResponse:
+      type: object
+      properties:
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecommendedJob"
+          description: >-
+            Ranked list of job recommendations, ordered by match_score
+            descending (best match first).
+        generated_by:
+          type: string
+          enum: [heuristic-v0, heuristic-v1, semantic-v1]
+          description: >-
+            Identifies the recommendation engine version.
+            "heuristic-v0" = M2 baseline.
+            "heuristic-v1" = M3 improved heuristic.
+            "semantic-v1" = M3 semantic/embedding-based.
+          example: "semantic-v1"
+        total:
+          type: integer
+          description: Total number of recommendations available.
+          example: 10
+      required:
+        - recommendations
+        - generated_by
+
+    RecommendedJob:
+      type: object
+      properties:
+        job_id:
+          type: string
+          description: >-
+            Job identifier. UUID in M3 schema; may be string for
+            M2-compatibility with legacy integer IDs.
+          example: "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+        title:
+          type: string
+          description: Job title.
+          example: "Senior Python Developer"
+        company:
+          type: string
+          description: Company name.
+          example: "TechCorp India"
+        location:
+          type: string
+          description: Job location.
+          example: "Hyderabad"
+        match_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: >-
+            Overall recommendation match score (0–100).
+            Preserves the M2 field name for backward compatibility.
+          example: 85.2
+        match_type:
+          type: string
+          enum: [semantic, heuristic, hybrid]
+          description: >-
+            NEW in M3. Indicates the type of matching used for this
+            recommendation. "semantic" = embedding-based. "heuristic" =
+            rule-based (M2-style). "hybrid" = combination of both.
+          example: "semantic"
+        ats_score:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 100
+          description: >-
+            NEW in M3. ATS match score for this job against the user's
+            current resume. Null if `include_ats=false` or resume not available.
+          example: 72.0
+        semantic_similarity:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 1
+          description: >-
+            NEW in M3. Cosine similarity between resume embedding and job
+            embedding (0.0–1.0). Null if semantic matching was not performed.
+          example: 0.87
+        match_percentage:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: >-
+            PRESERVED from M2. Alias for match_score, kept for backward
+            compatibility with existing frontend consumers.
+          example: 85.2
+        reason_tags:
+          type: array
+          items:
+            type: string
+          description: >-
+            Human-readable explanation tags for why this job was recommended.
+            Preserved from M2 matching engine.
+          example:
+            - "Matches your skills"
+            - "Good experience fit"
+            - "Recently posted"
+        generated_by:
+          type: string
+          enum: [heuristic-v0, heuristic-v1, semantic-v1]
+          description: >-
+            Engine version that scored this specific recommendation.
+          example: "semantic-v1"
+      required:
+        - job_id
+        - title
+        - match_score
+        - generated_by
+
+    # ----------------------------------------------------------
+    # Common Error Schemas
+    # ----------------------------------------------------------
+
+    ErrorResponse:
+      type: object
+      description: >-
+        Standard error response format used across all SwipeX API endpoints.
+        Consistent with Milestone 1 and 2 conventions.
+      properties:
+        error:
+          type: string
+          description: Short error category.
+          example: "Validation Error"
+        detail:
+          description: >-
+            Detailed error message. May be a string or an object containing
+            per-field validation errors.
+          oneOf:
+            - type: string
+            - type: object
+          example: "Resume not found."
+        status_code:
+          type: integer
+          description: HTTP status code (mirrors the response status).
+          example: 404
+
+    GatewayErrorResponse:
+      type: object
+      description: >-
+        Error response returned when the API Gateway cannot reach a
+        downstream microservice. Consistent with Milestone 2 Gateway
+        error format.
+      properties:
+        error:
+          type: string
+          description: Service-specific error label.
+          example: "Resume Service Unavailable"
+        service:
+          type: string
+          description: Name of the unavailable downstream service.
+          example: "Resume Service"
+        detail:
+          type: string
+          description: Human-readable error description.
+          example: "Could not connect to downstream Resume Service at http://127.0.0.1:8002."
+        status_code:
+          type: integer
+          description: HTTP status code.
+          example: 503

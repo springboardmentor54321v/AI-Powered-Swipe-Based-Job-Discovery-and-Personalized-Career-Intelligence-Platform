@@ -404,17 +404,6 @@ class JobDetailView(APIView):
             _normalize_jobs_payload(resp.data)
         return resp
 
-    @extend_schema(
-        operation_id="partial_update_job_posting",
-        request=JobUpdateSerializer,
-        summary="Partially Update Job Posting (Recruiter)",
-        description="Protected endpoint for RECRUITER and ADMIN roles. Partially updates fields on an existing job posting.",
-        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
-        tags=["Jobs"],
-    )
-    def patch(self, request, job_id):
-        return self.put(request, job_id)
-
 
     @extend_schema(
         operation_id="delete_job_posting",

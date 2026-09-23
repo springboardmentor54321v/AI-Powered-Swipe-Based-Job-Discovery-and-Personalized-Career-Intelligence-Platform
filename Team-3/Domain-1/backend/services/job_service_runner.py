@@ -617,6 +617,8 @@ class JobServiceHandler(BaseHTTPRequestHandler):
 
         self._send_json({"error": "Route not found in Job Service"}, status_code=404)
 
+    do_PATCH = do_PUT
+
     def do_DELETE(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
