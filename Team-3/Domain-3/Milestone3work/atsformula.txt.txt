@@ -1,0 +1,1 @@
+final_ats_score = (0.40 × keyword_match_score) + (0.60 × semantic_similarity_score)
