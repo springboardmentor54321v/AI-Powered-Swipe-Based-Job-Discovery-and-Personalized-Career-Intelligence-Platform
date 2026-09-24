@@ -38,26 +38,7 @@ class UploadResumeView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsJobSeeker]
 
-    @extend_schema(
-        request={
-            "multipart/form-data": {
-                "type": "object",
-                "properties": {
-                    "file": {
-                        "type": "string",
-                        "format": "binary",
-                        "description": "Candidate PDF Resume file to upload"
-                    }
-                },
-                "required": ["file"]
-            }
-        },
-        operation_id="upload_candidate_resume",
-        summary="Upload Candidate Resume (PDF)",
-        description="Uploads candidate PDF resume. Protected endpoint for JOB_SEEKER. Forwards multipart/form-data to Intern 3 Resume Service.",
-        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
-        tags=["Resume"],
-    )
+    @extend_schema(exclude=True)
     def post(self, request):
         return forward_to_downstream(
             request=request,
@@ -77,30 +58,7 @@ class ATSScoreView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsJobSeekerOrRecruiter]
 
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="resume_id",
-                type=str,
-                location=OpenApiParameter.PATH,
-                required=True,
-                description="Uploaded Resume UUID"
-            ),
-            OpenApiParameter(
-                name="job_id",
-                type=str,
-                location=OpenApiParameter.QUERY,
-                required=True,
-                default="290925001457",
-                description="Target Job ID from dataset to compare skills against"
-            ),
-        ],
-        operation_id="get_resume_ats_score",
-        summary="Get Resume ATS Match Score",
-        description="Retrieves ATS match score and missing keywords for given resume_id and job_id. Accessible by JOB_SEEKER and RECRUITER.",
-        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
-        tags=["Resume"],
-    )
+    @extend_schema(exclude=True)
     def get(self, request, resume_id):
         return forward_to_downstream(
             request=request,
@@ -120,29 +78,7 @@ class RecommendationsView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsJobSeeker]
 
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="resume_id",
-                type=str,
-                location=OpenApiParameter.QUERY,
-                required=False,
-                description="Uploaded Resume ID to generate matching job recommendations for"
-            ),
-            OpenApiParameter(
-                name="user_id",
-                type=str,
-                location=OpenApiParameter.QUERY,
-                required=False,
-                description="Candidate User ID"
-            ),
-        ],
-        operation_id="get_career_recommendations",
-        summary="Get Career Recommendations",
-        description="Returns recommended jobs matching candidate skills from Intern 3 Recommendation Service. Protected endpoint for JOB_SEEKER.",
-        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT},
-        tags=["Resume"],
-    )
+    @extend_schema(exclude=True)
     def get(self, request):
         return forward_to_downstream(
             request=request,

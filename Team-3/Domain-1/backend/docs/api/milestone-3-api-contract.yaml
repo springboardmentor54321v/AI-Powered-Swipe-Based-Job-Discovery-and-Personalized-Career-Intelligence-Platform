@@ -205,6 +205,71 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /resumes/{resume_id}/parse:
+    post:
+      tags:
+        - Resume
+      summary: Parse Resume Document & Extract Skills (Day 3)
+      operationId: parseResume
+      description: >-
+        Trigger text extraction and NLP skill extraction on an existing stored resume.
+        Invokes Intern 4's extraction modules and persists results using Intern 3's schema.
+        Idempotent: can be re-run safely to refresh extracted skills.
+
+        **Authentication**: Required (Bearer JWT)
+
+        **Authorization**: JOB_SEEKER role only
+
+        **Ownership**: The candidate can only parse their own resume document.
+      security:
+        - jwtAuth: []
+      parameters:
+        - name: resume_id
+          in: path
+          required: true
+          description: UUID of the resume record or version to parse.
+          schema:
+            type: string
+            format: uuid
+            example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      responses:
+        "200":
+          description: Resume parsed and skills extracted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResumeParseResponse"
+        "400":
+          description: Validation error or invalid file content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid JWT access token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: User does not have JOB_SEEKER role or does not own this resume.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Resume or stored file not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Downstream extraction module unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayErrorResponse"
+
   /resumes/{resume_id}/versions/{version_id}:
     get:
       tags:
@@ -605,6 +670,59 @@ components:
         - original_filename
         - uploaded_at
         - extraction_status
+
+    ResumeParseResponse:
+      type: object
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+          description: UUID of the resume record.
+        version_id:
+          type: string
+          format: uuid
+          description: UUID of the parsed resume version.
+        version_number:
+          type: integer
+          description: Version number parsed.
+        filename:
+          type: string
+          description: Original filename of the resume document.
+        parsed_status:
+          type: string
+          enum: [PARSED, FAILED, PENDING]
+          description: Status of the parsing operation.
+        parsed_text:
+          type: string
+          description: Cleaned plain text extracted from the document.
+        extracted_skills:
+          type: array
+          items:
+            type: string
+          description: List of skills extracted via NLP PhraseMatcher.
+        parsed_skills:
+          type: array
+          items:
+            type: string
+          description: Mirror of extracted_skills for frontend and test compatibility.
+        skills:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExtractedSkill"
+        parsed_at:
+          type: string
+          format: date-time
+          description: Timestamp when parsing was completed.
+        detail:
+          type: string
+          description: Human-readable status message.
+      required:
+        - resume_id
+        - version_id
+        - parsed_status
+        - parsed_text
+        - extracted_skills
+        - parsed_at
 
     ResumeListResponse:
       type: object

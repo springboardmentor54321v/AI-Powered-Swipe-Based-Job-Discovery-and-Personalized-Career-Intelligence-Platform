@@ -12,23 +12,27 @@ Authentication & RBAC:
   - Resume data is ownership-restricted: a user can only access their own.
 """
 
+import uuid
 import logging
+from django.utils import timezone
 from django.db import transaction
 from django.db.models import Max
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-from drf_spectacular.utils import extend_schema, OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiParameter
 
 from apps.auth_service.authentication import JWTAuthentication
 from apps.auth_service.permissions import IsJobSeeker
-from .models import Resume, ResumeVersion
+from .models import Resume, ResumeVersion, Skill, ResumeSkill
 from .serializers import (
     ResumeUploadResponseSerializer,
     ResumeSummarySerializer,
+    ResumeParseResponseSerializer,
 )
-from .storage import validate_resume_file, save_resume_file
+from .storage import validate_resume_file, save_resume_file, get_file_path
+from .extraction_service import extract_resume_content
 
 logger = logging.getLogger("resume_service.views")
 
@@ -237,3 +241,193 @@ class M3ResumeListView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class M3ResumeParseView(APIView):
+    """
+    POST /api/v1/resumes/{id}/parse
+
+    Triggers text extraction and NLP skill extraction on an existing stored resume.
+    
+    Workflow:
+      1. Authenticates request and validates JOB_SEEKER role.
+      2. Validates resume existence and verifies ownership (Job Seeker can only parse their own).
+      3. Locates the stored resume file on disk via Domain-1 storage.
+      4. Invokes Intern 4's (Domain-3) completed extraction modules:
+         - extract_pdf_text for PDF extraction (or python-docx for DOCX)
+         - extract_skills (spaCy PhraseMatcher) for skill extraction
+      5. Persists parsed_text, parsed_status, and extracted skills to PostgreSQL
+         using Intern 3's schema (resumes, skills, resume_skills).
+      6. Idempotent: Can be called multiple times without duplicate skills.
+      7. Returns structured response with parsed text and extracted skills.
+    """
+    serializer_class = ResumeParseResponseSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsJobSeeker]
+
+    @extend_schema(
+        operation_id="m3_parse_resume",
+        summary="Parse Resume Document & Extract Skills (M3)",
+        description=(
+            "Extracts raw text and NLP-detected skills from a previously uploaded resume file. "
+            "Requires valid JWT and JOB_SEEKER role. "
+            "Enforces strict ownership: a candidate can only parse their own resume."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="id",
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.PATH,
+                description="UUID of the Resume or ResumeVersion to parse",
+            ),
+        ],
+        responses={
+            200: ResumeParseResponseSerializer,
+            400: OpenApiTypes.OBJECT,
+            401: OpenApiTypes.OBJECT,
+            403: OpenApiTypes.OBJECT,
+            404: OpenApiTypes.OBJECT,
+            503: OpenApiTypes.OBJECT,
+        },
+        tags=["Resume (M3)"],
+    )
+    def post(self, request, resume_id=None, **kwargs):
+        # Support both url param names ("resume_id" and "id")
+        target_id_str = str(resume_id or kwargs.get("id") or "").strip()
+        user = request.user
+
+        # 1. Validate UUID format
+        try:
+            target_uuid = uuid.UUID(target_id_str)
+        except (ValueError, AttributeError):
+            return Response(
+                {"error": "Validation Error", "detail": "Invalid resume ID format. Expected UUID."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # 2. Look up Resume or ResumeVersion
+        resume = Resume.objects.filter(id=target_uuid).first()
+        version = None
+
+        if resume:
+            # Found by Resume.id -> find active or latest version
+            version = (
+                resume.versions.filter(is_active=True).first()
+                or resume.versions.order_by("-version_number").first()
+            )
+        else:
+            # Check if UUID points directly to a ResumeVersion
+            version = (
+                ResumeVersion.objects.filter(id=target_uuid)
+                .select_related("resume")
+                .first()
+            )
+            if version:
+                resume = version.resume
+
+        if not resume or not version:
+            return Response(
+                {"error": "Not Found", "detail": "Resume or version not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # 3. Enforce Strict Ownership
+        if resume.owner_id != user.id:
+            logger.warning(
+                f"Unauthorized parse attempt: user={user.id} tried to parse resume={resume.id} owned by user={resume.owner_id}"
+            )
+            return Response(
+                {"error": "Forbidden", "detail": "You do not have permission to parse this resume."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # 4. Locate stored file on disk
+        file_path = get_file_path(version.storage_key)
+        if not file_path.is_file():
+            logger.error(f"Stored resume file missing on disk: {file_path}")
+            return Response(
+                {
+                    "error": "Not Found",
+                    "detail": "Stored resume document could not be located on disk storage.",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # 5. Invoke Intern 4 extraction pipeline
+        try:
+            parsed_text, extracted_skills = extract_resume_content(file_path)
+        except ValueError as e:
+            version.parsed_status = "FAILED"
+            version.save(update_fields=["parsed_status"])
+            return Response(
+                {"error": "Extraction Error", "detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except RuntimeError as e:
+            version.parsed_status = "FAILED"
+            version.save(update_fields=["parsed_status"])
+            return Response(
+                {"error": "Downstream Unavailable", "detail": str(e)},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except Exception as e:
+            logger.exception(f"Unexpected extraction failure for {file_path}: {e}")
+            version.parsed_status = "FAILED"
+            version.save(update_fields=["parsed_status"])
+            return Response(
+                {"error": "Internal Error", "detail": "Failed to parse resume content."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # 6. Persist results using Intern 3's schema
+        with transaction.atomic():
+            version.parsed_text = parsed_text
+            version.parsed_status = "PARSED"
+            version.parsed_at = timezone.now()
+            version.save(update_fields=["parsed_text", "parsed_status", "parsed_at"])
+
+            # Idempotency: clear existing skills for this version before re-inserting
+            ResumeSkill.objects.filter(resume_version=version).delete()
+
+            created_skills_data = []
+            for skill_name in extracted_skills:
+                norm = skill_name.strip().lower()
+                if not norm:
+                    continue
+                skill_obj, _ = Skill.objects.get_or_create(
+                    normalized_name=norm,
+                    defaults={"name": skill_name.strip()}
+                )
+                rs, _ = ResumeSkill.objects.get_or_create(
+                    resume_version=version,
+                    skill=skill_obj,
+                    defaults={"source": "parsed", "confidence": 1.0}
+                )
+                created_skills_data.append({
+                    "skill_name": skill_obj.name,
+                    "normalized_name": skill_obj.normalized_name,
+                    "source": rs.source,
+                    "confidence": rs.confidence,
+                })
+
+        logger.info(
+            f"Successfully parsed resume={resume.id} v={version.version_number}: "
+            f"{len(extracted_skills)} skills extracted and persisted"
+        )
+
+        response_data = {
+            "resume_id": str(resume.id),
+            "version_id": str(version.id),
+            "version_number": version.version_number,
+            "filename": version.original_filename,
+            "parsed_status": version.parsed_status,
+            "parsed_text": parsed_text,
+            "extracted_skills": extracted_skills,
+            "parsed_skills": extracted_skills,
+            "skills": created_skills_data,
+            "parsed_at": version.parsed_at.isoformat(),
+            "detail": "Resume parsed and skills extracted successfully.",
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
