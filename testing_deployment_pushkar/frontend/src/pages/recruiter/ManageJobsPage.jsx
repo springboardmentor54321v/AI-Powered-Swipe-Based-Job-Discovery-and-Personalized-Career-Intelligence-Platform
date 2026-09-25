@@ -1,0 +1,669 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  Search,
+  PlusCircle,
+  Briefcase,
+  Users,
+  Edit2,
+  Trash2,
+  Eye,
+  Power,
+  XCircle,
+  MapPin,
+  X,
+  AlertCircle,
+} from "lucide-react";
+import { jobService } from "../../services/jobService";
+
+export function ManageJobsPage() {
+  // =========================
+  // STATE
+  // =========================
+
+  const [recruiterJobs, setRecruiterJobs] = useState([]);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [viewDetailsJob, setViewDetailsJob] = useState(null);
+
+  // =========================
+  // LOAD RECRUITER JOBS
+  // =========================
+
+  useEffect(() => {
+    loadRecruiterJobs();
+  }, []);
+
+  const loadRecruiterJobs = async () => {
+    setIsLoading(true);
+    setLoadError("");
+
+    try {
+      const response = await jobService.getRecruiterJobs();
+
+      const jobs = (response.jobs || []).map((job) => ({
+        ...job,
+
+        // Convert backend skills string into frontend array
+        requiredSkills:
+          typeof job.skills === "string"
+            ? job.skills
+                .split(",")
+                .map((skill) => skill.trim())
+                .filter(Boolean)
+            : [],
+
+        // Backend → frontend display names
+        employmentType:
+          job.employment_type || "Not specified",
+
+        experienceLevel:
+          job.experience_level || "Not specified",
+
+        salaryRange:
+          job.salary || "Not specified",
+
+        workMode:
+          job.work_mode || "Not specified",
+
+        postedDate:
+          job.created_at
+            ? new Date(job.created_at).toLocaleDateString()
+            : "Recently",
+
+        applicantsCount: 0,
+      }));
+
+      setRecruiterJobs(jobs);
+    } catch (error) {
+      console.error(
+        "Failed to load recruiter jobs:",
+        error
+      );
+
+      setLoadError(
+        error.response?.data?.message ||
+          "Failed to load your job postings."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // =========================
+  // SEARCH + STATUS FILTER
+  // =========================
+
+  const filteredJobs = useMemo(() => {
+    const search = searchQuery.trim().toLowerCase();
+
+    return recruiterJobs.filter((job) => {
+      const matchesSearch =
+        !search ||
+        job.title?.toLowerCase().includes(search) ||
+        job.company?.toLowerCase().includes(search) ||
+        job.location?.toLowerCase().includes(search) ||
+        job.requiredSkills?.some((skill) =>
+          skill.toLowerCase().includes(search)
+        );
+
+      const matchesStatus =
+        statusFilter === "All" ||
+        job.status?.toLowerCase() ===
+          statusFilter.toLowerCase();
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [recruiterJobs, searchQuery, statusFilter]);
+
+  // =========================
+  // DELETE JOB
+  // =========================
+
+  const handleDeleteJob = async () => {
+    if (!deleteConfirmId) return;
+
+    try {
+      await jobService.deleteJob(deleteConfirmId);
+
+      // Remove deleted job from UI immediately
+      setRecruiterJobs((prev) =>
+        prev.filter(
+          (job) => job.id !== deleteConfirmId
+        )
+      );
+
+      setDeleteConfirmId(null);
+
+      // Close details modal if it was the deleted job
+      if (
+        viewDetailsJob?.id === deleteConfirmId
+      ) {
+        setViewDetailsJob(null);
+      }
+    } catch (error) {
+      console.error(
+        "Delete job failed:",
+        error
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to delete job."
+      );
+    }
+  };
+
+  // =========================
+  // RENDER
+  // =========================
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-200">
+
+      {/* =========================
+          HEADER
+      ========================= */}
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Manage Job Openings
+          </h1>
+
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Monitor, view, and manage your company's
+            job requisitions.
+          </p>
+        </div>
+
+        <Link
+          to="/recruiter/post-job"
+          id="btn-manage-post-new"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95 shrink-0"
+        >
+          <PlusCircle className="w-4 h-4" />
+          <span>Post New Job</span>
+        </Link>
+      </div>
+
+      {/* =========================
+          SEARCH + FILTER
+      ========================= */}
+
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+
+        {/* Search */}
+        <div className="relative w-full sm:w-80">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+
+          <input
+            type="text"
+            placeholder="Search roles, companies, locations, skills..."
+            value={searchQuery}
+            onChange={(e) =>
+              setSearchQuery(e.target.value)
+            }
+            className="w-full pl-9 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Status Filters */}
+        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+          {["All", "Active", "Inactive"].map(
+            (status) => (
+              <button
+                key={status}
+                type="button"
+                onClick={() =>
+                  setStatusFilter(status)
+                }
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap ${
+                  statusFilter === status
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {status}
+              </button>
+            )
+          )}
+        </div>
+      </div>
+
+      {/* =========================
+          CONTENT
+      ========================= */}
+
+      {isLoading ? (
+        /* Loading */
+        <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center">
+          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+
+          <h3 className="text-sm font-bold text-slate-800">
+            Loading your jobs...
+          </h3>
+
+          <p className="text-xs text-slate-500 mt-1">
+            Fetching your job postings from SwipeX.
+          </p>
+        </div>
+      ) : loadError ? (
+        /* Error */
+        <div className="bg-white rounded-3xl border border-rose-200 p-12 text-center">
+          <XCircle className="w-12 h-12 text-rose-300 mx-auto mb-3" />
+
+          <h3 className="text-base font-bold text-slate-800">
+            Unable to load jobs
+          </h3>
+
+          <p className="text-xs text-rose-600 mt-1">
+            {loadError}
+          </p>
+
+          <button
+            type="button"
+            onClick={loadRecruiterJobs}
+            className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold"
+          >
+            Try Again
+          </button>
+        </div>
+      ) : filteredJobs.length === 0 ? (
+        /* Empty */
+        <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center">
+          <Briefcase className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+
+          <h3 className="text-base font-bold text-slate-800">
+            {recruiterJobs.length === 0
+              ? "No jobs posted yet"
+              : "No jobs matched your criteria"}
+          </h3>
+
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            {recruiterJobs.length === 0
+              ? "Create your first job opening to start attracting candidates."
+              : "Try adjusting your search query or status filter."}
+          </p>
+
+          {recruiterJobs.length === 0 && (
+            <Link
+              to="/recruiter/post-job"
+              className="inline-flex items-center gap-2 mt-5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold"
+            >
+              <PlusCircle className="w-4 h-4" />
+              Post Your First Job
+            </Link>
+          )}
+        </div>
+      ) : (
+        /* Jobs */
+        <div className="space-y-3">
+
+          {filteredJobs.map((job) => (
+            <div
+              key={job.id}
+              className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:border-blue-200 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+            >
+
+              {/* =========================
+                  JOB INFO
+              ========================= */}
+
+              <div className="space-y-2 flex-1 min-w-0">
+
+                <div className="flex flex-wrap items-center gap-2.5">
+
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                    {job.title}
+                  </h3>
+
+                  <span
+                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      job.status === "Active"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-slate-100 text-slate-600 border border-slate-200"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        job.status === "Active"
+                          ? "bg-emerald-500"
+                          : "bg-slate-400"
+                      }`}
+                    />
+
+                    <span>
+                      {job.status || "Unknown"}
+                    </span>
+                  </span>
+                </div>
+
+                {/* Company */}
+                <p className="text-xs font-semibold text-slate-700">
+                  {job.company}
+                </p>
+
+                {/* Meta */}
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                    {job.location}
+                  </span>
+
+                  <span>•</span>
+
+                  <span>
+                    {job.employmentType}
+                  </span>
+
+                  <span>•</span>
+
+                  <span className="font-semibold text-slate-800">
+                    {job.salaryRange}
+                  </span>
+
+                  <span>•</span>
+
+                  <span>
+                    Posted {job.postedDate}
+                  </span>
+                </div>
+
+                {/* Skills */}
+                {job.requiredSkills?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {job.requiredSkills.map(
+                      (skill) => (
+                        <span
+                          key={skill}
+                          className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-medium"
+                        >
+                          {skill}
+                        </span>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* =========================
+                  ACTIONS
+              ========================= */}
+
+              <div className="flex flex-wrap items-center gap-2 lg:border-l lg:border-slate-100 lg:pl-6 shrink-0">
+
+                {/* Applicants */}
+                <Link
+                  to="/recruiter/applicants"
+                  className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold transition-colors"
+                >
+                  <Users className="w-4 h-4" />
+
+                  <span>
+                    {job.applicantsCount} Applicants
+                  </span>
+                </Link>
+
+                {/* View */}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setViewDetailsJob(job)
+                  }
+                  className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
+                  title="View Details"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+
+                {/* Edit - temporarily disabled */}
+                <button
+                  type="button"
+                  disabled
+                  className="p-2 text-slate-300 bg-slate-50 rounded-xl cursor-not-allowed"
+                  title="Edit will be connected to backend next"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+
+                {/* Status - temporarily disabled */}
+                <button
+                  type="button"
+                  disabled
+                  className="p-2 text-slate-300 bg-slate-50 rounded-xl cursor-not-allowed"
+                  title="Status management will be connected to backend next"
+                >
+                  <Power className="w-4 h-4" />
+                </button>
+
+                {/* Delete */}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setDeleteConfirmId(job.id)
+                  }
+                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                  title="Delete Job"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* =========================
+          DETAILS MODAL
+      ========================= */}
+
+      {viewDetailsJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in">
+
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-200 animate-in zoom-in-95">
+
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  {viewDetailsJob.title}
+                </h3>
+
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {viewDetailsJob.company}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setViewDetailsJob(null)
+                }
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+            </div>
+
+            <div className="space-y-4 text-xs">
+
+              {/* Location */}
+              <div>
+                <p className="font-bold text-slate-500 uppercase text-[10px]">
+                  Location
+                </p>
+
+                <p className="text-slate-800 font-semibold mt-0.5">
+                  {viewDetailsJob.location}
+                </p>
+              </div>
+
+              {/* Employment */}
+              <div>
+                <p className="font-bold text-slate-500 uppercase text-[10px]">
+                  Employment
+                </p>
+
+                <p className="text-slate-800 font-semibold mt-0.5">
+                  {viewDetailsJob.employmentType}
+                  {" • "}
+                  {viewDetailsJob.experienceLevel}
+                  {" • "}
+                  {viewDetailsJob.workMode}
+                </p>
+              </div>
+
+              {/* Salary */}
+              <div>
+                <p className="font-bold text-slate-500 uppercase text-[10px]">
+                  Compensation
+                </p>
+
+                <p className="text-slate-800 font-semibold mt-0.5">
+                  {viewDetailsJob.salaryRange}
+                </p>
+              </div>
+
+              {/* Deadline */}
+              {viewDetailsJob.deadline && (
+                <div>
+                  <p className="font-bold text-slate-500 uppercase text-[10px]">
+                    Application Deadline
+                  </p>
+
+                  <p className="text-slate-800 font-semibold mt-0.5">
+                    {new Date(
+                      viewDetailsJob.deadline
+                    ).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+
+              {/* Description */}
+              <div>
+                <p className="font-bold text-slate-500 uppercase text-[10px]">
+                  Role Overview
+                </p>
+
+                <p className="text-slate-700 leading-relaxed mt-0.5 whitespace-pre-line">
+                  {viewDetailsJob.description ||
+                    "No description provided."}
+                </p>
+              </div>
+
+              {/* Qualifications */}
+              <div>
+                <p className="font-bold text-slate-500 uppercase text-[10px]">
+                  Qualifications
+                </p>
+
+                <p className="text-slate-700 leading-relaxed mt-0.5 whitespace-pre-line">
+                  {viewDetailsJob.qualifications ||
+                    "No qualifications specified."}
+                </p>
+              </div>
+
+              {/* Skills */}
+              <div>
+                <p className="font-bold text-slate-500 uppercase text-[10px] mb-1">
+                  Required Skills
+                </p>
+
+                <div className="flex flex-wrap gap-1">
+                  {viewDetailsJob.requiredSkills?.map(
+                    (skill) => (
+                      <span
+                        key={skill}
+                        className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold"
+                      >
+                        {skill}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex justify-end">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setViewDetailsJob(null)
+                }
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+              >
+                Close
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+          DELETE CONFIRMATION
+      ========================= */}
+
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in">
+
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-200 animate-in zoom-in-95 text-center">
+
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+
+            <div>
+              <h3 className="text-base font-bold text-slate-900">
+                Delete Job Requisition?
+              </h3>
+
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Are you sure you want to delete this job
+                posting? Candidates will no longer be able
+                to discover or apply to this role.
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setDeleteConfirmId(null)
+                }
+                className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+              >
+                Keep Job
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteJob}
+                className="flex-1 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors"
+              >
+                Delete
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+export default ManageJobsPage;
