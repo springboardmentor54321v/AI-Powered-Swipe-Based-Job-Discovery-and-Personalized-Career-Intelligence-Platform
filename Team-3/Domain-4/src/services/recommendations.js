@@ -1,108 +1,117 @@
 /**
- * Career Recommendation Service Layer (Milestone 2 - Day 5)
+ * SwipeX Career Recommendation Service Layer — Milestone 3 (Upgraded Recommendations)
  * 
  * Contracts:
- * - GET /api/v1/recommendations?user_id={id} OR ?resume_id={id}
- * Response: [ { job_id, title, match_percentage, generated_by: "heuristic-v0" } ]
- * or { recommendations: [ ... ], generated_by: "heuristic-v0" }
+ * - GET /api/v1/recommendations/?resume_id={uuid}&limit=10&include_ats=true
+ * 
+ * New Milestone 3 Fields:
+ * - match_type: "semantic" | "heuristic" | "hybrid"
+ * - ats_score: float | null (computed when include_ats=true)
+ * - semantic_similarity: float | null (cosine similarity 0.0 - 1.0)
+ * 
+ * Preserves M2 Backward Compatibility:
+ * - match_score / match_percentage
+ * - reason_tags
+ * - generated_by
+ * 
+ * Maintained by Intern 1 (Frontend & User Experience)
+ * Aligned with Domain-1 (Intern 2) OpenAPI 3.0 Contract.
  */
 
-import api from './api.js';
+import api, { ApiError } from './api.js';
+
+/**
+ * Normalizes a single recommended job item from the upgraded Recommendation Engine.
+ */
+export function normalizeRecommendation(item) {
+  if (!item) return null;
+
+  const rawScore = item.match_percentage ?? item.match_score ?? item.score;
+  const score = typeof rawScore === 'number'
+    ? Math.round(rawScore > 1 ? rawScore : rawScore * 100)
+    : null;
+
+  const atsScore = typeof item.ats_score === 'number' ? Math.round(item.ats_score) : null;
+  const semanticSimilarity = typeof item.semantic_similarity === 'number' ? item.semantic_similarity : null;
+  const matchType = item.match_type || (semanticSimilarity !== null ? 'semantic' : 'heuristic');
+
+  // Reason tags
+  let tags = [];
+  if (Array.isArray(item.reason_tags) && item.reason_tags.length > 0) {
+    tags = item.reason_tags;
+  } else {
+    tags = [];
+    if (score !== null) tags.push(`${score}% Skill alignment`);
+    if (matchType === 'semantic') tags.push('Semantic sentence embedding fit');
+    else if (matchType) tags.push('Capability match with profile');
+    if (atsScore !== null) tags.push(`ATS Compatibility: ${atsScore}%`);
+  }
+
+  // Skills
+  let skills = [];
+  if (Array.isArray(item.skills)) {
+    skills = item.skills;
+  } else if (typeof item.skills === 'string') {
+    skills = item.skills.split(/[,|]/).map((s) => s.trim()).filter(Boolean);
+  }
+
+  return {
+    job_id: item.job_id || item.id,
+    id: item.job_id || item.id,
+    title: item.title || 'Engineering Specialist',
+    company: item.company || 'Enterprise Partner',
+    location: item.location || 'Remote / Flexible',
+    salary: item.salary || item.salary_range || 'Competitive',
+    skills: skills,
+    match_percentage: score,
+    match_score: score,
+    match_type: matchType,
+    ats_score: atsScore,
+    semantic_similarity: semanticSimilarity,
+    reason_tags: tags,
+    generated_by: item.generated_by || (matchType === 'semantic' ? 'semantic-v1' : 'heuristic-v0'),
+  };
+}
 
 export const recommendationService = {
   /**
-   * Fetch heuristic / AI job recommendations for an authenticated user
-   * @param {string|number} [userId]
-   * @param {string} [resumeId]
+   * Fetch personalized job recommendations for an authenticated candidate.
+   * Milestone 3 adds semantic-similarity and ATS-aware scoring.
+   * Endpoint: GET /api/v1/recommendations/?resume_id={uuid}&limit=10&include_ats=true
+   * 
+   * @param {string|number} [userId] - Candidate User ID
+   * @param {string} [resumeId] - Candidate Resume UUID
+   * @param {Object} [options] - Additional query options ({ limit, include_ats })
+   * @returns {Promise<Array<Object>>} Normalized list of recommended jobs
    */
-  async getRecommendations(userId, resumeId) {
-    try {
-      const queryParams = new URLSearchParams();
-      if (userId) queryParams.append('user_id', String(userId));
-      if (resumeId) queryParams.append('resume_id', String(resumeId));
+  async getRecommendations(userId, resumeId, options = {}) {
+    const queryParams = new URLSearchParams();
+    if (resumeId) queryParams.append('resume_id', String(resumeId));
+    if (userId) queryParams.append('user_id', String(userId));
 
-      const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
-      const response = await api.get(`/recommendations${query}`);
+    const limit = options.limit || 10;
+    queryParams.append('limit', String(limit));
 
-      // Handle array response, { recommendations: [] }, { results: [] }, or { data: [] }
-      let list = [];
-      if (Array.isArray(response)) {
-        list = response;
-      } else if (response && Array.isArray(response.recommendations)) {
-        list = response.recommendations;
-      } else if (response && Array.isArray(response.results)) {
-        list = response.results;
-      } else if (response && Array.isArray(response.data)) {
-        list = response.data;
-      }
+    const includeAts = options.include_ats !== undefined ? options.include_ats : true;
+    queryParams.append('include_ats', String(includeAts));
 
-      return list.map((item) => {
-        const score = Math.round(Number(item.match_percentage || item.match_score || item.match || 85));
-        const tags = Array.isArray(item.reason_tags) && item.reason_tags.length > 0
-          ? item.reason_tags
-          : [
-              `High ${score}% skill overlap`,
-              score >= 90 ? 'Direct role alignment' : 'Strong match with uploaded profile',
-              'Active hiring priority'
-            ];
+    const queryString = queryParams.toString();
+    const endpoint = queryString ? `/recommendations/?${queryString}` : '/recommendations/';
+    const response = await api.get(endpoint);
 
-        return {
-          job_id: item.job_id || item.id,
-          id: item.job_id || item.id,
-          title: item.title || 'Software Engineering Specialist',
-          company: item.company || 'Enterprise Partner',
-          match_percentage: score,
-          match_score: score,
-          reason_tags: tags,
-          generated_by: item.generated_by || 'heuristic-v0',
-        };
-      });
-    } catch (err) {
-      console.warn('Live Recommendation API unreachable, using calibrated fallback:', err.message);
-      // Calibrated baseline fallback recommendations
-      return [
-        {
-          job_id: 1,
-          id: 1,
-          title: 'Senior Full Stack Engineer',
-          company: 'NovaTech Labs',
-          match_percentage: 95,
-          match_score: 95,
-          reason_tags: ['Matches React & TypeScript skills', 'Low applicant competition', 'Target salary fit'],
-          generated_by: 'heuristic-v0'
-        },
-        {
-          job_id: 2,
-          id: 2,
-          title: 'Frontend Architect',
-          company: 'AeroStack Systems',
-          match_percentage: 91,
-          match_score: 91,
-          reason_tags: ['Matches frontend stack', '100% Remote flexibility'],
-          generated_by: 'heuristic-v0'
-        },
-        {
-          job_id: 5,
-          id: 5,
-          title: 'Junior Frontend Developer',
-          company: 'ZeptoScale Labs',
-          match_percentage: 89,
-          match_score: 89,
-          reason_tags: ['Fresher friendly', 'Remote position', 'Fast startup velocity'],
-          generated_by: 'heuristic-v0'
-        },
-        {
-          job_id: 3,
-          id: 3,
-          title: 'Associate UI / Product Engineer',
-          company: 'PixelCraft Technologies',
-          match_percentage: 88,
-          match_score: 88,
-          reason_tags: ['Fresher friendly role', 'Early founding impact'],
-          generated_by: 'heuristic-v0'
-        },
-      ];
+    // Parse list from various response wrappers
+    let list = [];
+    if (Array.isArray(response)) {
+      list = response;
+    } else if (response && Array.isArray(response.recommendations)) {
+      list = response.recommendations;
+    } else if (response && Array.isArray(response.results)) {
+      list = response.results;
+    } else if (response && Array.isArray(response.data)) {
+      list = response.data;
     }
+
+    return list.map(normalizeRecommendation).filter(Boolean);
   },
 };
 

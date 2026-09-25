@@ -285,8 +285,8 @@ export default function JobSeekerOverviewPage() {
                       const rawScore = rec.match_score ?? rec.match_percentage;
                       const score = typeof rawScore === 'number'
                         ? Math.round(rawScore > 1 ? rawScore : rawScore * 100)
-                        : 92;
-                      return `${score}% Match`;
+                        : null;
+                      return score !== null ? `${score}% Match` : (rec.match_type ? `${rec.match_type} match` : 'Recommended');
                     })()}
                   </span>
                 </div>
