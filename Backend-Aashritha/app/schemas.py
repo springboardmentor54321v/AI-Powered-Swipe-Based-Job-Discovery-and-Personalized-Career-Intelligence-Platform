@@ -124,10 +124,6 @@ class CompanyOut(BaseModel):
     job_count: int = 0
 
 
-class CompanyDetailOut(CompanyOut):
-    jobs: List["JobOut"] = Field(default_factory=list)
-
-
 # ==========================================================================
 # Job schemas
 # ==========================================================================
@@ -202,6 +198,11 @@ class PaginatedJobsResponse(BaseModel):
     results: List[JobOut]
 
 
+# Placed after JobOut so it can reference JobOut without forward references
+class CompanyDetailOut(CompanyOut):
+    jobs: List[JobOut] = Field(default_factory=list)
+
+
 # ==========================================================================
 # Swipe schemas
 # ==========================================================================
@@ -233,8 +234,10 @@ class SwipeListResponse(BaseModel):
 
 class RecommendationItem(BaseModel):
     job: JobOut
-    match_score: float = Field(..., ge=0, le=100)
-    match_reasons: List[str] = Field(default_factory=list)
+    match_score: float
+    match_reasons: List[str]
+    semantic_match_score: Optional[float] = None
+    recommendation_tags: Optional[List[str]] = None
 
 
 class RecommendationResponse(BaseModel):
@@ -246,3 +249,12 @@ class RecommendationResponse(BaseModel):
 
 
 CompanyDetailOut.model_rebuild()
+class ATSScoreRequest(BaseModel):
+    resume_id: uuid.UUID
+    job_id: uuid.UUID
+
+class ATSScoreResponse(BaseModel):
+    match_score: float
+    summary: Optional[str] = None
+    missing_skills: Optional[List[str]] = None
+    missing_keywords: Optional[List[str]] = None

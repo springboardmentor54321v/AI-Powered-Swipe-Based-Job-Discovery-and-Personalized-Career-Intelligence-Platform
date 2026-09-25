@@ -95,7 +95,7 @@ class User(Base):
     company = relationship("Company", back_populates="recruiters", foreign_keys=[company_id])
 
     swipes = relationship("Swipe", back_populates="user", cascade="all, delete-orphan")
-
+    resumes = relationship("Resume", back_populates="user", cascade="all, delete-orphan")
     def __repr__(self) -> str:
         return f"<User id={self.id} email={self.email} role={self.role}>"
 
@@ -211,3 +211,31 @@ class Swipe(Base):
 
     def __repr__(self) -> str:
         return f"<Swipe user_id={self.user_id} job_id={self.job_id} action={self.action}>"
+
+# --------------------------------------------------------------------------
+# Resume (Milestone 3 - Day 2)
+# --------------------------------------------------------------------------
+
+class Resume(Base):
+    __tablename__ = "resumes"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    file_name = Column(String(255), nullable=False)
+    file_type = Column(String(10), nullable=False)  # 'pdf' or 'docx'
+    version_number = Column(Integer, nullable=False, default=1)
+    is_active_version = Column(Boolean, nullable=False, default=True, server_default="true")
+    parsed_status = Column(String(20), nullable=False, default="pending")  # 'pending', 'processing', 'done', 'failed'
+    parsed_text = Column(Text, nullable=True)
+    extracted_skills = Column(JSON, nullable=True)  # e.g. ["Python", "FastAPI", "Docker"]
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    user = relationship("User", back_populates="resumes")
+
+    def __repr__(self) -> str:
+        return f"<Resume id={self.id} user_id={self.user_id} version={self.version_number}>"
