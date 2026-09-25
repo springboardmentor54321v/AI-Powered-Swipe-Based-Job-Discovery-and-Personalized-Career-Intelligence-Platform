@@ -7,7 +7,7 @@ Supports multi-factor scoring, swipe-based preference learning, and human-readab
 import ast
 from typing import List, Dict, Optional, Any
 import pandas as pd
-from src.ats import calculate_ats_score
+from src.ats import calculate_ats_score, score_resume_against_job
 
 
 def parse_required_skills(skills_entry) -> List[str]:
@@ -106,7 +106,9 @@ def calculate_heuristic_match(
     user_profile: Optional[Dict[str, Any]] = None,
     preferences: Optional[Dict[str, Any]] = None,
     job_index: int = 0,
-    total_jobs: int = 200
+    total_jobs: int = 200,
+    resume_text: str = "",
+    semantic_engine = None
 ) -> Dict[str, Any]:
     """
     Calculate explainable heuristic match score and generate reason tags for a job.
@@ -128,12 +130,20 @@ def calculate_heuristic_match(
     reasons = []
 
     # Calculate ATS Skill Overlap
+    generated_by = "heuristic-v0"
     if not job_required_skills:
         raw_ats_score = 100.0
         matched_skills = []
     else:
-        ats_res = calculate_ats_score(candidate_skills, job_required_skills)
+        job_desc = str(job_row.get('Description', ''))
+        ats_res = score_resume_against_job(
+            resume_data={"skills": candidate_skills, "text": resume_text},
+            job_data={"required_skills": job_required_skills, "keywords": [], "title": job_title, "description": job_desc},
+            semantic_engine=semantic_engine,
+            config={"keyword_weight": 0.5, "semantic_weight": 0.5}
+        )
         raw_ats_score = float(ats_res["match_score"])
+        generated_by = ats_res.get("generated_by", "heuristic-v0")
         c_skills_lower = {s.lower() for s in candidate_skills}
         matched_skills = [s for s in job_required_skills if s.lower() in c_skills_lower]
 
@@ -176,7 +186,7 @@ def calculate_heuristic_match(
             "match_score": final_score,
             "match_percentage": float(final_score),
             "reasons": reasons,
-            "generated_by": "heuristic-v0"
+            "generated_by": generated_by
         }
 
     # Full Multi-Factor Heuristic Mode
@@ -296,7 +306,7 @@ def calculate_heuristic_match(
         "match_score": final_score,
         "match_percentage": float(final_score),
         "reasons": reasons,
-        "generated_by": "heuristic-v0"
+        "generated_by": generated_by
     }
 
 
@@ -305,7 +315,9 @@ def get_job_recommendations(
     resume_skills: List[str],
     jobs_df: pd.DataFrame,
     user_profile: Optional[Dict[str, Any]] = None,
-    swipes: Optional[List[Dict[str, Any]]] = None
+    swipes: Optional[List[Dict[str, Any]]] = None,
+    resume_text: str = "",
+    semantic_engine = None
 ) -> List[Dict[str, Any]]:
     """
     Generate job recommendations sorted by match score (descending).
@@ -332,7 +344,9 @@ def get_job_recommendations(
             user_profile=user_profile,
             preferences=preferences,
             job_index=idx,
-            total_jobs=total_jobs
+            total_jobs=total_jobs,
+            resume_text=resume_text,
+            semantic_engine=semantic_engine
         )
         recommendations.append(rec_item)
 

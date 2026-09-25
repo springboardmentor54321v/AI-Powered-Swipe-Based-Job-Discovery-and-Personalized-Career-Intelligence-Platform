@@ -160,7 +160,7 @@ class TestDay5GatewayIntegration(unittest.TestCase):
         ats_data = ats_resp.json()
         self.assertIn("match_score", ats_data)
         self.assertIn("missing_keywords", ats_data)
-        self.assertEqual(ats_data["generated_by"], "heuristic-v0")
+        self.assertIn(ats_data["generated_by"], ["heuristic-v0", "blended-v1"])
 
 
 if __name__ == "__main__":

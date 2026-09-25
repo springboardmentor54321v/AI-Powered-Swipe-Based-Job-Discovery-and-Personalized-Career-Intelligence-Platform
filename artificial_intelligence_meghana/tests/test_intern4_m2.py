@@ -241,7 +241,7 @@ class TestIntern4Milestone2(unittest.TestCase):
         self.assertIn("location", first)
         self.assertIn("match_score", first)
         self.assertIn("reasons", first)
-        self.assertEqual(first["generated_by"], "heuristic-v0")
+        self.assertIn(first["generated_by"], ["heuristic-v0", "blended-v1"])
 
     def test_14_api_swipe_recording_endpoint(self):
         """Test POST /api/v1/swipes records swipe and alters recommendation ranking."""

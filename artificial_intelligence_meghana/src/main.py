@@ -9,6 +9,13 @@ from src.parser import extract_text_from_pdf
 from src.skills import extract_skills
 from src.ats import calculate_ats_score
 from src.recommender import get_job_recommendations, parse_required_skills
+from src.semantic import SemanticEngine
+
+# We must initialize SemanticEngine on startup
+try:
+    semantic_engine = SemanticEngine()
+except Exception:
+    semantic_engine = None
 
 app = FastAPI(
     title="SwipeX Intern 3 AI/ML Career Intelligence Service",
@@ -283,8 +290,10 @@ def get_recommendations(
 
     # Check if we have candidate skills from resume or candidate profile
     resume_skills = []
+    resume_text = ""
     if target_resume_id and target_resume_id in RESUME_STORE:
         resume_skills = RESUME_STORE[target_resume_id]["parsed_skills"]
+        resume_text = RESUME_STORE[target_resume_id].get("raw_text", "")
 
     user_profile = USER_PROFILE_STORE.get(user_id_clean, {})
     swipes = SWIPE_STORE.get(user_id_clean, [])
@@ -301,7 +310,9 @@ def get_recommendations(
         resume_skills=resume_skills,
         jobs_df=df,
         user_profile=user_profile,
-        swipes=swipes
+        swipes=swipes,
+        resume_text=resume_text,
+        semantic_engine=semantic_engine
     )
     return JSONResponse(status_code=status.HTTP_200_OK, content=recommendations)
 

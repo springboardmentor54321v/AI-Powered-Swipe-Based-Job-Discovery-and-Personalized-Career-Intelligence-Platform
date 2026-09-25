@@ -51,7 +51,7 @@ class TestDay6ATSAndRecommendations(unittest.TestCase):
         result = calculate_ats_score(resume_skills, job_skills)
         self.assertEqual(result["match_score"], 100.0)
         self.assertEqual(result["missing_keywords"], [])
-        self.assertEqual(result["generated_by"], "heuristic-v0")
+        self.assertIn(result["generated_by"], ["heuristic-v0", "blended-v1"])
 
     def test_02_ats_partial_skill_match(self):
         """B. Partial skill match -> partial percentage score"""
@@ -60,7 +60,7 @@ class TestDay6ATSAndRecommendations(unittest.TestCase):
         result = calculate_ats_score(resume_skills, job_skills)
         self.assertEqual(result["match_score"], 66.67)
         self.assertEqual(result["missing_keywords"], ["FastAPI"])
-        self.assertEqual(result["generated_by"], "heuristic-v0")
+        self.assertIn(result["generated_by"], ["heuristic-v0", "blended-v1"])
 
     def test_03_ats_no_skill_match(self):
         """C. No skill match -> 0% match score"""
@@ -69,7 +69,7 @@ class TestDay6ATSAndRecommendations(unittest.TestCase):
         result = calculate_ats_score(resume_skills, job_skills)
         self.assertEqual(result["match_score"], 0.0)
         self.assertEqual(result["missing_keywords"], ["Python", "SQL"])
-        self.assertEqual(result["generated_by"], "heuristic-v0")
+        self.assertIn(result["generated_by"], ["heuristic-v0", "blended-v1"])
 
     def test_04_ats_missing_keywords(self):
         """D. Verify missing required skills are returned correctly"""
@@ -197,7 +197,7 @@ class TestDay6ATSAndRecommendations(unittest.TestCase):
         for item in recs[:5]: # Inspect top recommendations
             self.assertIn("job_id", item)
             self.assertIn("match_percentage", item)
-            self.assertEqual(item["generated_by"], "heuristic-v0")
+            self.assertIn(item["generated_by"], ["heuristic-v0", "blended-v1"])
             self.assertIsInstance(item["match_percentage"], (int, float))
 
     # =========================================================================
