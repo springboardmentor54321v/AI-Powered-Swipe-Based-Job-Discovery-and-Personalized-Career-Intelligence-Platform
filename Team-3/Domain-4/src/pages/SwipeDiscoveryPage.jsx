@@ -30,6 +30,13 @@ export default function SwipeDiscoveryPage() {
   const [swipeError, setSwipeError] = useState('');
   const [loadError, setLoadError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const toastTimeoutRef = React.useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
 
   // Discovery Feed Mode: 'recommended' (AI Personalized) vs 'all' (Global Exploration)
   const [feedMode, setFeedMode] = useState('recommended');
@@ -228,8 +235,9 @@ export default function SwipeDiscoveryPage() {
   }, [currentJob, swiping, swipeHistory, handleSwipe, handleUndo]);
 
   const showToast = (msg) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setToastMessage(msg);
-    setTimeout(() => {
+    toastTimeoutRef.current = setTimeout(() => {
       setToastMessage('');
     }, 3000);
   };

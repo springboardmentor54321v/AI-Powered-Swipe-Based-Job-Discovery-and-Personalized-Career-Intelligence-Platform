@@ -31,6 +31,11 @@ export default function ResumeUploadPage() {
   // Active default version and currently inspected version
   const [activeVersionId, setActiveVersionId] = useState(null);
   const [inspectedVersionId, setInspectedVersionId] = useState(null);
+  const activeVersionIdRef = React.useRef(activeVersionId);
+
+  useEffect(() => {
+    activeVersionIdRef.current = activeVersionId;
+  }, [activeVersionId]);
 
   // Upload UI state
   const [isUploading, setIsUploading] = useState(false);
@@ -50,7 +55,7 @@ export default function ResumeUploadPage() {
 
       if (loadedVersions.length > 0) {
         // Determine active/inspected ID
-        const targetId = preferSelectedId || activeVersionId;
+        const targetId = preferSelectedId || activeVersionIdRef.current;
         const matched = loadedVersions.find((v) => v.version_id === targetId);
         const defaultActive = loadedVersions.find((v) => v.is_active) || loadedVersions[0];
 
@@ -68,7 +73,7 @@ export default function ResumeUploadPage() {
     } finally {
       setIsLoadingList(false);
     }
-  }, [activeVersionId]);
+  }, []);
 
   useEffect(() => {
     fetchResumeList();

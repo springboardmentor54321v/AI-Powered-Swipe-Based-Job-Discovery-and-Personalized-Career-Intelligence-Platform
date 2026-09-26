@@ -126,6 +126,7 @@ export default function ResumeDropzone({ onUpload, isUploading = false }) {
         onDrop={handleDrop}
         role="button"
         tabIndex={0}
+        aria-label="Upload resume file dropzone. Drag and drop PDF or DOCX document up to 5MB, or press Enter to browse files."
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();

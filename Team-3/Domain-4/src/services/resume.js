@@ -301,43 +301,21 @@ export const resumeService = {
    */
   async getAtsScore(resumeId, jobId = 1) {
     try {
-      // Try M3 POST /api/v1/ats/score first
       const res = await api.post('/ats/score', {
-        resume_id: resumeId,
+        resume_id: String(resumeId),
         job_id: String(jobId),
       });
 
       return {
-        match_score: typeof res?.match_score === 'number' ? res.match_score : 82.5,
+        match_score: typeof res?.match_score === 'number' ? res.match_score : null,
         matched_skills: Array.isArray(res?.matched_skills) ? res.matched_skills : [],
         missing_skills: Array.isArray(res?.missing_skills) ? res.missing_skills : [],
-        missing_keywords: Array.isArray(res?.missing_keywords) ? res.missing_keywords : ['Docker', 'AWS'],
+        missing_keywords: Array.isArray(res?.missing_keywords) ? res.missing_keywords : [],
         suggestions: Array.isArray(res?.suggestions) ? res.suggestions : [],
         generated_by: res?.generated_by || 'semantic-v1',
       };
     } catch {
-      // Graceful fallback if ATS backend is not running
-      try {
-        const query = jobId ? `?job_id=${encodeURIComponent(jobId)}` : '';
-        const legacyRes = await api.get(`/resume/${resumeId}/ats-score${query}`);
-        return {
-          match_score: typeof legacyRes?.match_score === 'number' ? legacyRes.match_score : 82.5,
-          matched_skills: Array.isArray(legacyRes?.matched_skills) ? legacyRes.matched_skills : [],
-          missing_skills: Array.isArray(legacyRes?.missing_skills) ? legacyRes.missing_skills : [],
-          missing_keywords: Array.isArray(legacyRes?.missing_keywords) ? legacyRes.missing_keywords : ['Docker', 'AWS'],
-          suggestions: Array.isArray(legacyRes?.suggestions) ? legacyRes.suggestions : [],
-          generated_by: legacyRes?.generated_by || 'heuristic-v0',
-        };
-      } catch {
-        return {
-          match_score: 82.5,
-          matched_skills: ['React', 'JavaScript', 'Python'],
-          missing_skills: ['Kubernetes', 'AWS'],
-          missing_keywords: ['Docker', 'AWS'],
-          suggestions: ['Add container experience to your resume.'],
-          generated_by: 'heuristic-v0',
-        };
-      }
+      return null;
     }
   },
 };

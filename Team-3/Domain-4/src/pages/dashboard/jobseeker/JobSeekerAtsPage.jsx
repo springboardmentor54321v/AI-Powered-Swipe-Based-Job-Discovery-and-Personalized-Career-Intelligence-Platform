@@ -85,8 +85,8 @@ export default function JobSeekerAtsPage() {
       .then((data) => {
         const list = Array.isArray(data) ? data : data?.jobs || [];
         setJobs(list);
-        if (list.length > 0 && !selectedJobId) {
-          setSelectedJobId(String(list[0].id || list[0].job_id));
+        if (list.length > 0) {
+          setSelectedJobId((prev) => prev || String(list[0].id || list[0].job_id));
         }
       })
       .catch(() => {
@@ -95,7 +95,7 @@ export default function JobSeekerAtsPage() {
       .finally(() => {
         setIsLoadingJobs(false);
       });
-  }, [selectedJobId]);
+  }, []);
 
   // Find currently selected objects
   const selectedVersion = resumeVersions.find((v) => v.version_id === selectedVersionId) || resumeVersions[0];

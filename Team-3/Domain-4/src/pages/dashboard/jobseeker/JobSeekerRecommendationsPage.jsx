@@ -22,6 +22,7 @@ import authService from '../../../services/auth';
 export default function JobSeekerRecommendationsPage() {
   const navigate = useNavigate();
   const session = authService.getSession();
+  const userId = session?.user?.user_id || session?.user?.id || 1;
 
   const [activeResume, setActiveResume] = useState(null);
   const [hasNoResume, setHasNoResume] = useState(false);
@@ -33,8 +34,6 @@ export default function JobSeekerRecommendationsPage() {
   const fetchRecommendations = useCallback(async (resumeId) => {
     setLoading(true);
     setError(null);
-
-    const userId = session?.user?.user_id || session?.user?.id || 1;
 
     try {
       const data = await recommendationService.getRecommendations(userId, resumeId, {
@@ -58,7 +57,7 @@ export default function JobSeekerRecommendationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [session]);
+  }, [userId]);
 
   // 2. Resolve candidate's active resume on mount
   useEffect(() => {
