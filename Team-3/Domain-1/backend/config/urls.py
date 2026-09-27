@@ -46,6 +46,9 @@ urlpatterns = [
 
     # Milestone 3 — Resume Service (new versioned endpoints)
     path("api/v1/resumes/", include("apps.resume_service.m3_urls")),
+
+    # Milestone 3 — ATS Scoring (Day 4)
+    path("api/v1/ats/", include("apps.resume_service.ats_urls")),
 ]
 
 

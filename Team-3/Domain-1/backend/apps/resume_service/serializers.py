@@ -128,6 +128,31 @@ class ResumeSummarySerializer(serializers.ModelSerializer):
         return []
 
 
+class ATSScoreResponseSerializer(serializers.Serializer):
+    """
+    Serializes the response from POST /api/v1/ats/score.
+    Returns blended ATS score with keyword and semantic components.
+
+    Formula (from Intern 4):
+        final_ats_score = (0.40 × keyword_match_score) + (0.60 × semantic_similarity_score)
+    """
+    resume_id = serializers.UUIDField()
+    version_id = serializers.UUIDField()
+    job_id = serializers.CharField()
+    job_title = serializers.CharField(required=False, allow_blank=True)
+    keyword_score = serializers.FloatField()
+    semantic_similarity = serializers.FloatField()
+    semantic_score = serializers.FloatField()
+    final_ats_score = serializers.FloatField()
+    matched_skills = serializers.ListField(child=serializers.CharField())
+    missing_skills = serializers.ListField(child=serializers.CharField())
+    matched_keywords = serializers.ListField(child=serializers.CharField())
+    missing_keywords = serializers.ListField(child=serializers.CharField())
+    below_threshold = serializers.BooleanField()
+    threshold = serializers.FloatField()
+    detail = serializers.CharField(required=False)
+
+
 class ResumeListResponseSerializer(serializers.Serializer):
     """
     Wraps the resume list in a paginated response per the Day-1 contract.

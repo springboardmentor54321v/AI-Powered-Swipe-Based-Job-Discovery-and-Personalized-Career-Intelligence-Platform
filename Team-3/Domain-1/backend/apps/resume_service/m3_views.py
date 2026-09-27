@@ -30,9 +30,11 @@ from .serializers import (
     ResumeUploadResponseSerializer,
     ResumeSummarySerializer,
     ResumeParseResponseSerializer,
+    ATSScoreResponseSerializer,
 )
 from .storage import validate_resume_file, save_resume_file, get_file_path
 from .extraction_service import extract_resume_content
+from .ats_scoring_service import resolve_job_data, compute_ats_score
 
 logger = logging.getLogger("resume_service.views")
 
@@ -428,6 +430,238 @@ class M3ResumeParseView(APIView):
             "parsed_at": version.parsed_at.isoformat(),
             "detail": "Resume parsed and skills extracted successfully.",
         }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+class M3ATSScoreView(APIView):
+    """
+    POST /api/v1/ats/score
+
+    Computes a blended ATS compatibility score for a parsed resume
+    against a specific job posting.
+
+    Workflow:
+      1. Authenticates request and validates JOB_SEEKER role.
+      2. Validates request body (resume_id, job_id).
+      3. Retrieves the resume version, enforces strict ownership.
+      4. Ensures the resume has been parsed (Day-3 prerequisite).
+      5. Resolves job data (description, skills, keywords) from
+         Intern 3's CSV dataset or the live Job Service.
+      6. Delegates to Intern 4's (Domain-3) completed blended ATS
+         scoring engine:
+           final_ats_score = keyword_score × 0.40 + semantic_score × 0.60
+      7. Returns structured scoring results with actionable feedback.
+
+    Protected: Requires valid JWT and JOB_SEEKER role.
+    Ownership: Strict — candidate can only score their own resume.
+    """
+    serializer_class = ATSScoreResponseSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsJobSeeker]
+
+    @extend_schema(
+        operation_id="m3_ats_score",
+        summary="Compute ATS Score — Resume vs Job (M3)",
+        description=(
+            "Calculates a blended ATS compatibility score for a parsed resume "
+            "against a job posting. Uses Intern 4's scoring engine: "
+            "final_ats_score = (keyword_score × 0.40) + (semantic_score × 0.60). "
+            "Requires the resume to be parsed first (POST /resumes/{id}/parse). "
+            "Protected: JOB_SEEKER role only. Ownership-enforced."
+        ),
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "resume_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "UUID of the Resume or ResumeVersion",
+                    },
+                    "job_id": {
+                        "type": "string",
+                        "description": "Job ID to score against (matches jobId in dataset)",
+                    },
+                },
+                "required": ["resume_id", "job_id"],
+            }
+        },
+        responses={
+            200: ATSScoreResponseSerializer,
+            400: OpenApiTypes.OBJECT,
+            401: OpenApiTypes.OBJECT,
+            403: OpenApiTypes.OBJECT,
+            404: OpenApiTypes.OBJECT,
+            503: OpenApiTypes.OBJECT,
+        },
+        tags=["ATS Scoring (M3)"],
+    )
+    def post(self, request):
+        user = request.user
+        resume_id_str = str(request.data.get("resume_id", "")).strip()
+        job_id_str = str(request.data.get("job_id", "")).strip()
+
+        # ── 1. Validate required fields ──
+        if not resume_id_str or not job_id_str:
+            return Response(
+                {
+                    "error": "Validation Error",
+                    "detail": "Both 'resume_id' and 'job_id' are required.",
+                    "status_code": 400,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # ── 2. Validate UUID format ──
+        try:
+            target_uuid = uuid.UUID(resume_id_str)
+        except (ValueError, AttributeError):
+            return Response(
+                {
+                    "error": "Validation Error",
+                    "detail": "Invalid resume_id format. Expected UUID.",
+                    "status_code": 400,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # ── 3. Look up Resume or ResumeVersion ──
+        resume = Resume.objects.filter(id=target_uuid).first()
+        version = None
+
+        if resume:
+            # Found by Resume.id -> find active or latest version
+            version = (
+                resume.versions.filter(is_active=True).first()
+                or resume.versions.order_by("-version_number").first()
+            )
+        else:
+            # Check if UUID points directly to a ResumeVersion
+            version = (
+                ResumeVersion.objects.filter(id=target_uuid)
+                .select_related("resume")
+                .first()
+            )
+            if version:
+                resume = version.resume
+
+        if not resume or not version:
+            return Response(
+                {
+                    "error": "Not Found",
+                    "detail": "Resume or version not found.",
+                    "status_code": 404,
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # ── 4. Enforce Strict Ownership ──
+        if resume.owner_id != user.id:
+            logger.warning(
+                f"Unauthorized ATS score attempt: user={user.id} "
+                f"tried to score resume={resume.id} owned by user={resume.owner_id}"
+            )
+            return Response(
+                {
+                    "error": "Forbidden",
+                    "detail": "You do not have permission to score this resume.",
+                    "status_code": 403,
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # ── 5. Verify resume is parsed ──
+        if version.parsed_status != "PARSED" or not version.parsed_text:
+            return Response(
+                {
+                    "error": "Validation Error",
+                    "detail": (
+                        "Resume must be parsed before computing an ATS score. "
+                        "Call POST /api/v1/resumes/{id}/parse first."
+                    ),
+                    "status_code": 400,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # ── 6. Collect resume skills from DB ──
+        resume_skills = list(
+            ResumeSkill.objects.filter(resume_version=version)
+            .select_related("skill")
+            .values_list("skill__normalized_name", flat=True)
+        )
+
+        # ── 7. Resolve job data ──
+        try:
+            job_data = resolve_job_data(job_id_str)
+        except ValueError as e:
+            return Response(
+                {
+                    "error": "Not Found",
+                    "detail": str(e),
+                    "status_code": 404,
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # ── 8. Compute blended ATS score via Intern 4's engine ──
+        try:
+            scoring_result = compute_ats_score(
+                resume_text=version.parsed_text,
+                resume_skills=resume_skills,
+                job_data=job_data,
+            )
+        except RuntimeError as e:
+            return Response(
+                {
+                    "error": "Downstream Unavailable",
+                    "detail": str(e),
+                    "status_code": 503,
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except Exception as e:
+            logger.exception(
+                f"Unexpected ATS scoring failure for resume={resume.id}, "
+                f"job={job_id_str}: {e}"
+            )
+            return Response(
+                {
+                    "error": "Internal Error",
+                    "detail": "Failed to compute ATS score.",
+                    "status_code": 500,
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # ── 9. Build response ──
+        response_data = {
+            "resume_id": str(resume.id),
+            "version_id": str(version.id),
+            "job_id": job_id_str,
+            "job_title": job_data.get("title", ""),
+            "keyword_score": scoring_result["keyword_score"],
+            "semantic_similarity": scoring_result["semantic_similarity"],
+            "semantic_score": scoring_result["semantic_score"],
+            "final_ats_score": scoring_result["final_ats_score"],
+            "matched_skills": scoring_result["matched_skills"],
+            "missing_skills": scoring_result["missing_skills"],
+            "matched_keywords": scoring_result["matched_keywords"],
+            "missing_keywords": scoring_result["missing_keywords"],
+            "below_threshold": scoring_result["below_threshold"],
+            "threshold": scoring_result["threshold"],
+            "detail": (
+                f"ATS score computed successfully. "
+                f"{'Below' if scoring_result['below_threshold'] else 'Above'} "
+                f"threshold ({scoring_result['threshold']}%)."
+            ),
+        }
+
+        logger.info(
+            f"ATS score computed: user={user.id}, resume={resume.id}, "
+            f"job={job_id_str}, score={scoring_result['final_ats_score']}"
+        )
 
         return Response(response_data, status=status.HTTP_200_OK)
 
