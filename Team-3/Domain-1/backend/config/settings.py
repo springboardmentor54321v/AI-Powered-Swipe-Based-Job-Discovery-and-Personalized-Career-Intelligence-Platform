@@ -123,9 +123,10 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": (
         "SwipeX: Swipe-Based Intelligent Job Discovery and Career Assistance Platform.\n"
         "Milestone 1 — Authentication, Identity & RBAC API.\n"
-        "Milestone 2 — Authentication, RBAC, Jobs, Search, Companies, Swipe, Recruiter CRUD, Matching Engine & Resume/ATS Gateway."
+        "Milestone 2 — Authentication, RBAC, Jobs, Search, Companies, Swipe, Recruiter CRUD, Matching Engine & Resume/ATS Gateway.\n"
+        "Milestone 3 — Resume Upload, Versioning, ATS Scoring & AI Suggestions."
     ),
-    "VERSION": "2.0.0",
+    "VERSION": "3.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
@@ -152,4 +153,10 @@ GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "")
 JOB_SERVICE_URL = os.getenv("JOB_SERVICE_URL", "http://127.0.0.1:8001")
 RESUME_SERVICE_URL = os.getenv("RESUME_SERVICE_URL", "http://127.0.0.1:8002")
 MATCHING_ENGINE_URL = os.getenv("MATCHING_ENGINE_URL", os.getenv("RESUME_SERVICE_URL", "http://127.0.0.1:8002"))
+
+# Resume File Storage (Milestone 3)
+# Local disk storage path for uploaded resume files.
+# Matches Intern 3's RESUME_STORAGE_PATH / disk driver pattern.
+RESUME_STORAGE_PATH = os.getenv("RESUME_STORAGE_PATH", os.path.join(BASE_DIR, "media", "resumes"))
+RESUME_MAX_FILE_SIZE = int(os.getenv("RESUME_MAX_FILE_SIZE", str(5 * 1024 * 1024)))  # 5 MB default
 

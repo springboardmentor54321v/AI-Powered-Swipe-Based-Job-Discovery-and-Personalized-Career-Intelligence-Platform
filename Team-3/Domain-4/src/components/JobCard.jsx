@@ -278,7 +278,9 @@ function CardContent({ job, isRecommendation = false }) {
   const experience = job.experience_level || job.experience || 'All Experience Levels';
   const applicantCount = job.applicant_count !== undefined ? job.applicant_count : (job.applicants || 14);
   const competitionLevel = job.competition_level || (applicantCount < 20 ? 'Low' : applicantCount < 50 ? 'Medium' : 'High');
-  const matchScore = job.match_score || job.match_percentage || 92;
+  const rawScore = job.match_percentage ?? job.match_score;
+  const matchScore = typeof rawScore === 'number' ? Math.round(rawScore > 1 ? rawScore : rawScore * 100) : null;
+  const hasMatchInfo = matchScore !== null || job.ats_score != null || job.semantic_similarity != null || (isRecommendation && Boolean(job.match_type));
   const reasonTags = Array.isArray(job.reason_tags) ? job.reason_tags : [];
 
   return (
@@ -302,11 +304,15 @@ function CardContent({ job, isRecommendation = false }) {
           </span>
         </div>
 
-        {/* AI Match Score Badge (When Recommendation Feed is active or score present) */}
-        {(isRecommendation || job.match_score || job.match_percentage) && (
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 text-primary border border-primary/40 text-xs font-extrabold shadow-sm animate-pulse">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <span>{matchScore}% Match</span>
+        {/* AI Match Metadata Badge (Secondary indicator, pointer-events-none to protect swipe capture) */}
+        {hasMatchInfo && (
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-surface-elevated text-primary border border-primary/30 text-xs font-semibold pointer-events-none select-none">
+            <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span>
+              {matchScore !== null ? `${matchScore}% Match` : (job.match_type ? `${job.match_type.charAt(0).toUpperCase() + job.match_type.slice(1)} Match` : 'Recommended')}
+              {job.match_type && matchScore !== null ? ` • ${job.match_type}` : ''}
+              {job.ats_score != null && matchScore === null ? ` • ATS: ${job.ats_score}%` : ''}
+            </span>
           </div>
         )}
       </div>

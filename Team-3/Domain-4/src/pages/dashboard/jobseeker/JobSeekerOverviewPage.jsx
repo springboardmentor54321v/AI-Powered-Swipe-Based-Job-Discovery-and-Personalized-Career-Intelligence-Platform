@@ -19,6 +19,7 @@ import Button from '../../../components/common/Button';
 import Chip from '../../../components/common/Chip';
 import jobService from '../../../services/jobs';
 import resumeService from '../../../services/resume';
+import atsService from '../../../services/ats';
 import recommendationService from '../../../services/recommendations';
 import authService from '../../../services/auth';
 
@@ -50,7 +51,7 @@ export default function JobSeekerOverviewPage() {
 
     // Fetch ATS if resume exists
     if (resume?.resume_id) {
-      resumeService.getAtsScore(resume.resume_id, 1)
+      atsService.scoreResume(resume.resume_id, 1)
         .then((score) => setAtsData(score))
         .catch(() => setAtsData(null));
     }
@@ -285,8 +286,8 @@ export default function JobSeekerOverviewPage() {
                       const rawScore = rec.match_score ?? rec.match_percentage;
                       const score = typeof rawScore === 'number'
                         ? Math.round(rawScore > 1 ? rawScore : rawScore * 100)
-                        : 92;
-                      return `${score}% Match`;
+                        : null;
+                      return score !== null ? `${score}% Match` : (rec.match_type ? `${rec.match_type} match` : 'Recommended');
                     })()}
                   </span>
                 </div>
@@ -318,7 +319,7 @@ export default function JobSeekerOverviewPage() {
           </div>
           <p className="text-xs text-content-muted max-w-xl leading-relaxed">
             {activeResume
-              ? `Active document: "${activeResume.filename}". Compatibility benchmark is at ${atsData?.match_score || 88}%.`
+              ? `Active document: "${activeResume.filename}". ${atsData?.match_score != null ? `Compatibility benchmark is at ${atsData.match_score}%.` : 'Inspect keyword and semantic breakdown to benchmark readiness.'}`
               : 'You have not uploaded a resume yet. Upload your resume to calculate keyword alignment scores.'}
           </p>
         </div>

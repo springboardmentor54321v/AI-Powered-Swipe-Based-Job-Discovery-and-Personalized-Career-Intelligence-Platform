@@ -18,6 +18,7 @@ import FilterBar from '../components/FilterBar';
 import Button from '../components/common/Button';
 import jobService from '../services/jobs';
 import recommendationService from '../services/recommendations';
+import resumeService from '../services/resume';
 import authService from '../services/auth';
 
 export default function SwipeDiscoveryPage() {
@@ -29,6 +30,13 @@ export default function SwipeDiscoveryPage() {
   const [swipeError, setSwipeError] = useState('');
   const [loadError, setLoadError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const toastTimeoutRef = React.useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
 
   // Discovery Feed Mode: 'recommended' (AI Personalized) vs 'all' (Global Exploration)
   const [feedMode, setFeedMode] = useState('recommended');
@@ -79,8 +87,9 @@ export default function SwipeDiscoveryPage() {
       };
 
       if (mode === 'recommended') {
-        // 1. Fetch AI Recommendations for authenticated user
-        const recList = await recommendationService.getRecommendations(userId, null);
+        // 1. Fetch AI Recommendations for authenticated user with active resume if available
+        const activeResume = resumeService.getActiveResume();
+        const recList = await recommendationService.getRecommendations(userId, activeResume?.resume_id, { include_ats: true });
         
         // 2. Fetch base jobs to merge full metadata
         const baseJobs = await jobService.listJobs(queryPayload);
@@ -91,23 +100,27 @@ export default function SwipeDiscoveryPage() {
           recMap.set(String(r.job_id || r.id), r);
         });
 
-        // Enrich base jobs with recommendation match scores & reason tags
+        // Enrich base jobs with recommendation match scores, type, ATS score, and reason tags
         let merged = (Array.isArray(baseJobs) ? baseJobs : []).map((job) => {
           const jobIdStr = String(job.id || job.job_id);
           const recInfo = recMap.get(jobIdStr);
 
-          const matchScore = recInfo?.match_percentage || job.match_score || job.match_percentage || 88;
-          const reasonTags = recInfo?.reason_tags || job.reason_tags || [
-            `${matchScore}% Skill match`,
-            job.company_type ? `${job.company_type} hiring` : 'Role fit'
-          ];
+          const rawScore = recInfo?.match_percentage ?? recInfo?.match_score ?? job.match_score ?? job.match_percentage;
+          const matchScore = typeof rawScore === 'number' ? Math.round(rawScore > 1 ? rawScore : rawScore * 100) : null;
+          const matchType = recInfo?.match_type || null;
+          const atsScore = recInfo?.ats_score ?? null;
+          const semanticSimilarity = recInfo?.semantic_similarity ?? null;
+          const reasonTags = recInfo?.reason_tags || job.reason_tags || [];
 
           return {
             ...job,
             match_score: matchScore,
             match_percentage: matchScore,
+            match_type: matchType,
+            ats_score: atsScore,
+            semantic_similarity: semanticSimilarity,
             reason_tags: reasonTags,
-            is_recommendation: true,
+            is_recommendation: Boolean(recInfo),
           };
         });
 
@@ -222,8 +235,9 @@ export default function SwipeDiscoveryPage() {
   }, [currentJob, swiping, swipeHistory, handleSwipe, handleUndo]);
 
   const showToast = (msg) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setToastMessage(msg);
-    setTimeout(() => {
+    toastTimeoutRef.current = setTimeout(() => {
       setToastMessage('');
     }, 3000);
   };

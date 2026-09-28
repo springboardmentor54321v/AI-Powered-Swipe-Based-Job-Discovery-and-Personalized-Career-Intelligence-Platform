@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "createdAt": "2026-09-26T13:14:06.792Z",
+  "tables": {
+    "jobs": [
+      {
+        "id": 1,
+        "title": "Backend Engineer",
+        "company": "Acme",
+        "description": "Build APIs and services.",
+        "created_at": "2026-09-23 13:16:26",
+        "required_skills": "[\"node.js\",\"javascript\",\"sql\",\"rest api\"]",
+        "keywords": "[\"express\",\"postgresql\",\"docker\",\"testing\"]"
+      },
+      {
+        "id": 2,
+        "title": "Data Analyst",
+        "company": "Globex",
+        "description": "Analyze business and product data.",
+        "created_at": "2026-09-23 13:16:26",
+        "required_skills": "[\"sql\",\"python\",\"data analysis\",\"excel\"]",
+        "keywords": "[\"tableau\",\"power bi\",\"statistics\",\"etl\"]"
+      },
+      {
+        "id": 3,
+        "title": "Product Designer",
+        "company": "Initech",
+        "description": "Design accessible product experiences.",
+        "created_at": "2026-09-23 13:16:26",
+        "required_skills": "[\"figma\",\"user research\",\"prototyping\",\"accessibility\"]",
+        "keywords": "[\"wireframes\",\"usability testing\",\"design systems\",\"ux\"]"
+      }
+    ],
+    "resumes": [
+      {
+        "id": "01a5dffa-200a-43cd-a202-31b2a53a81eb",
+        "candidate_id": "test-user",
+        "filename": "README.md",
+        "content_type": "application/octet-stream",
+        "storage_key": "test-user/e04f9b8d-7fed-4732-970c-a4be522d7fd4-README.md",
+        "size_bytes": 2097,
+        "created_at": "2026-09-25 14:22:32"
+      }
+    ],
+    "skills": [
+      {
+        "id": 1,
+        "name": "node.js",
+        "normalized_name": "node.js",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 2,
+        "name": "javascript",
+        "normalized_name": "javascript",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 3,
+        "name": "sql",
+        "normalized_name": "sql",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 4,
+        "name": "rest api",
+        "normalized_name": "rest api",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 5,
+        "name": "express",
+        "normalized_name": "express",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 6,
+        "name": "postgresql",
+        "normalized_name": "postgresql",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 7,
+        "name": "docker",
+        "normalized_name": "docker",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 8,
+        "name": "testing",
+        "normalized_name": "testing",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 9,
+        "name": "python",
+        "normalized_name": "python",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 10,
+        "name": "data analysis",
+        "normalized_name": "data analysis",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 11,
+        "name": "excel",
+        "normalized_name": "excel",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 12,
+        "name": "tableau",
+        "normalized_name": "tableau",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 13,
+        "name": "power bi",
+        "normalized_name": "power bi",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 14,
+        "name": "statistics",
+        "normalized_name": "statistics",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 15,
+        "name": "etl",
+        "normalized_name": "etl",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 16,
+        "name": "figma",
+        "normalized_name": "figma",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 17,
+        "name": "user research",
+        "normalized_name": "user research",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 18,
+        "name": "prototyping",
+        "normalized_name": "prototyping",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 19,
+        "name": "accessibility",
+        "normalized_name": "accessibility",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 20,
+        "name": "wireframes",
+        "normalized_name": "wireframes",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 21,
+        "name": "usability testing",
+        "normalized_name": "usability testing",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 22,
+        "name": "design systems",
+        "normalized_name": "design systems",
+        "created_at": "2026-09-23 13:16:26"
+      },
+      {
+        "id": 23,
+        "name": "ux",
+        "normalized_name": "ux",
+        "created_at": "2026-09-23 13:16:26"
+      }
+    ],
+    "resume_skills": [],
+    "resume_versions": [
+      {
+        "id": "legacy-01a5dffa-200a-43cd-a202-31b2a53a81eb",
+        "resume_id": "01a5dffa-200a-43cd-a202-31b2a53a81eb",
+        "version_number": 1,
+        "status": "READY",
+        "is_default": 1,
+        "extracted_text": null,
+        "created_at": "2026-09-26 13:14:01"
+      }
+    ],
+    "resume_version_skills": []
+  }
+}
