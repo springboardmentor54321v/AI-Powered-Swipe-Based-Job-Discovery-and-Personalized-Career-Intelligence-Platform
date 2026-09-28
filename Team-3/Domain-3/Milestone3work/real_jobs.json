@@ -1,0 +1,12 @@
+[
+  {
+    "job_id": 1,
+    "title": "Backend Developer",
+    "semantic_similarity_score": 0.825
+  },
+  {
+    "job_id": 2,
+    "title": "Machine Learning Engineer",
+    "semantic_similarity_score": 0.912
+  }
+]
