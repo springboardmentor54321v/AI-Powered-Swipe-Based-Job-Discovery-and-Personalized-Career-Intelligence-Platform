@@ -49,6 +49,9 @@ urlpatterns = [
 
     # Milestone 3 — ATS Scoring (Day 4)
     path("api/v1/ats/", include("apps.resume_service.ats_urls")),
+
+    # Milestone 3 — AI Suggestions (Day 5)
+    path("api/v1/suggestions/", include("apps.resume_service.suggestions_urls")),
 ]
 
 

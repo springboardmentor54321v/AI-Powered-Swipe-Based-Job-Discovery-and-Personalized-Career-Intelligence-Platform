@@ -153,6 +153,67 @@ class ATSScoreResponseSerializer(serializers.Serializer):
     detail = serializers.CharField(required=False)
 
 
+class SuggestionItemSerializer(serializers.Serializer):
+    """
+    Serializes a single AI-generated resume optimization suggestion.
+    Maps to the Day-1 contract's suggestion item schema.
+    """
+    category = serializers.CharField()
+    priority = serializers.CharField()
+    title = serializers.CharField()
+    detail = serializers.CharField()
+    related_skills = serializers.ListField(
+        child=serializers.CharField(), required=False, allow_null=True
+    )
+
+
+class SuggestionsResponseSerializer(serializers.Serializer):
+    """
+    Serializes the response from POST /api/v1/suggestions/.
+    Returns AI-generated resume optimization suggestions per the Day-1 contract.
+    Supports both LLM-powered and free rule-based fallback modes.
+    """
+    resume_id = serializers.UUIDField()
+    job_id = serializers.CharField(allow_null=True, required=False)
+    job_title = serializers.CharField(required=False)
+    source = serializers.CharField()
+    keyword_match_pct = serializers.FloatField()
+    matched_skills = serializers.ListField(child=serializers.CharField())
+    missing_skills = serializers.ListField(child=serializers.CharField())
+    suggestions = SuggestionItemSerializer(many=True)
+    generated_at = serializers.DateTimeField()
+    detail = serializers.CharField(required=False)
+
+
+class RecommendationItemSerializer(serializers.Serializer):
+    """
+    Serializes a single job recommendation from Intern 4's
+    UpgradedRecommendationEngine.
+    """
+    job_id = serializers.IntegerField()
+    job_title = serializers.CharField()
+    company = serializers.CharField()
+    required_skills = serializers.ListField(child=serializers.CharField())
+    semantic_similarity_score = serializers.FloatField()
+    swipe_boost = serializers.FloatField()
+    final_match_percentage = serializers.FloatField()
+    match_type = serializers.CharField(required=False)
+
+
+class RecommendationsResponseSerializer(serializers.Serializer):
+    """
+    Serializes the response from GET /api/v1/recommendations/.
+    Returns upgraded AI-powered job recommendations with semantic
+    similarity and swipe-history blending.
+    """
+    user_id = serializers.CharField()
+    resume_id = serializers.UUIDField(allow_null=True, required=False)
+    recommendations = RecommendationItemSerializer(many=True)
+    count = serializers.IntegerField()
+    match_type = serializers.CharField()
+    detail = serializers.CharField(required=False)
+
+
 class ResumeListResponseSerializer(serializers.Serializer):
     """
     Wraps the resume list in a paginated response per the Day-1 contract.
