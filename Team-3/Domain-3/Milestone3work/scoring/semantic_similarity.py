@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 """Day 4 semantic similarity using sentence-transformers."""
 
 from sentence_transformers import SentenceTransformer
@@ -104,7 +104,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-=======
+
 """Day 4 semantic similarity using sentence-transformers."""
 
 from sentence_transformers import SentenceTransformer
@@ -210,4 +210,4 @@ def main():
 
 if __name__ == "__main__":
     main()
->>>>>>> 842db0727a87e39d282eab0bb4077e65bdc06c9a
+
