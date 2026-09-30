@@ -67,8 +67,9 @@ export default function LoginPage() {
         password: password,
       });
 
-      // Navigate to discover on successful login
-      navigate('/discover');
+      // Route through the role-aware dashboard; its recommendation page is
+      // connected to the live Matching Engine.
+      navigate('/dashboard');
     } catch (err) {
       // User-friendly error message
       const message = err?.message || 'Unable to sign in right now. Please check your credentials and try again.';

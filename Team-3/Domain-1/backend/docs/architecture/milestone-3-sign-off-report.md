@@ -62,9 +62,10 @@ Client applications exclusively communicate with the API Gateway (Port :8000), w
 - **Data Ownership:** A Job Seeker can only parse, score, and receive suggestions for their *own* resume. The API Gateway injects the authenticated `X-User-Id` into downstream requests, preventing IDOR (Insecure Direct Object Reference) vulnerabilities.
 
 ## 10. QA / Regression Status
-- **Missing QA Evidence:** Intern 5 has *not* published Milestone 3 QA regression evidence in `Domain-5/testing/`. 
-- **Developer Verification:** The local test suite passes (155/155 tests successful), but independent QA sign-off is lacking.
-- **Status:** **BLOCKED**
+- **QA Evidence:** Intern 5 published the Milestone 3 Day 5 regression report and QA summary in `Team-3/Domain-5/testing/`.
+- **Local Verification:** Domain 1 resume tests (20), Domain 3 scoring/recommendation tests (6), Domain 5 contract tests (2), and the authenticated M3 upload/list/detail/parse/ATS gateway flow passed. Frontend build and image checks passed.
+- **M2 Regression:** Authenticated swipe/history live check passed using a temporary Job Seeker account; its account and swipe were removed after the test.
+- **Status:** Local M2/M3 QA passed; broader mentor/code-freeze approval remains separate.
 
 ## 11. API Documentation Status
 - The OpenAPI/Swagger documentation (`schema.json`) has been generated and finalized based on the actual implemented routes, capturing all new M3 endpoints and legacy M2 endpoints.
@@ -80,8 +81,8 @@ Client applications exclusively communicate with the API Gateway (Port :8000), w
 7. Fetch upgraded recommendations (`GET /api/v1/recommendations/`) and display ATS-aware job suggestions.
 
 ## 13. Code Freeze Status
-- **Status:** **PENDING QA**
-- The codebase is developmentally stable and locally tested, but a formal code freeze cannot be enacted without Intern 5's QA approval.
+- **Status:** **PENDING TEAM APPROVAL**
+- Local M3 QA evidence is available. The team and mentor must decide code freeze and demo approval.
 
 ## 14. Known Limitations
 - Notifications, application tracking dashboards, analytics visualization, and production/cloud deployment are explicitly out of scope for Milestone 3 per the SRS.
@@ -95,5 +96,6 @@ Future milestones can consume the following stabilized metadata:
 - Output from the semantic recommendation engine.
 
 ## 16. Final Sign-Off Status
-- **Status: NOT SIGNED OFF**
-- Justification: Waiting on Domain-5 (Intern 5) to execute and document the final QA regression pass for Milestone 3.
+- **Status: LOCAL QA PASSED; TEAM SIGN-OFF PENDING**
+- Evidence: `Team-3/Domain-5/testing/milestone-3-day-5-report.md`.
+- Justification: The local M3 regression passed; this report does not grant mentor/demo approval, code freeze, or production release.

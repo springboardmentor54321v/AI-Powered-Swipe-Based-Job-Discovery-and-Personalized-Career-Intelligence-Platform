@@ -11,11 +11,13 @@ from .m3_views import (
     M3ResumeListView,
     M3ResumeParseView,
     M3RecommendationsView,
+    M3ResumeVersionDetailView,
 )
 
 urlpatterns = [
     path("upload", M3ResumeUploadView.as_view(), name="m3-resume-upload"),
     path("", M3ResumeListView.as_view(), name="m3-resume-list"),
+    path("<uuid:resume_id>/versions/<uuid:version_id>", M3ResumeVersionDetailView.as_view(), name="m3-resume-version-detail"),
     path("<str:resume_id>/parse", M3ResumeParseView.as_view(), name="m3-resume-parse"),
     path("recommendations", M3RecommendationsView.as_view(), name="m3-resume-recommendations"),
 ]

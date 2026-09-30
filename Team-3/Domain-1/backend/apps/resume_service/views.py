@@ -82,9 +82,9 @@ class RecommendationsView(APIView):
     def get(self, request):
         return forward_to_downstream(
             request=request,
-            target_base_url=getattr(settings, "RESUME_SERVICE_URL", "http://127.0.0.1:8002"),
+            target_base_url=getattr(settings, "MATCHING_ENGINE_URL", "http://127.0.0.1:8004"),
             subpath="api/v1/recommendations",
-            service_name="Recommendation Service",
+            service_name="Matching Engine",
         )
 
 

@@ -30,7 +30,7 @@ from django.conf import settings
 
 from apps.users.models import User, Role, RoleEnum
 from apps.auth_service.jwt_utils import generate_access_token
-from apps.resume_service.models import Resume, ResumeVersion
+from apps.resume_service.models import Resume, ResumeVersion, ResumeSkill, Skill
 from apps.resume_service.storage import file_exists
 
 # Use a temporary directory for test resume storage
@@ -361,6 +361,36 @@ class M3ResumeListTests(TestCase):
         self.assertTrue(resume["current_version"]["is_active"])
         self.assertIn("versions", resume)
         self.assertEqual(len(resume["versions"]), 2)
+
+    def test_05_version_detail_returns_skills_for_owner(self):
+        upload = self._upload_for_user(self.token_a, b"detail")
+        self.assertEqual(upload.status_code, status.HTTP_201_CREATED)
+        data = upload.json()
+        version = ResumeVersion.objects.get(id=data["version_id"])
+        skill = Skill.objects.create(name="Python", normalized_name="python")
+        ResumeSkill.objects.create(resume_version=version, skill=skill)
+
+        url = reverse(
+            "m3-resume-version-detail",
+            kwargs={"resume_id": data["resume_id"], "version_id": data["version_id"]},
+        )
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token_a}")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["resume_id"], data["resume_id"])
+        self.assertEqual(response.json()["extracted_skills"], ["Python"])
+
+    def test_06_version_detail_hides_other_users_resume(self):
+        upload = self._upload_for_user(self.token_a, b"private-detail")
+        data = upload.json()
+        url = reverse(
+            "m3-resume-version-detail",
+            kwargs={"resume_id": data["resume_id"], "version_id": data["version_id"]},
+        )
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token_b}")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # ── Test 5: RBAC — Recruiter denied list ──
     def test_05_recruiter_denied_list(self):

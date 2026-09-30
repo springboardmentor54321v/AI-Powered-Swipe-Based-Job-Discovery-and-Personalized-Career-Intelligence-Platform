@@ -1,39 +1,53 @@
-# SwipeX Milestone 2 — Intern 5 Test Plan
+# Team 3 Milestone 3 QA Regression Plan
+
+**QA owner:** Intern 5 — Platform, Testing & Deployment
 
 ## Purpose
 
-Validate the M2 local platform: Job, Search, Company, Swipe, Matching/Recommendations, gateway permissions, frontend flow, and regression. Production packaging and deployment are excluded.
+Validate the Milestone 3 resume, parsing, ATS, suggestions, and recommendation work while rerunning the Milestone 2 gateway regression checks. The QA scope is local development and CI; it does not include a production deployment.
 
-## Coverage
+## Coverage and evidence
 
-| Level | Intern 5 work | Evidence |
+| Level | Coverage | Evidence |
 | --- | --- | --- |
-| Contract | Maintain M2 endpoint/security expectations | milestone-2-api-contracts.md |
-| API automation | Job/filter/search/company/swipe smoke tests | test_m2_live_contracts.py |
-| Integration | Run services together through Docker Compose | integration-checklist.md |
-| E2E | Login → filter/search → company → swipe → recommendation | browser/API evidence |
-| RBAC | Anonymous, job seeker, recruiter, admin access rules | HTTP status evidence |
-| Regression | Re-run M1/M2 flows after fixes | quality report |
+| Contract | Frozen M1/M2 API contracts | `automated/test_contract_document.py`, `automated/test_m2_contract_document.py` |
+| Domain 1 unit/API | Resume upload, format validation, versioning, ownership, role access, version details | `Team-3/Domain-1/backend/tests/test_m3_resume.py` |
+| Domain 3 unit | Keyword scoring, suggestions, recommendation ranking | `Team-3/Domain-3/Milestone3work/tests/test_keyword_ats.py`, `test_day5.py` |
+| M2 live regression | Jobs, search, companies, anonymous swipe security, optional authenticated history | `automated/test_m2_live_contracts.py` |
+| M3 live contracts | Anonymous upload/ATS rejection; optional authenticated upload/list/detail/parse/ATS | `automated/test_m3_live_contracts.py` |
+| Integrated services | Compose image, PDF extraction, skill extraction, semantic and blended ATS adapter | `docker-compose.full.dev.yml` and Day 5 report |
+| Day 6 accuracy spot check | Five synthetic labeled keyword-overlap examples scored by the Domain 3 production keyword scorer | `automated/day6_accuracy_spot_check.py`, `automated/test_m3_day6_accuracy.py`, `milestone-3-day-6-report.md` |
+| Frontend | Resume page production bundle | `Team-3/Domain-4` `npm run build` |
+| CI | Django, contracts, Domain 3 unit tests, frontend build | `.github/workflows/milestone-2-ci.yml` |
 
-## Entry criteria
+## Local regression commands
 
-1. Docker Desktop is running.
-2. Gateway, frontend, PostgreSQL, Redis, Job/Swipe/Company and Matching services are available locally.
-3. M2 API response shapes are confirmed by service owners.
-4. A disposable job-seeker token is available for protected tests.
+From the repository root:
+
+```powershell
+python -m pytest Team-3/Domain-5/testing/automated -m "not integration"
+python -m pytest Team-3/Domain-3/Milestone3work/tests/test_keyword_ats.py Team-3/Domain-3/Milestone3work/tests/test_day5.py -q
+python Team-3/Domain-5/testing/automated/day6_accuracy_spot_check.py
+```
+
+For live checks, start the local Compose stack, then set the gateway URL:
+
+```powershell
+$env:SWIPEX_M2_GATEWAY_URL = 'http://localhost:8080'
+$env:SWIPEX_GATEWAY_URL = 'http://localhost:8080'
+$env:SWIPEX_M3_GATEWAY_URL = 'http://localhost:8080'
+python -m pytest Team-3/Domain-5/testing/automated -m integration -q
+```
+
+The authenticated M2 and M3 tests require their respective disposable tokens:
+`SWIPEX_M2_ACCESS_TOKEN` and `SWIPEX_M3_ACCESS_TOKEN`. The M3 journey creates a resume record; use a disposable Job Seeker account and synthetic resume. If an authenticated test is skipped, report it as pending rather than a full E2E pass.
 
 ## Exit criteria
 
-- Contract tests and frontend production build pass.
-- Every required live test passes, or has a defect record and approved exception.
-- No Critical or High defect remains open.
-- Regression, RBAC and E2E evidence is attached.
-- QA report records that no production deployment happened.
-
-## Commands
-
-    python -m pytest testing\\automated -m "not integration"
-    $env:SWIPEX_M2_GATEWAY_URL = "http://localhost:8080"
-    python -m pytest testing\\automated\\test_m2_live_contracts.py -m integration
-    $env:SWIPEX_M2_ACCESS_TOKEN = "<temporary-job-seeker-token>"
-    python -m pytest testing\\automated\\test_m2_live_contracts.py -m integration
+- CI unit, contract, lint, and frontend-build jobs pass.
+- Local M2/M3 anonymous gateway checks pass; authenticated E2E either passes with a disposable token or remains explicitly pending.
+- No unresolved Critical or High defects remain in the tested local scope.
+- Regression evidence and any limitations are recorded in `milestone-3-day-5-report.md` and `integration-checklist.md`.
+- Day 6 spot-check results are recorded in `milestone-3-day-6-report.md`; its five synthetic examples measure consistency with a keyword-overlap rubric, not general semantic or hiring accuracy.
+- Day 7 handoff and remaining approval boundaries are recorded in `milestone-3-day-7-handoff.md`.
+- QA status does not imply mentor approval, code-freeze approval, or production release.

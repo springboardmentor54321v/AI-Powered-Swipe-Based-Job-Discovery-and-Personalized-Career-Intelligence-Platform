@@ -33,7 +33,9 @@ import api, { ApiError } from './api.js';
 export function normalizeAtsResult(raw, resumeId, jobId) {
   if (!raw) return null;
 
-  const matchScore = typeof raw.match_score === 'number'
+  const matchScore = typeof raw.final_ats_score === 'number'
+    ? raw.final_ats_score
+    : typeof raw.match_score === 'number'
     ? raw.match_score
     : typeof raw.score === 'number'
     ? raw.score
@@ -82,13 +84,17 @@ export function normalizeAtsResult(raw, resumeId, jobId) {
     job_id: raw.job_id || jobId,
     match_score: Math.round(matchScore * 10) / 10,
     keyword_score: typeof raw.keyword_score === 'number' ? raw.keyword_score : null,
-    semantic_similarity: typeof raw.semantic_similarity === 'number' ? raw.semantic_similarity : null,
+    semantic_similarity: typeof raw.semantic_score === 'number'
+      ? raw.semantic_score
+      : typeof raw.semantic_similarity === 'number'
+      ? (raw.semantic_similarity <= 1 ? raw.semantic_similarity * 100 : raw.semantic_similarity)
+      : null,
     matched_skills: matchedSkills,
     missing_skills: missingSkills,
     missing_keywords: missingKeywords,
     suggestions: suggestions,
     raw_suggestions: Array.isArray(raw.suggestions) ? raw.suggestions : [],
-    generated_by: raw.generated_by || 'semantic-v1',
+    generated_by: raw.generated_by || 'blended-keyword-semantic-v1',
     scored_at: raw.scored_at || new Date().toISOString(),
   };
 }

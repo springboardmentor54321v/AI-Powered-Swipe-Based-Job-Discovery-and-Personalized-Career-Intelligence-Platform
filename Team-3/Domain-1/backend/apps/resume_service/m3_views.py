@@ -33,6 +33,7 @@ from apps.auth_service.permissions import IsJobSeeker
 from .models import Resume, ResumeVersion, Skill, ResumeSkill
 from .serializers import (
     ResumeUploadResponseSerializer,
+    ResumeVersionSerializer,
     ResumeSummarySerializer,
     ResumeParseResponseSerializer,
     ATSScoreResponseSerializer,
@@ -251,6 +252,40 @@ class M3ResumeListView(APIView):
             "results": serializer.data,
         }
 
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+class M3ResumeVersionDetailView(APIView):
+    """Return version metadata and parsed skills for the owning Job Seeker."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsJobSeeker]
+
+    @extend_schema(
+        operation_id="m3_get_resume_version",
+        summary="Get Resume Version Details",
+        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
+        tags=["Resume (M3)"],
+    )
+    def get(self, request, resume_id, version_id):
+        version = (
+            ResumeVersion.objects.select_related("resume")
+            .prefetch_related("resume_skills__skill")
+            .filter(id=version_id, resume_id=resume_id, resume__owner=request.user)
+            .first()
+        )
+        if version is None:
+            return Response(
+                {"detail": "Resume version not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        response_data = ResumeVersionSerializer(version).data
+        response_data["resume_id"] = str(version.resume_id)
+        response_data["extracted_skills"] = [
+            skill.name for skill in Skill.objects.filter(
+                resume_skills__resume_version=version
+            ).order_by("name")
+        ]
         return Response(response_data, status=status.HTTP_200_OK)
 
 

@@ -285,11 +285,20 @@ export const resumeService = {
           is_active: true,
           extraction_status: 'pending',
           extracted_skills: [],
+          detail_unavailable: true,
           metadata: {},
         };
       }
       throw err;
     }
+  },
+
+  /** Parse the selected resume and persist its extracted skills. */
+  async parseResume(resumeId) {
+    if (!resumeId) {
+      throw new ApiError('Resume ID is required to parse the uploaded document.', 400);
+    }
+    return api.post(`/resumes/${resumeId}/parse`, {});
   },
 
   /**
@@ -307,12 +316,20 @@ export const resumeService = {
       });
 
       return {
-        match_score: typeof res?.match_score === 'number' ? res.match_score : null,
+        match_score: typeof res?.final_ats_score === 'number'
+          ? res.final_ats_score
+          : typeof res?.match_score === 'number' ? res.match_score : null,
         matched_skills: Array.isArray(res?.matched_skills) ? res.matched_skills : [],
         missing_skills: Array.isArray(res?.missing_skills) ? res.missing_skills : [],
         missing_keywords: Array.isArray(res?.missing_keywords) ? res.missing_keywords : [],
+        keyword_score: typeof res?.keyword_score === 'number' ? res.keyword_score : null,
+        semantic_similarity: typeof res?.semantic_score === 'number'
+          ? res.semantic_score
+          : typeof res?.semantic_similarity === 'number'
+          ? (res.semantic_similarity <= 1 ? res.semantic_similarity * 100 : res.semantic_similarity)
+          : null,
         suggestions: Array.isArray(res?.suggestions) ? res.suggestions : [],
-        generated_by: res?.generated_by || 'semantic-v1',
+        generated_by: res?.generated_by || 'blended-keyword-semantic-v1',
       };
     } catch {
       return null;

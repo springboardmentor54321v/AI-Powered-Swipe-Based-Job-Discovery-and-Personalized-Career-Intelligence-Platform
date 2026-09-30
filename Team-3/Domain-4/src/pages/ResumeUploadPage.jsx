@@ -92,9 +92,11 @@ export default function ResumeUploadPage() {
           setVersions((prev) =>
             prev.map((v) => (v.version_id === ver.version_id ? { ...v, ...detail } : v))
           );
+        } else if (detail?.detail_unavailable) {
+          setUploadError('Resume details are not available yet. Try refreshing after parsing completes.');
         }
-      } catch {
-        // If version detail endpoint is unavailable or fails, keep current version in view
+      } catch (error) {
+        setUploadError(error.message || 'Unable to load extracted resume skills.');
       }
     }
   };
@@ -108,12 +110,24 @@ export default function ResumeUploadPage() {
     try {
       const uploadedVersion = await resumeService.uploadResume(file, customLabel);
 
+      let parseError = null;
+      try {
+        await resumeService.parseResume(uploadedVersion.resume_id);
+      } catch (error) {
+        parseError = error;
+      }
+
       // Refresh list from server to reflect the newly persisted version
       await fetchResumeList(uploadedVersion.version_id);
 
       setShowUploadZone(false);
       const versionNum = uploadedVersion.version_number ? `Version ${uploadedVersion.version_number}` : 'new version';
-      setUploadSuccessMessage(`Successfully uploaded "${uploadedVersion.original_filename}" as ${versionNum}!`);
+      if (parseError) {
+        setUploadSuccessMessage(`Uploaded "${uploadedVersion.original_filename}" as ${versionNum}.`);
+        setUploadError(`Resume uploaded, but parsing failed: ${parseError.message || 'Please try again later.'}`);
+      } else {
+        setUploadSuccessMessage(`Successfully uploaded and parsed "${uploadedVersion.original_filename}" as ${versionNum}!`);
+      }
     } catch (err) {
       setUploadError(err.message || 'Failed to upload resume. Please try again.');
     } finally {

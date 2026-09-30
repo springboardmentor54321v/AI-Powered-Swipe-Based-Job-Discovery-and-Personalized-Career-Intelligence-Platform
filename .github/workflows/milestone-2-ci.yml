@@ -1,4 +1,4 @@
-name: Milestone 2 Quality Checks
+name: Team 3 Quality Checks
 
 on:
   push:
@@ -10,6 +10,45 @@ permissions:
   contents: read
 
 jobs:
+  resume-upload-list-tests:
+    name: Milestone 3 resume upload and list tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: swipex_test
+          POSTGRES_USER: swipex
+          POSTGRES_PASSWORD: swipex-test-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U swipex -d swipex_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_NAME: swipex_test
+      DATABASE_USER: swipex
+      DATABASE_PASSWORD: swipex-test-password
+      DATABASE_HOST: localhost
+      DATABASE_PORT: "5432"
+      RESUME_STORAGE_PATH: ${{ runner.temp }}/swipex-test-resumes
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install backend and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r Team-3/Domain-1/backend/requirements.txt pytest
+      - name: Run resume upload and list API tests with temporary file storage
+        working-directory: Team-3/Domain-1/backend
+        run: python manage.py test tests.test_m3_resume --verbosity 2
+
   contract-tests:
     name: Domain 5 contract tests
     runs-on: ubuntu-latest
@@ -21,9 +60,27 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install test runner
-        run: python -m pip install --upgrade pip pytest
+        run: python -m pip install --upgrade pip pytest ruff
+      - name: Lint automated API tests
+        run: ruff check --select E4,E7,E9,F Team-3/Domain-5/testing/automated
       - name: Run static API contract tests
         run: python -m pytest Team-3/Domain-5/testing/automated -m "not integration"
+
+  domain3-scoring-tests:
+    name: Domain 3 scoring and recommendation unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip pytest requests
+      - name: Run scoring and recommendation tests
+        working-directory: Team-3/Domain-3/Milestone3work
+        run: python -m pytest tests/test_keyword_ats.py tests/test_day5.py -q
 
   frontend-build:
     name: Domain 4 production build

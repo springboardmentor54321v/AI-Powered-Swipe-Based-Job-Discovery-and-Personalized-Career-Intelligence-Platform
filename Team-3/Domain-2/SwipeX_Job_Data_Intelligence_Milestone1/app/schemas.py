@@ -15,6 +15,8 @@ class JobOut(BaseModel):
     posted_at: datetime
     experience_level: str
     applicant_count: int
+    posted_time: datetime
+    competition_level: str
 
 
 class JobDetail(JobOut):
