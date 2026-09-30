@@ -1,6 +1,7 @@
 name: Team 3 Quality Checks
 
 on:
+  workflow_dispatch:
   push:
     branches: [Team-3]
   pull_request:
