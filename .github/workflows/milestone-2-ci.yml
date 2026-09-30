@@ -34,7 +34,6 @@ jobs:
       DATABASE_PASSWORD: swipex-test-password
       DATABASE_HOST: localhost
       DATABASE_PORT: "5432"
-      RESUME_STORAGE_PATH: ${{ runner.temp }}/swipex-test-resumes
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -42,6 +41,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Configure temporary resume storage
+        run: echo "RESUME_STORAGE_PATH=$RUNNER_TEMP/swipex-test-resumes" >> "$GITHUB_ENV"
       - name: Install backend and test dependencies
         run: |
           python -m pip install --upgrade pip
