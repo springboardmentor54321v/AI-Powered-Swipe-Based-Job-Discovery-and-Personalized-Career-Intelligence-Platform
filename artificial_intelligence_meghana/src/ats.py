@@ -2,6 +2,7 @@
 ATS Scoring Engine v1 module for SwipeX Intern 4 AI/ML Career Intelligence Service.
 Calculates keyword-match ATS score, detects missing skills/keywords deterministically.
 """
+from src.suggestions import generate_suggestions
 
 # Threshold below which missing skills/keywords are forcibly reported
 ATS_MISSING_THRESHOLD = 80.0
@@ -110,7 +111,7 @@ def score_resume_against_job(resume_data: dict, job_data: dict, semantic_engine=
     status_tag = "heuristic-v1" if semantic_score is None else "blended-v1"
 
     # Strict output contract compliant with Milestone 3 requirements and M2 backward compatibility
-    return {
+    result = {
         "score": final_score,
         "keyword_score": keyword_score,
         "semantic_score": semantic_score,
@@ -123,6 +124,10 @@ def score_resume_against_job(resume_data: dict, job_data: dict, semantic_engine=
         "match_score": final_score, 
         "generated_by": status_tag
     }
+
+    # Inject suggestions into the final result payload
+    result["suggestions"] = generate_suggestions(result)
+    return result
 
 
 def calculate_ats_score(resume_skills: list[str], job_required_skills: list[str]) -> dict:
