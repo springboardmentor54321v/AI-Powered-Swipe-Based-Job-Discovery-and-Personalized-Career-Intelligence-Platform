@@ -1,6 +1,19 @@
-"""ASGI config for SwipeX project."""
 import os
-from django.core.asgi import get_asgi_application
+import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-application = get_asgi_application()
+django.setup()
+
+from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from apps.notification_service.routing import websocket_urlpatterns
+from apps.auth_service.middleware import JWTAuthMiddlewareStack
+
+django_asgi_app = get_asgi_application()
+
+application = ProtocolTypeRouter({
+    "http": django_asgi_app,
+    "websocket": JWTAuthMiddlewareStack(
+        URLRouter(websocket_urlpatterns)
+    ),
+})

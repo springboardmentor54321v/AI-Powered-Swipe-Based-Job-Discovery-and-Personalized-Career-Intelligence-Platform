@@ -10,6 +10,8 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+import apps.notification_service.views
+
 class HealthCheckView(APIView):
     """
     Development health check endpoint (GET /health).
@@ -52,6 +54,14 @@ urlpatterns = [
 
     # Milestone 3 — AI Suggestions (Day 5)
     path("api/v1/suggestions/", include("apps.resume_service.suggestions_urls")),
+
+    # Milestone 4 — Day 2
+    path("api/v1/notifications/", include("apps.notification_service.urls")),
+    path("api/v1/alert-preferences/", apps.notification_service.views.AlertPreferenceView.as_view(), name="alert-prefs"),
+
+    # Milestone 4 — Day 3
+    path("api/v1/applications/", include("apps.application_service.urls")),
+    path("api/v1/analytics/", include("apps.analytics_service.urls")),
 ]
 
 

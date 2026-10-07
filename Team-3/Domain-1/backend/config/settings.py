@@ -15,6 +15,7 @@ ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.
 
 # Application definition
 INSTALLED_APPS = [
+    "daphne",
     # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
@@ -33,6 +34,10 @@ INSTALLED_APPS = [
     "apps.auth_service.apps.AuthServiceConfig",
     "apps.job_service.apps.JobServiceConfig",
     "apps.resume_service.apps.ResumeServiceConfig",
+    "apps.notification_service",
+    "apps.application_service",
+    "apps.analytics_service",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -115,6 +120,17 @@ REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
     ],
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+    ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle"
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "100/day",
+        "user": "1000/day"
+    }
 }
 
 # drf-spectacular (OpenAPI / Swagger UI)
@@ -131,7 +147,24 @@ SPECTACULAR_SETTINGS = {
 }
 
 # CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    origin.strip() 
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",") 
+    if origin.strip()
+]
+
+# Secure HTTP Headers (Day 4)
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # Redis Cache Configuration (Prepared for local development)
 REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
@@ -149,6 +182,15 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "")
 
+# Email Configuration
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.getenv("SMTP_HOST", "localhost")
+EMAIL_PORT = int(os.getenv("SMTP_PORT", 1025))
+EMAIL_HOST_USER = os.getenv("SMTP_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("SMTP_USE_TLS", "False").lower() == "true"
+DEFAULT_FROM_EMAIL = os.getenv("SENDER_EMAIL", "noreply@swipex.app")
+
 # Downstream Microservices URLs (API Gateway routing)
 JOB_SERVICE_URL = os.getenv("JOB_SERVICE_URL", "http://127.0.0.1:8001")
 RESUME_SERVICE_URL = os.getenv("RESUME_SERVICE_URL", "http://127.0.0.1:8002")
@@ -160,3 +202,14 @@ MATCHING_ENGINE_URL = os.getenv("MATCHING_ENGINE_URL", os.getenv("RESUME_SERVICE
 RESUME_STORAGE_PATH = os.getenv("RESUME_STORAGE_PATH", os.path.join(BASE_DIR, "media", "resumes"))
 RESUME_MAX_FILE_SIZE = int(os.getenv("RESUME_MAX_FILE_SIZE", str(5 * 1024 * 1024)))  # 5 MB default
 
+# ASGI Configuration for Channels
+ASGI_APPLICATION = "config.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.environ.get("REDIS_HOST", "127.0.0.1"), int(os.environ.get("REDIS_PORT", 6379)))],
+        },
+    },
+}

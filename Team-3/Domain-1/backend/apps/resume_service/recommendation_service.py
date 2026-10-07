@@ -64,6 +64,21 @@ def get_upgraded_recommendations(
 
     try:
         from recommendation_engine import UpgradedRecommendationEngine
+        import intern2_client
+        
+        # Monkey-patch fetch_all_jobs at runtime to flatten paginated results
+        # since we are not allowed to modify Domain-3 source code.
+        if not hasattr(intern2_client, "_original_fetch_all_jobs"):
+            intern2_client._original_fetch_all_jobs = intern2_client.fetch_all_jobs
+            
+            def patched_fetch_all_jobs():
+                data = intern2_client._original_fetch_all_jobs()
+                if isinstance(data, dict):
+                    return data.get("results") or data.get("jobs", [])
+                return data
+                
+            intern2_client.fetch_all_jobs = patched_fetch_all_jobs
+
     except ImportError as e:
         logger.error(f"Failed to import Intern 4 UpgradedRecommendationEngine: {e}")
         raise RuntimeError(
