@@ -1,5 +1,7 @@
 # Team 3 Milestone 3 QA Regression Plan
 
+> This document records M3 regression scope. Milestone 4 platform/release checks are defined in [`milestone-4-deployment-runbook.md`](milestone-4-deployment-runbook.md) and their release evidence belongs in [`milestone-4-qa-report.md`](milestone-4-qa-report.md).
+
 **QA owner:** Intern 5 — Platform, Testing & Deployment
 
 ## Purpose
