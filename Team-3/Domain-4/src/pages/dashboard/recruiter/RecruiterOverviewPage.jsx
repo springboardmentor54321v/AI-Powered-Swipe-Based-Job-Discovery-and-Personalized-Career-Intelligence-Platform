@@ -16,7 +16,10 @@ import {
 import Button from '../../../components/common/Button';
 import Chip from '../../../components/common/Chip';
 import jobService from '../../../services/jobs';
+import applicationService from '../../../services/applications';
+import analyticsService from '../../../services/analytics';
 import authService from '../../../services/auth';
+import ApplicationFunnelChart from '../../../components/analytics/ApplicationFunnelChart';
 
 export default function RecruiterOverviewPage() {
   const navigate = useNavigate();
@@ -25,18 +28,22 @@ export default function RecruiterOverviewPage() {
 
   const [jobs, setJobs] = useState([]);
   const [swipes, setSwipes] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       jobService.listJobs({}),
-      jobService.getSwipeHistory()
-    ]).then(([jobList, swipeList]) => {
+      jobService.getSwipeHistory(),
+      applicationService.getApplications().catch(() => [])
+    ]).then(([jobList, swipeList, appList]) => {
       setJobs(Array.isArray(jobList) ? jobList : []);
       setSwipes(Array.isArray(swipeList) ? swipeList : []);
+      setApplications(Array.isArray(appList) ? appList : []);
     }).catch(() => {
       setJobs([]);
       setSwipes([]);
+      setApplications([]);
     }).finally(() => {
       setLoading(false);
     });
@@ -47,7 +54,7 @@ export default function RecruiterOverviewPage() {
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      
+
       {/* Top Banner */}
       <div className="surface-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-white/[0.08]">
         <div className="space-y-1">
@@ -93,9 +100,9 @@ export default function RecruiterOverviewPage() {
 
       {/* Recruiter Overview Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        
+
         {/* Metric 1: Active Jobs */}
-        <div 
+        <div
           onClick={() => navigate('/dashboard/recruiter/jobs')}
           className="surface-card p-4 space-y-1 hover-card cursor-pointer"
         >
@@ -112,7 +119,7 @@ export default function RecruiterOverviewPage() {
         </div>
 
         {/* Metric 2: Total Jobs Posted */}
-        <div 
+        <div
           onClick={() => navigate('/dashboard/recruiter/jobs')}
           className="surface-card p-4 space-y-1 hover-card cursor-pointer"
         >
@@ -129,7 +136,7 @@ export default function RecruiterOverviewPage() {
         </div>
 
         {/* Metric 3: Applications Received */}
-        <div 
+        <div
           onClick={() => navigate('/dashboard/recruiter/applications')}
           className="surface-card p-4 space-y-1 hover-card cursor-pointer"
         >
@@ -146,7 +153,7 @@ export default function RecruiterOverviewPage() {
         </div>
 
         {/* Metric 4: Candidates in Pipeline */}
-        <div 
+        <div
           onClick={() => navigate('/dashboard/recruiter/candidates')}
           className="surface-card p-4 space-y-1 hover-card cursor-pointer"
         >
@@ -165,7 +172,7 @@ export default function RecruiterOverviewPage() {
 
       {/* Main Grid: Recent Applications & Active Job Posts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         {/* Section 1: Recent Applications Received */}
         <div className="surface-card space-y-4 border-white/[0.08]">
           <div className="flex items-center justify-between border-b border-outline-variant pb-3">
@@ -280,40 +287,74 @@ export default function RecruiterOverviewPage() {
 
       </div>
 
-      {/* Recruitment Activity Stream */}
-      <div className="surface-card p-6 space-y-4 border-white/[0.08]">
-        <div className="flex items-center justify-between border-b border-outline-variant pb-3">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-amber-400" />
-            <h2 className="text-sm font-bold text-content">Recruitment Funnel & Sourcing Velocity</h2>
-          </div>
-          <span className="text-[11px] text-content-subtle">Real-time telemetry</span>
-        </div>
+      {/* Recruitment Funnel Chart (Milestone 4) */}
+      {(() => {
+        const shortlistedCount = applications.filter((a) => {
+          const s = (a.status || '').toLowerCase();
+          return s === 'shortlisted' || s === 'screened';
+        }).length;
+        const interviewCount = applications.filter((a) => {
+          const s = (a.status || '').toLowerCase();
+          return s === 'interview' || s === 'interviewed';
+        }).length;
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
-            <span className="text-content-subtle block text-[11px]">Candidate Deck Impressions</span>
-            <span className="text-lg font-bold text-content">
-              {swipes.length * 4 + 32} views
-            </span>
-            <p className="text-[11px] text-emerald-400">Total job cards served to job seekers</p>
-          </div>
+        const funnel = {
+          saved: swipes.length,
+          applied: inboundCandidates.length > 0 ? inboundCandidates.length : applications.length,
+          shortlisted: shortlistedCount,
+          interview: interviewCount,
+        };
 
-          <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
-            <span className="text-content-subtle block text-[11px]">Swipe Match Conversion</span>
-            <span className="text-lg font-bold text-content">
-              {swipes.length > 0 ? `${Math.round((inboundCandidates.length / swipes.length) * 100)}%` : '78%'}
-            </span>
-            <p className="text-[11px] text-content-subtle">Impressions converted to applications</p>
-          </div>
+        const conversionRate = swipes.length > 0
+          ? `${Math.round((inboundCandidates.length / swipes.length) * 100)}%`
+          : '0%';
 
-          <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
-            <span className="text-content-subtle block text-[11px]">Hiring Velocity</span>
-            <span className="text-lg font-bold text-emerald-400">&lt; 18 hours</span>
-            <p className="text-[11px] text-content-subtle">Average turnaround from swipe to screen</p>
-          </div>
-        </div>
-      </div>
+        return (
+          <>
+            <ApplicationFunnelChart
+              funnel={funnel}
+              title="Candidate Application Pipeline Funnel"
+            />
+
+            {/* Recruitment Activity Stream */}
+            <div className="surface-card p-6 space-y-4 border-white/[0.08]">
+              <div className="flex items-center justify-between border-b border-outline-variant pb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-amber-400" />
+                  <h2 className="text-sm font-bold text-content">Recruitment Sourcing Velocity</h2>
+                </div>
+                <span className="text-[11px] text-content-subtle">Real-time telemetry</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
+                  <span className="text-content-subtle block text-[11px]">Total Requisitions Managed</span>
+                  <span className="text-lg font-bold text-content">
+                    {jobs.length} postings
+                  </span>
+                  <p className="text-[11px] text-emerald-400">Requisitions active in discovery catalog</p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
+                  <span className="text-content-subtle block text-[11px]">Inbound Swipe Conversion</span>
+                  <span className="text-lg font-bold text-content">
+                    {conversionRate}
+                  </span>
+                  <p className="text-[11px] text-content-subtle">Candidate interest converted to pipeline</p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
+                  <span className="text-content-subtle block text-[11px]">Active Pipeline Depth</span>
+                  <span className="text-lg font-bold text-emerald-400">
+                    {shortlistedCount + interviewCount} screened
+                  </span>
+                  <p className="text-[11px] text-content-subtle">Candidates currently in advanced stages</p>
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
     </div>
   );

@@ -33,6 +33,10 @@ import AdminUsersPage from './pages/dashboard/admin/AdminUsersPage';
 import AdminJobsPage from './pages/dashboard/admin/AdminJobsPage';
 import AdminActivityPage from './pages/dashboard/admin/AdminActivityPage';
 
+// Milestone 4 Pages
+import NotificationHistoryPage from './pages/dashboard/NotificationHistoryPage';
+import AlertPreferencesPage from './pages/dashboard/AlertPreferencesPage';
+
 import authService from './services/auth';
 
 /**
@@ -67,10 +71,10 @@ function RoleRoute({ allowedRole, children }) {
 
   if (currentRole !== allowedRole) {
     // Redirect to the user's correct role dashboard
-    const target = currentRole === 'recruiter' 
-      ? '/dashboard/recruiter' 
-      : currentRole === 'admin' 
-      ? '/dashboard/admin' 
+    const target = currentRole === 'recruiter'
+      ? '/dashboard/recruiter'
+      : currentRole === 'admin'
+      ? '/dashboard/admin'
       : '/dashboard/job-seeker';
     return <Navigate to={target} replace />;
   }
@@ -120,85 +124,85 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        
+
         {/* Public Marketing Landing & Auth Pages */}
-        <Route 
-          path="/" 
+        <Route
+          path="/"
           element={
             <AppLayout>
               <HomePage />
             </AppLayout>
-          } 
+          }
         />
-        <Route 
-          path="/login" 
+        <Route
+          path="/login"
           element={
             <PublicOnlyRoute>
               <AppLayout>
                 <LoginPage />
               </AppLayout>
             </PublicOnlyRoute>
-          } 
+          }
         />
-        <Route 
-          path="/register" 
+        <Route
+          path="/register"
           element={
             <PublicOnlyRoute>
               <AppLayout>
                 <RegisterPage />
               </AppLayout>
             </PublicOnlyRoute>
-          } 
+          }
         />
 
         {/* Global Redirects for direct legacy paths */}
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <DashboardRedirect />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/discover" 
+        <Route
+          path="/discover"
           element={
             <ProtectedRoute>
               <Navigate to="/dashboard/job-seeker/discover" replace />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/resume" 
+        <Route
+          path="/resume"
           element={
             <ProtectedRoute>
               <Navigate to="/dashboard/job-seeker/resume" replace />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/companies" 
+        <Route
+          path="/companies"
           element={
             <ProtectedRoute>
               <Navigate to="/dashboard/job-seeker/companies" replace />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/companies/:id" 
+        <Route
+          path="/companies/:id"
           element={
             <ProtectedRoute>
               <Navigate to="/dashboard/job-seeker/companies/:id" replace />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/profile" 
+        <Route
+          path="/profile"
           element={
             <ProtectedRoute>
               <DashboardRedirect />
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* 1. JOB SEEKER ROLE WORKSPACE */}
@@ -218,6 +222,8 @@ export default function App() {
           <Route path="companies/:id" element={<CompanyDetailPage />} />
           <Route path="saved" element={<JobSeekerSavedJobsPage />} />
           <Route path="applications" element={<JobSeekerApplicationsPage />} />
+          <Route path="notifications" element={<NotificationHistoryPage />} />
+          <Route path="alert-preferences" element={<AlertPreferencesPage />} />
           <Route path="resume" element={<ResumeUploadPage />} />
           <Route path="ats" element={<JobSeekerAtsPage />} />
           <Route path="recommendations" element={<JobSeekerRecommendationsPage />} />
@@ -240,6 +246,7 @@ export default function App() {
           <Route path="post-job" element={<RecruiterPostJobPage />} />
           <Route path="applications" element={<RecruiterApplicationsPage />} />
           <Route path="candidates" element={<RecruiterCandidatesPage />} />
+          <Route path="notifications" element={<NotificationHistoryPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
@@ -257,6 +264,7 @@ export default function App() {
           <Route index element={<AdminOverviewPage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="jobs" element={<AdminJobsPage />} />
+          <Route path="notifications" element={<NotificationHistoryPage />} />
           <Route path="activity" element={<AdminActivityPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>

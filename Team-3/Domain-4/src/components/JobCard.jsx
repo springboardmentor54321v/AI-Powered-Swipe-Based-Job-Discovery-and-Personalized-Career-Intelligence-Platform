@@ -1,22 +1,22 @@
 import React, { useState, useRef } from 'react';
-import { 
-  Building2, 
-  MapPin, 
-  Banknote, 
-  Clock, 
-  X, 
-  Check, 
-  Users, 
-  Briefcase, 
-  Sparkles, 
+import {
+  Building2,
+  MapPin,
+  Banknote,
+  Clock,
+  X,
+  Check,
+  Users,
+  Briefcase,
+  Sparkles,
   RotateCcw
 } from 'lucide-react';
 import Chip from './common/Chip';
 import Button from './common/Button';
 
-export default function JobCard({ 
-  job, 
-  onSwipe, 
+export default function JobCard({
+  job,
+  onSwipe,
   onUndo,
   canUndo = false,
   onDragProgress,
@@ -40,7 +40,7 @@ export default function JobCard({
     const opacity = 0.8 + absProgress * 0.2;
 
     return (
-      <div 
+      <div
         style={{
           transform: `translate3d(0, ${translateY}px, 0) scale(${scale})`,
           opacity: opacity,
@@ -59,7 +59,7 @@ export default function JobCard({
     // Don't trigger drag if clicking an anchor or button
     if (e.target.closest('a') || e.target.closest('button')) return;
     if (e.button !== 0 && e.pointerType === 'mouse') return;
-    
+
     setIsDragging(true);
     startXRef.current = e.clientX;
     try {
@@ -149,19 +149,19 @@ export default function JobCard({
       }`}
     >
       {/* Right Drag Aura (Green Glow along Right Side) */}
-      <div 
-        style={{ opacity: rightOpacity }} 
-        className="absolute inset-0 rounded-3xl bg-gradient-to-l from-emerald-500/25 via-emerald-500/5 to-transparent pointer-events-none border-2 border-emerald-500/60 z-20 transition-opacity duration-75" 
+      <div
+        style={{ opacity: rightOpacity }}
+        className="absolute inset-0 rounded-3xl bg-gradient-to-l from-emerald-500/25 via-emerald-500/5 to-transparent pointer-events-none border-2 border-emerald-500/60 z-20 transition-opacity duration-75"
       />
 
       {/* Left Drag Aura (Red Glow along Left Side) */}
-      <div 
-        style={{ opacity: leftOpacity }} 
-        className="absolute inset-0 rounded-3xl bg-gradient-to-r from-red-500/25 via-red-500/5 to-transparent pointer-events-none border-2 border-red-500/60 z-20 transition-opacity duration-75" 
+      <div
+        style={{ opacity: leftOpacity }}
+        className="absolute inset-0 rounded-3xl bg-gradient-to-r from-red-500/25 via-red-500/5 to-transparent pointer-events-none border-2 border-red-500/60 z-20 transition-opacity duration-75"
       />
 
       {/* Tinder-Style Green "APPLY" Stamp (Top-Left) */}
-      <div 
+      <div
         style={{ opacity: rightOpacity }}
         className="absolute top-6 left-6 z-30 pointer-events-none -rotate-12 border-[3.5px] border-emerald-400 bg-emerald-950/90 text-emerald-400 px-3.5 py-1 rounded-xl font-black text-xl sm:text-2xl tracking-widest uppercase shadow-[0_0_25px_rgba(52,211,153,0.5)] backdrop-blur-sm transition-opacity duration-75 flex items-center gap-1.5"
       >
@@ -170,7 +170,7 @@ export default function JobCard({
       </div>
 
       {/* Tinder-Style Red "PASS" Stamp (Top-Right) */}
-      <div 
+      <div
         style={{ opacity: leftOpacity }}
         className="absolute top-6 right-6 z-30 pointer-events-none rotate-12 border-[3.5px] border-red-500 bg-red-950/90 text-red-400 px-3.5 py-1 rounded-xl font-black text-xl sm:text-2xl tracking-widest uppercase shadow-[0_0_25px_rgba(239,68,68,0.5)] backdrop-blur-sm transition-opacity duration-75 flex items-center gap-1.5"
       >
@@ -276,8 +276,9 @@ function CardContent({ job, isRecommendation = false }) {
   const skills = formatSkills(job.skills);
   const companyId = job.company_id || job.company?.toLowerCase().replace(/\s+/g, '-') || 1;
   const experience = job.experience_level || job.experience || 'All Experience Levels';
-  const applicantCount = job.applicant_count !== undefined ? job.applicant_count : (job.applicants || 14);
-  const competitionLevel = job.competition_level || (applicantCount < 20 ? 'Low' : applicantCount < 50 ? 'Medium' : 'High');
+  const applicantCount = job.applicant_count !== undefined ? job.applicant_count : (job.applicants !== undefined ? job.applicants : 0);
+  const competitionLevel = job.competition_level || (applicantCount < 50 ? 'Low' : applicantCount < 100 ? 'Medium' : 'High');
+  const isEarlyApplicant = Boolean(job.early_applicant || job.is_early_applicant);
   const rawScore = job.match_percentage ?? job.match_score;
   const matchScore = typeof rawScore === 'number' ? Math.round(rawScore > 1 ? rawScore : rawScore * 100) : null;
   const hasMatchInfo = matchScore !== null || job.ats_score != null || job.semantic_similarity != null || (isRecommendation && Boolean(job.match_type));
@@ -285,7 +286,7 @@ function CardContent({ job, isRecommendation = false }) {
 
   return (
     <div className="space-y-4">
-      
+
       {/* Top Header Badge Strip */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -364,9 +365,9 @@ function CardContent({ job, isRecommendation = false }) {
         </div>
         <div className="flex items-center gap-2 text-content-muted min-w-0">
           <Users className="w-4 h-4 text-content-subtle shrink-0" />
-          <div className="flex items-center gap-1.5 truncate">
-            <span>{applicantCount} applicants</span>
-            <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0 text-xs">
+            <span className="whitespace-nowrap">{applicantCount} applicants</span>
+            <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold shrink-0 ${
               competitionLevel.toLowerCase() === 'low'
                 ? 'text-emerald-400 bg-emerald-950/60'
                 : competitionLevel.toLowerCase() === 'medium'
@@ -375,6 +376,11 @@ function CardContent({ job, isRecommendation = false }) {
             }`}>
               {competitionLevel}
             </span>
+            {isEarlyApplicant && (
+              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold text-blue-300 bg-blue-950/60 border border-blue-800/40 shrink-0">
+                Early Applicant
+              </span>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2 text-content-muted min-w-0">

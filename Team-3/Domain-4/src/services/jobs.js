@@ -1,12 +1,12 @@
 /**
  * SwipeX Job & Swipe Service (Milestone 2 - Day 3 Live Integration)
- * 
+ *
  * Orchestrates live API communication with Intern 2's backend services:
  * - GET  /api/v1/jobs
  * - GET  /api/v1/jobs/:id
  * - POST /api/v1/swipes
  * - GET  /api/v1/swipes/history
- * 
+ *
  * Includes robust normalization and offline development fallback.
  */
 
@@ -24,8 +24,8 @@ export function normalizeJob(raw) {
   if (!raw) return null;
 
   const id = raw.job_id || raw.id;
-  const skills = Array.isArray(raw.skills) 
-    ? raw.skills 
+  const skills = Array.isArray(raw.skills)
+    ? raw.skills
     : typeof raw.skills === 'string' && raw.skills.includes('|')
     ? raw.skills.split('|').map((s) => s.trim()).filter(Boolean)
     : typeof raw.skills === 'string' && raw.skills.includes(',')
@@ -50,6 +50,7 @@ export function normalizeJob(raw) {
     experience_level: raw.experience_level || 'All Experience Levels',
     applicant_count: raw.applicant_count !== undefined ? raw.applicant_count : 0,
     competition_level: raw.competition_level || ((raw.applicant_count || 0) < 20 ? 'Low' : (raw.applicant_count || 0) < 50 ? 'Medium' : 'High'),
+    early_applicant: raw.early_applicant !== undefined ? raw.early_applicant : (raw.is_early_applicant !== undefined ? raw.is_early_applicant : undefined),
     description: raw.description || '',
     industry: raw.industry || '',
   };

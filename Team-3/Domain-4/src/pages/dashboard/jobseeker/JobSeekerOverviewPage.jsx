@@ -21,7 +21,11 @@ import jobService from '../../../services/jobs';
 import resumeService from '../../../services/resume';
 import atsService from '../../../services/ats';
 import recommendationService from '../../../services/recommendations';
+import applicationService from '../../../services/applications';
+import analyticsService from '../../../services/analytics';
 import authService from '../../../services/auth';
+import ApplicationFunnelChart from '../../../components/analytics/ApplicationFunnelChart';
+import SkillGapChart from '../../../components/analytics/SkillGapChart';
 
 export default function JobSeekerOverviewPage() {
   const navigate = useNavigate();
@@ -29,11 +33,13 @@ export default function JobSeekerOverviewPage() {
   const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'Candidate';
 
   const [swipes, setSwipes] = useState([]);
+  const [formalApps, setFormalApps] = useState([]);
   const [swipesLoading, setSwipesLoading] = useState(true);
   const [activeResume, setActiveResume] = useState(null);
   const [atsData, setAtsData] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [recsLoading, setRecsLoading] = useState(true);
+  const [seekerAnalytics, setSeekerAnalytics] = useState(null);
 
   // Time-aware greeting
   const hour = new Date().getHours();
@@ -49,6 +55,11 @@ export default function JobSeekerOverviewPage() {
       .catch(() => setSwipes([]))
       .finally(() => setSwipesLoading(false));
 
+    // Fetch formal applications to compute real stage counts
+    applicationService.getApplications()
+      .then((apps) => setFormalApps(Array.isArray(apps) ? apps : []))
+      .catch(() => setFormalApps([]));
+
     // Fetch ATS if resume exists
     if (resume?.resume_id) {
       atsService.scoreResume(resume.resume_id, 1)
@@ -62,14 +73,42 @@ export default function JobSeekerOverviewPage() {
       .then((data) => setRecommendations(Array.isArray(data) ? data : []))
       .catch(() => setRecommendations([]))
       .finally(() => setRecsLoading(false));
+
+    // Fetch Seeker Analytics
+    analyticsService.getSeekerAnalytics()
+      .then((data) => {
+        if (data && !data.error) setSeekerAnalytics(data);
+      })
+      .catch(() => {});
   }, []);
 
   const applications = swipes.filter((s) => s.direction === 'right');
-  const savedJobs = swipes.filter((s) => s.direction === 'right'); // Can be filtered or bookmarked
+  const savedJobs = swipes.filter((s) => s.direction === 'right');
+
+  // Compute real counts from actual application objects without fabricating data
+  const realShortlisted = formalApps.filter((a) => {
+    const st = (a.status || '').toLowerCase();
+    return st === 'shortlisted' || st === 'screened';
+  }).length;
+
+  const realInterview = formalApps.filter((a) => {
+    const st = (a.status || '').toLowerCase();
+    return st === 'interview' || st === 'interviewed';
+  }).length;
+
+  const funnelData = seekerAnalytics?.application_funnel || {
+    saved: savedJobs.length,
+    applied: applications.length > 0 ? applications.length : formalApps.length,
+    shortlisted: realShortlisted,
+    interview: realInterview,
+  };
+
+  const matchedSkills = atsData?.matched_skills || atsData?.matchedSkills || activeResume?.skills || [];
+  const missingSkills = atsData?.missing_skills || atsData?.missingSkills || [];
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      
+
       {/* Top Welcome Banner */}
       <div className="surface-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-white/[0.08]">
         <div className="space-y-1">
@@ -112,9 +151,9 @@ export default function JobSeekerOverviewPage() {
 
       {/* Primary Overview Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        
+
         {/* Metric 1: Applications */}
-        <div 
+        <div
           onClick={() => navigate('/dashboard/job-seeker/applications')}
           className="surface-card p-4 space-y-1 hover-card cursor-pointer"
         >
@@ -131,7 +170,7 @@ export default function JobSeekerOverviewPage() {
         </div>
 
         {/* Metric 2: Saved Jobs */}
-        <div 
+        <div
           onClick={() => navigate('/dashboard/job-seeker/saved')}
           className="surface-card p-4 space-y-1 hover-card cursor-pointer"
         >
@@ -148,7 +187,7 @@ export default function JobSeekerOverviewPage() {
         </div>
 
         {/* Metric 3: ATS Score */}
-        <div 
+        <div
           onClick={() => navigate('/dashboard/job-seeker/ats')}
           className="surface-card p-4 space-y-1 hover-card cursor-pointer"
         >
@@ -165,7 +204,7 @@ export default function JobSeekerOverviewPage() {
         </div>
 
         {/* Metric 4: Recommendations */}
-        <div 
+        <div
           onClick={() => navigate('/dashboard/job-seeker/recommendations')}
           className="surface-card p-4 space-y-1 hover-card cursor-pointer"
         >
@@ -185,7 +224,7 @@ export default function JobSeekerOverviewPage() {
 
       {/* Main Grid: Recent Applications & Recommended Jobs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         {/* Section 1: Recent Applications */}
         <div className="surface-card space-y-4 border-white/[0.08]">
           <div className="flex items-center justify-between border-b border-outline-variant pb-3">
@@ -308,6 +347,12 @@ export default function JobSeekerOverviewPage() {
           )}
         </div>
 
+      </div>
+
+      {/* Milestone 4 Analytics Visualizations */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ApplicationFunnelChart funnel={funnelData} title="My Application Funnel" />
+        <SkillGapChart matchedSkills={matchedSkills} missingSkills={missingSkills} title="Verified Skills & Market Gaps" />
       </div>
 
       {/* Resume & ATS Summary Card */}

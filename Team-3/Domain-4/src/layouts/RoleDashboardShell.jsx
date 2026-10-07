@@ -22,11 +22,14 @@ import {
   X,
   ChevronRight,
   LayoutDashboard,
-  CheckCircle2
+  CheckCircle2,
+  Bell,
+  Sliders
 } from 'lucide-react';
 import authService from '../services/auth';
 import Button from '../components/common/Button';
 import Chip from '../components/common/Chip';
+import NotificationBell from '../components/notifications/NotificationBell';
 
 export default function RoleDashboardShell() {
   const navigate = useNavigate();
@@ -70,6 +73,8 @@ export default function RoleDashboardShell() {
         { path: '/dashboard/job-seeker/companies', label: 'Companies & Startups', icon: Building2 },
         { path: '/dashboard/job-seeker/saved', label: 'Saved Jobs', icon: Bookmark },
         { path: '/dashboard/job-seeker/applications', label: 'Applications', icon: Send },
+        { path: '/dashboard/job-seeker/notifications', label: 'Notifications', icon: Bell },
+        { path: '/dashboard/job-seeker/alert-preferences', label: 'Alert Preferences', icon: Sliders },
         { path: '/dashboard/job-seeker/resume', label: 'Resume', icon: FileText },
         { path: '/dashboard/job-seeker/ats', label: 'ATS Analysis', icon: Award },
         { path: '/dashboard/job-seeker/recommendations', label: 'Recommendations', icon: Sparkles },
@@ -86,6 +91,7 @@ export default function RoleDashboardShell() {
         { path: '/dashboard/recruiter/post-job', label: 'Post a Job', icon: PlusCircle },
         { path: '/dashboard/recruiter/applications', label: 'Applications', icon: Send },
         { path: '/dashboard/recruiter/candidates', label: 'Candidates', icon: UserCheck },
+        { path: '/dashboard/recruiter/notifications', label: 'Notifications', icon: Bell },
         { path: '/dashboard/recruiter/profile', label: 'Profile', icon: User },
       ],
     },
@@ -97,6 +103,7 @@ export default function RoleDashboardShell() {
         { path: '/dashboard/admin', label: 'Dashboard Overview', icon: LayoutDashboard, end: true },
         { path: '/dashboard/admin/users', label: 'Platform Users', icon: Users },
         { path: '/dashboard/admin/jobs', label: 'Platform Jobs', icon: Database },
+        { path: '/dashboard/admin/notifications', label: 'Notifications', icon: Bell },
         { path: '/dashboard/admin/activity', label: 'Security & Activity', icon: Activity },
         { path: '/dashboard/admin/profile', label: 'Profile', icon: User },
       ],
@@ -107,10 +114,10 @@ export default function RoleDashboardShell() {
 
   return (
     <div className="min-h-screen flex bg-[#0c0d12] text-content relative">
-      
+
       {/* Desktop Fixed Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 border-r border-white/[0.08] bg-[#0e0f15] shrink-0 sticky top-0 h-screen z-30 select-none">
-        
+
         {/* Brand Header */}
         <div className="p-5 border-b border-white/[0.08] flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group" title="SwipeX Home">
@@ -238,10 +245,10 @@ export default function RoleDashboardShell() {
 
       {/* Main Content Layout */}
       <div className="flex-1 flex flex-col min-w-0">
-        
+
         {/* Top Header Bar */}
         <header className="sticky top-0 z-20 h-16 border-b border-white/[0.08] bg-[#0c0d12]/90 backdrop-blur-xl px-4 sm:px-6 flex items-center justify-between gap-4">
-          
+
           {/* Mobile menu trigger & title */}
           <div className="flex items-center gap-3">
             <button
@@ -268,6 +275,9 @@ export default function RoleDashboardShell() {
               <span>Platform 99.98%</span>
             </div>
 
+            {/* Notification Bell */}
+            <NotificationBell historyPath={`/dashboard/${role === 'job_seeker' ? 'job-seeker' : role}/notifications`} />
+
             <Link
               to={`/dashboard/${role === 'job_seeker' ? 'job-seeker' : role}/profile`}
               className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:border-primary/40 text-xs font-medium text-content transition-colors"
@@ -289,12 +299,12 @@ export default function RoleDashboardShell() {
       {/* Mobile Drawer */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div 
+          <div
             className="fixed inset-0 bg-black/75 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
           <div className="relative flex flex-col w-72 max-w-[85vw] bg-[#0e0f15] border-r border-white/[0.08] p-5 space-y-5 animate-slideRight">
-            
+
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
               <div className="flex items-center gap-2.5">
                 <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center text-surface font-black text-base shadow-sm">

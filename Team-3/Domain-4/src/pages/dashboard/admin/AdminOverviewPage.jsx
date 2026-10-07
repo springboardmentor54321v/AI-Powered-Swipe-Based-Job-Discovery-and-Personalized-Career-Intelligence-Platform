@@ -18,6 +18,8 @@ import Button from '../../../components/common/Button';
 import Chip from '../../../components/common/Chip';
 import jobService from '../../../services/jobs';
 import authService from '../../../services/auth';
+import analyticsService from '../../../services/analytics';
+import HiringTrendChart from '../../../components/analytics/HiringTrendChart';
 
 export default function AdminOverviewPage() {
   const navigate = useNavigate();
@@ -45,6 +47,8 @@ export default function AdminOverviewPage() {
     { id: 'EVT-900', time: '10:22:11', actor: 'jane.doe@example.com', action: 'SWIPE_RIGHT_MATCH_RECORDED', status: 'Success' },
   ];
 
+  const [adminTrends, setAdminTrends] = useState(null);
+
   useEffect(() => {
     Promise.all([
       jobService.listJobs({}),
@@ -56,6 +60,12 @@ export default function AdminOverviewPage() {
       setJobs([]);
       setSwipes([]);
     });
+
+    analyticsService.getAdminAnalytics()
+      .then((data) => {
+        if (data && !data.error) setAdminTrends(data);
+      })
+      .catch(() => {});
   }, []);
 
   const jobSeekersCount = users.filter((u) => u.role === 'job_seeker').length;
@@ -68,7 +78,7 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      
+
       {/* Top Banner */}
       <div className="surface-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-white/[0.08]">
         <div className="space-y-1">
@@ -114,7 +124,7 @@ export default function AdminOverviewPage() {
 
       {/* Telemetry Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-        <div 
+        <div
           onClick={() => navigate('/dashboard/admin/users')}
           className="surface-card p-3.5 space-y-1 hover-card cursor-pointer"
         >
@@ -144,7 +154,7 @@ export default function AdminOverviewPage() {
           <span className="text-[10px] text-content-subtle">Hiring partners</span>
         </div>
 
-        <div 
+        <div
           onClick={() => navigate('/dashboard/admin/jobs')}
           className="surface-card p-3.5 space-y-1 hover-card cursor-pointer"
         >
@@ -165,7 +175,7 @@ export default function AdminOverviewPage() {
           <span className="text-[10px] text-content-subtle">Live in discovery</span>
         </div>
 
-        <div 
+        <div
           onClick={() => navigate('/dashboard/admin/activity')}
           className="surface-card p-3.5 space-y-1 hover-card cursor-pointer"
         >
@@ -180,7 +190,7 @@ export default function AdminOverviewPage() {
 
       {/* Main Grid: Recent Accounts & Live Security Telemetry */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         {/* Section 1: Recent Users & RBAC */}
         <div className="surface-card space-y-4">
           <div className="flex items-center justify-between border-b border-outline-variant pb-3">
@@ -277,7 +287,7 @@ export default function AdminOverviewPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          
+
           <div className="surface-card-subtle p-4 space-y-2 border-t-2 border-t-emerald-500">
             <div className="flex items-center justify-between font-bold text-content">
               <span>Identity & Auth Gateway</span>
@@ -309,6 +319,9 @@ export default function AdminOverviewPage() {
           </div>
 
         </div>
+
+        {/* Milestone 4 Hiring Trends Visualization */}
+        <HiringTrendChart trends={adminTrends || {}} />
 
         {/* Diagnostic Actions */}
         <div className="pt-2 flex flex-wrap gap-2.5">

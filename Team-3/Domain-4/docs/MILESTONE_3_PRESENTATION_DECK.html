@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SwipeX Milestone 3 — AI Resume Analysis & Recommendations</title>
+  <style>
+    :root {
+      --bg-base: #0a0a0f;
+      --bg-surface: #12111a;
+      --bg-surface-elevated: #1a1826;
+      --border-subtle: #272438;
+      --border-accent: #6366f1;
+      --accent-primary: #8b5cf6;
+      --accent-glow: rgba(139, 92, 246, 0.15);
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Presentation Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(18, 17, 26, 0.8);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .slide-counter {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-surface-elevated);
+      padding: 0.35rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Main Slide Container */
+    main {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 4rem;
+    }
+
+    .slide {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(1200px, 92vw);
+      height: min(720px, 82vh);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 3rem;
+      display: none;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px var(--accent-glow);
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Slide Titles & Headers */
+    .slide-header {
+      margin-bottom: 2rem;
+    }
+
+    .slide-tag {
+      color: var(--accent-primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+
+    .slide-title {
+      font-size: 2.15rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+    }
+
+    .slide-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Content Layouts */
+    .slide-content {
+      flex: 1;
+      display: flex;
+      gap: 2rem;
+      overflow-y: auto;
+    }
+
+    .col-half {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Cards & Components */
+    .card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-body {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Chips */
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .chip {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid transparent;
+    }
+
+    .chip-green {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .chip-orange {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .chip-purple {
+      background: rgba(139, 92, 246, 0.12);
+      color: #c084fc;
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    /* Score Gauge Visual */
+    .gauge-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: var(--bg-surface-elevated);
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .gauge-val {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #38bdf8;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .gauge-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Table Styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Timeline */
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.75rem;
+      width: 100%;
+    }
+
+    .timeline-node {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .timeline-day {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--accent-primary);
+    }
+
+    .timeline-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .timeline-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Presentation Footer */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2.5rem;
+      border-top: 1px solid var(--border-subtle);
+      background: rgba(18, 17, 26, 0.8);
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .nav-controls {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    button.btn-nav {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    button.btn-nav:hover {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
+    .badge-green {
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    .badge-yellow {
+      color: #fbbf24;
+      font-weight: 600;
+    }
+
+    .code-block {
+      background: #050508;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      line-height: 1.4;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <span>SWIPEX</span>
+      <span class="brand-badge">Milestone 3</span>
+      <span style="color: var(--text-dim); font-size: 0.85rem;">| Intern 1 (Domain-4 Frontend & UX)</span>
+    </div>
+    <div class="slide-counter" id="counter">Slide 1 / 14</div>
+  </header>
+
+  <!-- Slides Container -->
+  <main id="slide-container">
+
+    <!-- SLIDE 1 -->
+    <section class="slide active">
+      <div class="slide-header" style="margin-top: 2rem;">
+        <div class="slide-tag">Engineering Demo & Technical Presentation</div>
+        <h1 class="slide-title" style="font-size: 3rem; margin-top: 0.5rem;">SwipeX — Milestone 3</h1>
+        <p class="slide-subtitle" style="font-size: 1.35rem; color: #c084fc;">AI Resume Analysis & Recommendations</p>
+      </div>
+      <div class="slide-content" style="align-items: center;">
+        <div class="col-half">
+          <div class="card" style="border-left: 4px solid var(--accent-primary);">
+            <div class="card-title">Candidate Intelligence Architecture</div>
+            <div class="card-body">
+              A comprehensive frontend studio enabling multi-version resume management, instant NLP-extracted skill preview, ATS compatibility diagnostics, and personalized AI match indicators on the job swipe discovery feed.
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Engineering Ownership Boundary</div>
+            <div class="card-body">
+              <strong>Domain-4 / Intern 1:</strong> Frontend Architecture, UI Components, State Management, API Adapters, and Handoff Audit.<br>
+              <strong>Partner Domains:</strong> Backend Storage, NLP Extraction, ATS Formula Algorithms, Embeddings, and Gateway Routing.
+            </div>
+          </div>
+        </div>
+        <div class="col-half" style="align-items: center; justify-content: center;">
+          <div class="gauge-wrapper" style="width: 100%; border: 1px dashed var(--accent-primary); background: rgba(139, 92, 246, 0.05);">
+            <div style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 1rem;">Core Pillars Delivered</div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
+              <div class="chip chip-purple" style="text-align: center; padding: 0.75rem;">1. Resume & Capability Studio</div>
+              <div class="chip chip-purple" style="text-align: center; padding: 0.75rem;">2. ATS Compatibility Diagnostics</div>
+              <div class="chip chip-purple" style="text-align: center; padding: 0.75rem;">3. Gap Analysis & Suggestions</div>
+              <div class="chip chip-purple" style="text-align: center; padding: 0.75rem;">4. AI-Enhanced Swipe Discovery</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Strategic Goal</div>
+        <h2 class="slide-title">Milestone Objective & User Journey</h2>
+        <p class="slide-subtitle">Transforming candidate resumes into structured career intelligence.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="card">
+            <div class="card-title">Core Milestone Objectives</div>
+            <ul class="card-body" style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.6rem;">
+              <li><strong>Multi-Version Management:</strong> Upload, version, and switch active resumes seamlessly.</li>
+              <li><strong>Skill Extraction:</strong> Surface extracted skills immediately via responsive chips.</li>
+              <li><strong>ATS Diagnostics:</strong> Benchmark any resume version against specific job requisitions.</li>
+              <li><strong>Gap Analysis:</strong> Visualize matched skills, missing skills, and missing keywords.</li>
+              <li><strong>Actionable Tips:</strong> Render contextual improvement suggestions.</li>
+              <li><strong>Smart Discovery:</strong> Surface AI match % and reason tags on swipe cards.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-half" style="justify-content: center;">
+          <div class="card" style="background: rgba(18, 17, 26, 0.95);">
+            <div class="card-title">End-to-End User Journey</div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+              <div style="padding: 0.6rem; background: var(--bg-surface-elevated); border-radius: 6px; font-weight: 600;">1. Resume Upload (PDF / DOCX)</div>
+              <div style="text-align: center; color: var(--accent-primary);">↓</div>
+              <div style="padding: 0.6rem; background: var(--bg-surface-elevated); border-radius: 6px; font-weight: 600;">2. NLP Parsing & Skill Extraction</div>
+              <div style="text-align: center; color: var(--accent-primary);">↓</div>
+              <div style="padding: 0.6rem; background: var(--bg-surface-elevated); border-radius: 6px; font-weight: 600;">3. ATS Diagnostics & Gap Breakdown</div>
+              <div style="text-align: center; color: var(--accent-primary);">↓</div>
+              <div style="padding: 0.6rem; background: var(--bg-surface-elevated); border-radius: 6px; font-weight: 600;">4. Actionable Suggestions & Better Recommendations</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Architecture & Ownership</div>
+        <h2 class="slide-title">Intern 1 Responsibilities & Ownership</h2>
+        <p class="slide-subtitle">Clear technical demarcation between frontend delivery and backend intelligence.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="card" style="border-left: 4px solid var(--accent-green);">
+            <div class="card-title"><span class="badge-green">✔</span> Owned by Domain-4 (Intern 1)</div>
+            <ul class="card-body" style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+              <li>Resume Upload Dropzone (drag & drop, format/size validation)</li>
+              <li>Resume Version Manager & Active resume switcher</li>
+              <li>Parsed Skills Cloud preview and badges</li>
+              <li>ATS Compatibility Studio & radial score gauge</li>
+              <li>Skill Gap & Keyword Gap interactive lists</li>
+              <li>AI Suggestions Panel & actionable advice cards</li>
+              <li>JobCard AI Match % badge and reason pill integration</li>
+              <li>Responsive mobile-first layout and UX error handling</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-half">
+          <div class="card" style="border-left: 4px solid var(--text-dim);">
+            <div class="card-title">✖ Consumed from Partner Domains</div>
+            <ul class="card-body" style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+              <li>Physical file storage & disk storage key handling (Dom-1/2)</li>
+              <li>spaCy PhraseMatcher & text extraction engines (Dom-1/3)</li>
+              <li>ATS scoring formulas & threshold calculations (Dom-3)</li>
+              <li>ChromaDB semantic embeddings & vector store (Dom-3)</li>
+              <li>Rule-based and LLM suggestion generation logic (Dom-3)</li>
+              <li>API Gateway proxy forwarding & JWT injection (Dom-1)</li>
+              <li>PostgreSQL database schema & migrations (Dom-2)</li>
+              <li>Automated CI/CD and Docker container profiles (Dom-5)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Timeline & Milestones</div>
+        <h2 class="slide-title">Milestone 3 Development Journey (7 Days)</h2>
+        <p class="slide-subtitle">Systematic agile progression from contract review to verified deployment.</p>
+      </div>
+      <div class="slide-content" style="flex-direction: column; justify-content: center;">
+        <div class="timeline">
+          <div class="timeline-node">
+            <span class="timeline-day">Day 1</span>
+            <span class="timeline-title">Spec & Wireframes</span>
+            <span class="timeline-desc">Reviewed OpenAPI contract, verified M2 baseline, created 14 wireframes.</span>
+          </div>
+          <div class="timeline-node">
+            <span class="timeline-day">Day 2</span>
+            <span class="timeline-title">UI Scaffold & Mocks</span>
+            <span class="timeline-desc">Built Dropzone, VersionList, and ATS page with mock fixtures.</span>
+          </div>
+          <div class="timeline-node">
+            <span class="timeline-day">Day 3</span>
+            <span class="timeline-title">Live Resume APIs</span>
+            <span class="timeline-desc">Connected upload, list, and parse endpoints to live Gateway.</span>
+          </div>
+          <div class="timeline-node">
+            <span class="timeline-day">Day 4</span>
+            <span class="timeline-title">Live ATS Studio</span>
+            <span class="timeline-desc">Integrated ATS scoring API, radial score gauge, and gap breakdown.</span>
+          </div>
+          <div class="timeline-node">
+            <span class="timeline-day">Day 5</span>
+            <span class="timeline-title">AI Suggestions & Match%</span>
+            <span class="timeline-desc">Added suggestions panel and AI Match indicators on JobCards.</span>
+          </div>
+          <div class="timeline-node">
+            <span class="timeline-day">Day 6</span>
+            <span class="timeline-title">Hardening & Polish</span>
+            <span class="timeline-desc">Fixed re-render loops, cleaned toast unmounts, removed fake scores.</span>
+          </div>
+          <div class="timeline-node" style="border-color: var(--accent-primary);">
+            <span class="timeline-day">Day 7</span>
+            <span class="timeline-title">Audit & Handoff</span>
+            <span class="timeline-desc">Repository-wide audit, build verification, demo flow rehearsal.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Feature Deep Dive</div>
+        <h2 class="slide-title">Resume & Capability Studio</h2>
+        <p class="slide-subtitle">Centralized candidate portfolio with multi-version management.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="card">
+            <div class="card-title">Dropzone & Version Management</div>
+            <div class="card-body">
+              • <strong>Dual-Format Drag & Drop:</strong> Accepts PDF and DOCX files.<br>
+              • <strong>Client-Side Validation:</strong> Enforces 5 MB file size limit and mime-type integrity before network transport.<br>
+              • <strong>Version Labeling:</strong> Job seekers can label uploads (e.g. "Cloud Tailored", "Senior Lead").<br>
+              • <strong>Active Switcher:</strong> Single-click toggle sets current active version across all ATS and recommendation views.<br>
+              • <strong>Parsed Skills Preview:</strong> Instantly displays skills detected by the parsing pipeline.
+            </div>
+          </div>
+        </div>
+        <div class="col-half">
+          <div class="card" style="background: rgba(18, 17, 26, 0.95);">
+            <div class="card-title">Extracted Skills Cloud</div>
+            <div class="chip-container">
+              <span class="chip chip-purple">Python</span>
+              <span class="chip chip-purple">React</span>
+              <span class="chip chip-purple">Django</span>
+              <span class="chip chip-purple">SQL</span>
+              <span class="chip chip-purple">PostgreSQL</span>
+              <span class="chip chip-purple">Docker</span>
+              <span class="chip chip-purple">Git</span>
+              <span class="chip chip-purple">REST API</span>
+              <span class="chip chip-purple">spaCy</span>
+              <span class="chip chip-purple">FastAPI</span>
+            </div>
+            <div style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted);">
+              Extracted skills are persisted per resume version and feed directly into the ATS keyword matcher and recommendation engine.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Integration Protocol</div>
+        <h2 class="slide-title">Resume API Integration Architecture</h2>
+        <p class="slide-subtitle">How Domain-4 securely communicates with the Resume Service.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="code-block">
+POST /api/v1/resumes/upload
+Content-Type: multipart/form-data
+Body: { file: resume.pdf, label: "Senior Lead" }
+Response: 201 Created
+{
+  "resume_id": "7b2e98...",
+  "version_id": "3f1a42...",
+  "original_filename": "resume.pdf",
+  "is_active": true,
+  "extraction_status": "pending"
+}
+
+POST /api/v1/resumes/{id}/parse
+Response: 200 OK
+{
+  "parsed_status": "PARSED",
+  "extracted_skills": ["Python", "React", "Docker"]
+}
+          </div>
+        </div>
+        <div class="col-half">
+          <div class="card">
+            <div class="card-title">Client-Side Normalization</div>
+            <div class="card-body">
+              • <strong>Unified Adapter:</strong> <code>resumeService.js</code> normalizes both legacy and M3 schemas.<br>
+              • <strong>Defensive Fallbacks:</strong> Handles contract divergences (<code>extracted_skills</code> vs <code>skills</code>).<br>
+              • <strong>Status Traps:</strong> Specifically captures 400 Bad Request (duplicate file hash), 401 Unauthorized, and 503 Gateway Unavailable with actionable user notifications.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Diagnostic Studio</div>
+        <h2 class="slide-title">ATS Compatibility Diagnostics</h2>
+        <p class="slide-subtitle">Deterministic candidate-to-job matching without frontend fabrication.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="gauge-wrapper">
+            <div class="gauge-val">84.5%</div>
+            <div class="gauge-label">Strong Alignment (Above 80% Benchmark)</div>
+            <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); text-align: center;">
+              Formula: 40% Keyword Match (82%) + 60% Semantic Fit (86.2%)
+            </div>
+          </div>
+        </div>
+        <div class="col-half">
+          <div class="card">
+            <div class="card-title">Technical Scoring Rule</div>
+            <div class="card-body">
+              <strong>Zero Frontend Calculation:</strong> The frontend does NOT invent or compute ATS scores. All scores, percentiles, and thresholds are authored and computed by backend services.<br><br>
+              <strong>Evaluation Provenance:</strong> Every result renders engine provenance (<code>semantic-v1</code> or <code>heuristic-v0</code>) and calculation timestamp.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Actionable Transparency</div>
+        <h2 class="slide-title">Skill & Keyword Gap Analysis</h2>
+        <p class="slide-subtitle">Surfacing exact competency matches and missing terminology.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="card" style="border-left: 4px solid var(--accent-green);">
+            <div class="card-title" style="color: #34d399;">✔ Matched Skills (Identified in Both)</div>
+            <div class="chip-container">
+              <span class="chip chip-green">Python</span>
+              <span class="chip chip-green">React</span>
+              <span class="chip chip-green">REST API</span>
+              <span class="chip chip-green">SQL</span>
+              <span class="chip chip-green">Git</span>
+            </div>
+          </div>
+          <div class="card" style="border-left: 4px solid var(--accent-amber);">
+            <div class="card-title" style="color: #fbbf24;">▲ Missing Skills (Required by Job)</div>
+            <div class="chip-container">
+              <span class="chip chip-orange">Kubernetes</span>
+              <span class="chip chip-orange">Docker</span>
+              <span class="chip chip-orange">Redis</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-half">
+          <div class="card" style="border-left: 4px solid var(--accent-primary);">
+            <div class="card-title" style="color: #c084fc;">🔍 Missing Keywords (Domain Vocabulary)</div>
+            <div class="chip-container">
+              <span class="chip chip-purple">Microservices</span>
+              <span class="chip chip-purple">CI/CD Pipelines</span>
+              <span class="chip chip-purple">Event-Driven Architecture</span>
+            </div>
+            <div style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+              Clear categorization prevents false claims: candidates are advised to add keywords only if they have genuine practical experience.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 9 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Actionable Advice</div>
+        <h2 class="slide-title">AI & Rule-Based Suggestions Panel</h2>
+        <p class="slide-subtitle">Contextual optimization recommendations with source transparency.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="card">
+            <div class="card-title" style="color: #fbbf24;">⚡ [HIGH] Add Containerization Experience</div>
+            <div class="card-body">
+              Target job requires Docker & Kubernetes. Highlight past experience deploying containerized microservices.<br>
+              <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-dim);">
+                Category: Skills Gap • Provenance: rule_based
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color: #38bdf8;">⚡ [MEDIUM] Incorporate Event-Driven Keywords</div>
+            <div class="card-body">
+              Incorporate keywords like "Kafka" or "Event-Driven" if you have engineered asynchronous messaging systems.<br>
+              <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-dim);">
+                Category: Keywords • Provenance: ai_generated
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-half">
+          <div class="card">
+            <div class="card-title">Endpoint & Contract</div>
+            <div class="card-body">
+              <strong>API:</strong> <code>POST /api/v1/suggestions/</code><br>
+              <strong>Payload:</strong> <code>{ resume_id, job_id }</code><br><br>
+              <strong>Transparency Pill:</strong> Explicitly tags suggestions as either <code>ai_generated</code> (LLM) or <code>rule_based</code> heuristics.<br><br>
+              <strong>Scope Boundary:</strong> Domain-4 consumes and renders suggestions; rule logic is owned by Domain-3.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Discovery Deck Evolution</div>
+        <h2 class="slide-title">AI-Matched Job Recommendations</h2>
+        <p class="slide-subtitle">Infusing resume-aware career intelligence into the M2 swipe discovery feed.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="card" style="background: rgba(18, 17, 26, 0.98); border: 1px solid var(--accent-primary);">
+            <div style="font-size: 0.75rem; color: var(--accent-primary); font-weight: 700;">SWIPEX DISCOVERY CARD</div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0.35rem 0;">Lead Backend Architect</div>
+            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.75rem;">Stripe • Bengaluru / Remote • ₹38-45 LPA</div>
+
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+              <span class="chip chip-purple" style="font-weight: 700;">✦ 88% Match</span>
+              <span class="chip chip-green">85% ATS Fit</span>
+              <span class="chip chip-purple">Semantic Fit</span>
+            </div>
+
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              Reason: 88% Skill alignment with Resume_v2.pdf
+            </div>
+          </div>
+        </div>
+        <div class="col-half">
+          <div class="card">
+            <div class="card-title">Preserved M2 Capabilities</div>
+            <div class="card-body">
+              • <strong>Unimpeded Gestures:</strong> AI badges use <code>pointer-events-none</code> so cards remain freely draggable.<br>
+              • <strong>Optimistic Actions:</strong> Apply, Save, Skip, and Undo retain instant UI feedback.<br>
+              • <strong>Active Resume Driven:</strong> Recommendations automatically update when candidate switches resume version.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 11 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Component Tree</div>
+        <h2 class="slide-title">Frontend Architecture & Hierarchy</h2>
+        <p class="slide-subtitle">Clean modular separation of concerns in Domain-4.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="code-block" style="font-size: 0.8rem;">
+Pages:
+ ├── ResumeUploadPage.jsx
+ ├── JobSeekerAtsPage.jsx
+ ├── JobSeekerRecommendationsPage.jsx
+ └── JobSeekerOverviewPage.jsx
+
+Components:
+ ├── resume/
+ │    ├── ResumeDropzone.jsx
+ │    ├── ResumeVersionList.jsx
+ │    └── ParsedSkillsPreview.jsx
+ ├── ats/
+ │    ├── AtsScoreGauge.jsx
+ │    ├── SkillGapList.jsx
+ │    └── KeywordGapList.jsx
+ └── suggestions/
+      └── SuggestionsPlaceholder.jsx
+          </div>
+        </div>
+        <div class="col-half">
+          <div class="code-block" style="font-size: 0.8rem;">
+Service Layer:
+ ├── api.js (Fetch client with Bearer JWT)
+ ├── resume.js (Upload, List, Parse adapter)
+ ├── ats.js (ATS Scoring & normalization)
+ ├── suggestions.js (Suggestions adapter)
+ └── recommendations.js (Discovery feed)
+
+Architecture Principles:
+ • Zero business logic inside views
+ • Strict response normalization
+ • Defensive status traps (400, 401, 503)
+ • Fully decoupled from backend frameworks
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 12 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Quality Assurance</div>
+        <h2 class="slide-title">UX, Quality & Engineering Rigor</h2>
+        <p class="slide-subtitle">Production-grade stability, accessibility, and clean build metrics.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="card">
+            <div class="card-title">Production Stability Highlights</div>
+            <div class="card-body">
+              • <strong>Dependency Array Audit:</strong> Stabilized all <code>useCallback</code> and <code>useEffect</code> dependencies to eliminate re-fetch loops.<br>
+              • <strong>Lifecycle Safety:</strong> Cleaned unmounted component timer references in <code>SwipeDiscoveryPage</code>.<br>
+              • <strong>Zero Fabrication Policy:</strong> Eliminated hardcoded / synthetic fallback scores; strict null checks protect data honesty.<br>
+              • <strong>Responsive Viewports:</strong> Verified from 360px mobile viewports to 1440px desktop screens.
+            </div>
+          </div>
+        </div>
+        <div class="col-half">
+          <div class="card" style="border-left: 4px solid var(--accent-green);">
+            <div class="card-title"><span class="badge-green">✔</span> Build & Repository Verification</div>
+            <div class="card-body">
+              <strong>npm run build:</strong> PASSED (Vite 5.4.14 built in 7.63s with 0 errors)<br><br>
+              <strong>git diff --check:</strong> PASSED (0 conflict markers, clean diff)<br><br>
+              <strong>Commit Hash:</strong> <code>51a6847</code> pushed to <code>origin/Team-3</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 13 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Audit Findings</div>
+        <h2 class="slide-title">Final Status & Cross-Domain Dependencies</h2>
+        <p class="slide-subtitle">Clear distinction between completed frontend and pending external dependencies.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="card" style="border-left: 4px solid var(--accent-green);">
+            <div class="card-title"><span class="badge-green">✔</span> Domain-4 (Frontend): 100% COMPLETE</div>
+            <div class="card-body">
+              • Resume Upload Dropzone & Versioning UI<br>
+              • Parsed Skills Cloud & Extraction Indicators<br>
+              • ATS Compatibility Studio & Gauge Visualizer<br>
+              • Skill & Keyword Gap Analysis Breakdown<br>
+              • AI Suggestions Accordion & Badges<br>
+              • AI Match % on Job Discovery Deck<br>
+              • Production Build Verified (0 errors)
+            </div>
+          </div>
+        </div>
+        <div class="col-half">
+          <div class="card" style="border-left: 4px solid var(--accent-amber);">
+            <div class="card-title"><span class="badge-yellow">⚠</span> External Dependencies (Repository Audit)</div>
+            <div class="card-body">
+              • <strong>Domain-1 Gateway:</strong> Mount <code>/ats/score</code> and <code>/suggestions</code> routes.<br>
+              • <strong>Domain-1 Resume:</strong> Add version-detail route <code>/resumes/{id}/versions/{id}</code>.<br>
+              • <strong>Domain-3 ATS:</strong> Expose <code>keyword_ats.py</code> via HTTP endpoint.<br>
+              • <strong>Domain-3 Suggestions:</strong> Expose <code>rule_based_suggestions.py</code> via HTTP.<br>
+              • <strong>Domain-5 QA:</strong> Author M3 automated contract tests.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 14 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Live Demo Walkthrough</div>
+        <h2 class="slide-title">Demo Flow & Conclusion</h2>
+        <p class="slide-subtitle">The complete 10-step candidate intelligence journey.</p>
+      </div>
+      <div class="slide-content">
+        <div class="col-half">
+          <div class="code-block" style="font-size: 0.85rem;">
+1. Login as Job Seeker (JWT Auth)
+   ↓
+2. Open Resume Studio ──► Drag & Drop PDF resume
+   ↓
+3. Trigger Parsing ──► Extracted skills render instantly
+   ↓
+4. Open ATS Studio ──► Select Active Resume & Target Job
+   ↓
+5. ATS Diagnostics visualizes ──► 84.5% score & gaps
+   ↓
+6. Review Suggestions ──► Actionable improvement advice
+   ↓
+7. Open Discovery Feed ──► Swipe cards display "88% Match"
+   ↓
+8. Swipe Right ──► Optimistic apply saved to history!
+          </div>
+        </div>
+        <div class="col-half" style="justify-content: center;">
+          <div class="card" style="border: 1px solid var(--accent-primary); background: rgba(139, 92, 246, 0.05);">
+            <div class="card-title">Closing Message</div>
+            <div class="card-body" style="font-size: 1.05rem; color: #fff; line-height: 1.6;">
+              "Milestone 3 frontend delivers the user-facing AI resume intelligence experience while strictly preserving the existing SwipeX job discovery workflow."
+            </div>
+            <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--accent-primary); font-weight: 700;">
+              Intern 1 — Frontend & User Experience<br>
+              Team-3 / Domain-4 • September 2026
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Controls -->
+  <footer>
+    <div>Tip: Use <kbd>←</kbd> and <kbd>→</kbd> arrow keys to navigate slides</div>
+    <div class="nav-controls">
+      <button class="btn-nav" id="btn-prev" onclick="prevSlide()">Previous</button>
+      <button class="btn-nav" id="btn-next" onclick="nextSlide()">Next</button>
+    </div>
+  </footer>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('counter');
+    let currentSlide = 0;
+
+    function showSlide(index) {
+      slides[currentSlide].classList.remove('active');
+      currentSlide = (index + slides.length) % slides.length;
+      slides[currentSlide].classList.add('active');
+      counter.textContent = `Slide ${currentSlide + 1} / ${slides.length}`;
+    }
+
+    function nextSlide() {
+      showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      showSlide(currentSlide - 1);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+  </script>
+</body>
+</html>
