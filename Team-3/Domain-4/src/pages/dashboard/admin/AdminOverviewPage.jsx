@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield,
@@ -29,6 +29,7 @@ export default function AdminOverviewPage() {
   const [swipes, setSwipes] = useState([]);
   const [cachePurged, setCachePurged] = useState(false);
   const [maintenance, setMaintenance] = useState(false);
+  const [adminTrends, setAdminTrends] = useState(null);
 
   // Platform users directory sample
   const users = [
@@ -47,8 +48,6 @@ export default function AdminOverviewPage() {
     { id: 'EVT-900', time: '10:22:11', actor: 'jane.doe@example.com', action: 'SWIPE_RIGHT_MATCH_RECORDED', status: 'Success' },
   ];
 
-  const [adminTrends, setAdminTrends] = useState(null);
-
   useEffect(() => {
     Promise.all([
       jobService.listJobs({}),
@@ -63,10 +62,49 @@ export default function AdminOverviewPage() {
 
     analyticsService.getAdminAnalytics()
       .then((data) => {
-        if (data && !data.error) setAdminTrends(data);
+        if (data) setAdminTrends(data);
       })
       .catch(() => {});
   }, []);
+
+  const computedTrends = useMemo(() => {
+    if (adminTrends && !adminTrends.error && (adminTrends.top_skills || adminTrends.top_in_demand_skills)) {
+      return adminTrends;
+    }
+
+    if (jobs.length === 0) {
+      return adminTrends || {};
+    }
+
+    const skillCounts = {};
+    let startupCount = 0;
+    jobs.forEach((j) => {
+      const isStartup = (j.company_type || '').toLowerCase().includes('startup') || (j.company_type || '').toLowerCase().includes('newly founded') || Boolean(j.is_startup);
+      if (isStartup) startupCount++;
+
+      const skills = Array.isArray(j.skills)
+        ? j.skills
+        : typeof j.skills === 'string'
+        ? j.skills.split(/[,|]/)
+        : [];
+      skills.forEach((s) => {
+        const clean = s.trim();
+        if (clean) skillCounts[clean] = (skillCounts[clean] || 0) + 1;
+      });
+    });
+
+    const topSkills = Object.entries(skillCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([skill, count]) => ({ skill, count }));
+
+    return {
+      top_skills: topSkills,
+      startup_percentage: jobs.length > 0 ? Math.round((startupCount / jobs.length) * 100) : 0,
+      total_jobs_analyzed: jobs.length,
+      error: adminTrends?.error || null,
+    };
+  }, [adminTrends, jobs]);
 
   const jobSeekersCount = users.filter((u) => u.role === 'job_seeker').length;
   const recruitersCount = users.filter((u) => u.role === 'recruiter').length;
@@ -321,7 +359,7 @@ export default function AdminOverviewPage() {
         </div>
 
         {/* Milestone 4 Hiring Trends Visualization */}
-        <HiringTrendChart trends={adminTrends || {}} />
+        <HiringTrendChart trends={computedTrends} filterBadge="Platform Cumulative" />
 
         {/* Diagnostic Actions */}
         <div className="pt-2 flex flex-wrap gap-2.5">

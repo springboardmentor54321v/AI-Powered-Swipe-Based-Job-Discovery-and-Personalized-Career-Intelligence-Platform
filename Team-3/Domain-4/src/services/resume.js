@@ -254,6 +254,13 @@ export const resumeService = {
   },
 
   /**
+   * Alias for listResumes
+   */
+  async getResumes(params = {}) {
+    return this.listResumes(params);
+  },
+
+  /**
    * Get detailed metadata and extracted skills for a specific resume version.
    * Endpoint: GET /api/v1/resumes/{resume_id}/versions/{version_id}
    * 

@@ -1,18 +1,23 @@
 import React from 'react';
 import { FileText, Award, Eye, CheckCircle2 } from 'lucide-react';
 
-export default function ResumePerformanceChart({ performance = [], title = "Resume Version Performance" }) {
+export default function ResumePerformanceChart({ performance = [], title = "Resume Version Performance", filterBadge = null }) {
   const hasData = Array.isArray(performance) && performance.length > 0;
 
   return (
     <div className="surface-card p-6 rounded-3xl border border-white/[0.08] bg-[#12131a] space-y-5">
-      <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
         <div>
           <h3 className="text-sm font-bold text-white">{title}</h3>
           <p className="text-xs text-content-muted mt-0.5">
             Conversion metrics by uploaded CV revision
           </p>
         </div>
+        {filterBadge && (
+          <span className="text-[10px] text-content-subtle bg-white/[0.03] px-2.5 py-1 rounded-xl border border-white/[0.06] self-start sm:self-auto">
+            {filterBadge}
+          </span>
+        )}
       </div>
 
       {!hasData ? (

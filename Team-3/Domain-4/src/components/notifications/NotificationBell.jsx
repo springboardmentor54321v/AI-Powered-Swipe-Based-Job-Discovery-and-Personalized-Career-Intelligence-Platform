@@ -39,7 +39,9 @@ export default function NotificationBell({ historyPath = '/dashboard/job-seeker/
       });
 
     // 2. Attempt WebSocket stream connection if browser and token are available
-    if (token && typeof window !== 'undefined' && 'WebSocket' in window) {
+    // Note: When running directly on unproxied Vite dev port (5173), fallback directly to REST polling
+    const isDirectViteDev = typeof window !== 'undefined' && window.location.port === '5173';
+    if (!isDirectViteDev && token && typeof window !== 'undefined' && 'WebSocket' in window) {
       try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const host = window.location.host;

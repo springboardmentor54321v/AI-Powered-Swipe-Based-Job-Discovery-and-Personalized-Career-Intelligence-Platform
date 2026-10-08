@@ -20,6 +20,7 @@ import applicationService from '../../../services/applications';
 import analyticsService from '../../../services/analytics';
 import authService from '../../../services/auth';
 import ApplicationFunnelChart from '../../../components/analytics/ApplicationFunnelChart';
+import MetricCard from '../../../components/analytics/MetricCard';
 
 export default function RecruiterOverviewPage() {
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ export default function RecruiterOverviewPage() {
   const [swipes, setSwipes] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState('all'); // 'all' | '30d' | '7d'
+  const [selectedJobId, setSelectedJobId] = useState('all');
 
   useEffect(() => {
     Promise.all([
@@ -100,73 +103,44 @@ export default function RecruiterOverviewPage() {
 
       {/* Recruiter Overview Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-
-        {/* Metric 1: Active Jobs */}
-        <div
-          onClick={() => navigate('/dashboard/recruiter/jobs')}
-          className="surface-card p-4 space-y-1 hover-card cursor-pointer"
-        >
-          <div className="flex items-center justify-between text-xs text-content-muted">
-            <span className="font-medium">Active Jobs</span>
-            <Briefcase className="w-4 h-4 text-primary" />
-          </div>
-          <div className="text-xl font-bold text-content">
-            {loading ? '...' : activeJobs.length}
-          </div>
-          <p className="text-[11px] text-content-muted flex items-center gap-1">
-            <span>●</span> Live in candidate deck
-          </p>
+        <div onClick={() => navigate('/dashboard/recruiter/jobs')} className="cursor-pointer">
+          <MetricCard
+            title="Active Jobs"
+            value={loading ? '...' : activeJobs.length}
+            subtitle="Live in candidate deck"
+            icon={Briefcase}
+            color="primary"
+          />
         </div>
 
-        {/* Metric 2: Total Jobs Posted */}
-        <div
-          onClick={() => navigate('/dashboard/recruiter/jobs')}
-          className="surface-card p-4 space-y-1 hover-card cursor-pointer"
-        >
-          <div className="flex items-center justify-between text-xs text-content-muted">
-            <span className="font-medium">Total Jobs Posted</span>
-            <PlusCircle className="w-4 h-4 text-content-subtle" />
-          </div>
-          <div className="text-xl font-bold text-content">
-            {loading ? '...' : jobs.length}
-          </div>
-          <p className="text-[11px] text-content-subtle">
-            All company requisitions
-          </p>
+        <div onClick={() => navigate('/dashboard/recruiter/jobs')} className="cursor-pointer">
+          <MetricCard
+            title="Total Jobs Posted"
+            value={loading ? '...' : jobs.length}
+            subtitle="Company requisitions"
+            icon={PlusCircle}
+            color="purple"
+          />
         </div>
 
-        {/* Metric 3: Applications Received */}
-        <div
-          onClick={() => navigate('/dashboard/recruiter/applications')}
-          className="surface-card p-4 space-y-1 hover-card cursor-pointer"
-        >
-          <div className="flex items-center justify-between text-xs text-content-muted">
-            <span className="font-medium">Applications Received</span>
-            <Send className="w-4 h-4 text-primary" />
-          </div>
-          <div className="text-xl font-bold text-content">
-            {loading ? '...' : inboundCandidates.length}
-          </div>
-          <p className="text-[11px] text-content-subtle">
-            Candidate right-swipes
-          </p>
+        <div onClick={() => navigate('/dashboard/recruiter/applications')} className="cursor-pointer">
+          <MetricCard
+            title="Applications Received"
+            value={loading ? '...' : inboundCandidates.length}
+            subtitle="Candidate right-swipes"
+            icon={Send}
+            color="emerald"
+          />
         </div>
 
-        {/* Metric 4: Candidates in Pipeline */}
-        <div
-          onClick={() => navigate('/dashboard/recruiter/candidates')}
-          className="surface-card p-4 space-y-1 hover-card cursor-pointer"
-        >
-          <div className="flex items-center justify-between text-xs text-content-muted">
-            <span className="font-medium">Candidate Pool</span>
-            <UserCheck className="w-4 h-4 text-content-subtle" />
-          </div>
-          <div className="text-xl font-bold text-content">
-            {loading ? '...' : inboundCandidates.length + 3}
-          </div>
-          <p className="text-[11px] text-content-subtle">
-            Verified candidate profiles
-          </p>
+        <div onClick={() => navigate('/dashboard/recruiter/candidates')} className="cursor-pointer">
+          <MetricCard
+            title="Candidate Pool"
+            value={loading ? '...' : inboundCandidates.length + 3}
+            subtitle="Verified candidate profiles"
+            icon={UserCheck}
+            color="amber"
+          />
         </div>
       </div>
 
@@ -287,74 +261,159 @@ export default function RecruiterOverviewPage() {
 
       </div>
 
-      {/* Recruitment Funnel Chart (Milestone 4) */}
-      {(() => {
-        const shortlistedCount = applications.filter((a) => {
-          const s = (a.status || '').toLowerCase();
-          return s === 'shortlisted' || s === 'screened';
-        }).length;
-        const interviewCount = applications.filter((a) => {
-          const s = (a.status || '').toLowerCase();
-          return s === 'interview' || s === 'interviewed';
-        }).length;
+      {/* Recruitment Funnel Chart & Sourcing Velocity (Milestone 4) */}
+      <div className="space-y-4">
+        {/* Filter Controls Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.02] p-4 rounded-2xl border border-white/[0.06]">
+          <div>
+            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <span>Pipeline Funnel & Sourcing Velocity</span>
+            </h2>
+            <p className="text-xs text-content-muted mt-0.5">
+              Candidate application progression across active company requisitions
+            </p>
+          </div>
 
-        const funnel = {
-          saved: swipes.length,
-          applied: inboundCandidates.length > 0 ? inboundCandidates.length : applications.length,
-          shortlisted: shortlistedCount,
-          interview: interviewCount,
-        };
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Job Filter Dropdown */}
+            {jobs.length > 0 && (
+              <select
+                value={selectedJobId}
+                onChange={(e) => setSelectedJobId(e.target.value)}
+                className="bg-black/40 border border-white/[0.1] rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none focus:border-primary"
+              >
+                <option value="all">All Requisitions ({jobs.length})</option>
+                {jobs.map((j) => (
+                  <option key={j.id || j.job_id} value={String(j.id || j.job_id)}>
+                    {j.title}
+                  </option>
+                ))}
+              </select>
+            )}
 
-        const conversionRate = swipes.length > 0
-          ? `${Math.round((inboundCandidates.length / swipes.length) * 100)}%`
-          : '0%';
-
-        return (
-          <>
-            <ApplicationFunnelChart
-              funnel={funnel}
-              title="Candidate Application Pipeline Funnel"
-            />
-
-            {/* Recruitment Activity Stream */}
-            <div className="surface-card p-6 space-y-4 border-white/[0.08]">
-              <div className="flex items-center justify-between border-b border-outline-variant pb-3">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-amber-400" />
-                  <h2 className="text-sm font-bold text-content">Recruitment Sourcing Velocity</h2>
-                </div>
-                <span className="text-[11px] text-content-subtle">Real-time telemetry</span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
-                  <span className="text-content-subtle block text-[11px]">Total Requisitions Managed</span>
-                  <span className="text-lg font-bold text-content">
-                    {jobs.length} postings
-                  </span>
-                  <p className="text-[11px] text-emerald-400">Requisitions active in discovery catalog</p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
-                  <span className="text-content-subtle block text-[11px]">Inbound Swipe Conversion</span>
-                  <span className="text-lg font-bold text-content">
-                    {conversionRate}
-                  </span>
-                  <p className="text-[11px] text-content-subtle">Candidate interest converted to pipeline</p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
-                  <span className="text-content-subtle block text-[11px]">Active Pipeline Depth</span>
-                  <span className="text-lg font-bold text-emerald-400">
-                    {shortlistedCount + interviewCount} screened
-                  </span>
-                  <p className="text-[11px] text-content-subtle">Candidates currently in advanced stages</p>
-                </div>
-              </div>
+            {/* Date Range Selector */}
+            <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/[0.06]">
+              {[
+                { id: 'all', label: 'All Time' },
+                { id: '30d', label: 'Past 30 Days' },
+                { id: '7d', label: 'Past 7 Days' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setDateRange(tab.id)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    dateRange === tab.id
+                      ? 'bg-primary text-surface shadow-sm font-bold'
+                      : 'text-content-muted hover:text-white'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
-          </>
-        );
-      })()}
+          </div>
+        </div>
+
+        {(dateRange !== 'all' || selectedJobId !== 'all') && (
+          <div className="text-[11px] text-content-subtle px-1 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span>
+              Client-side filtered ({dateRange !== 'all' ? (dateRange === '7d' ? 'Past 7 Days' : 'Past 30 Days') : 'All Time'}
+              {selectedJobId !== 'all' ? ` • Role #${selectedJobId}` : ''}) • Server-side recruiter date range aggregation pending in Backend Analytics Service.
+            </span>
+          </div>
+        )}
+
+        {(() => {
+          // Date cutoff filter
+          const filterByDate = (dateStr) => {
+            if (dateRange === 'all' || !dateStr) return true;
+            const itemDate = new Date(dateStr).getTime();
+            const cutoff = Date.now() - (dateRange === '7d' ? 7 : 30) * 24 * 60 * 60 * 1000;
+            return itemDate >= cutoff;
+          };
+
+          const filteredSwipes = swipes
+            .filter((s) => filterByDate(s.swiped_at || s.created_at))
+            .filter((s) => (selectedJobId === 'all' ? true : String(s.job_id) === selectedJobId));
+
+          const filteredApps = applications
+            .filter((a) => filterByDate(a.created_at || a.applied_at))
+            .filter((a) => (selectedJobId === 'all' ? true : String(a.job_id) === selectedJobId));
+
+          const filteredInbound = filteredSwipes.filter((s) => s.direction === 'right');
+
+          const shortlistedCount = filteredApps.filter((a) => {
+            const s = (a.status || '').toLowerCase();
+            return s === 'shortlisted' || s === 'screened';
+          }).length;
+
+          const interviewCount = filteredApps.filter((a) => {
+            const s = (a.status || '').toLowerCase();
+            return s === 'interview' || s === 'interviewed';
+          }).length;
+
+          const funnel = {
+            saved: filteredSwipes.length,
+            applied: filteredInbound.length > 0 ? filteredInbound.length : filteredApps.length,
+            shortlisted: shortlistedCount,
+            interview: interviewCount,
+          };
+
+          const conversionRate = filteredSwipes.length > 0
+            ? `${Math.round((filteredInbound.length / filteredSwipes.length) * 100)}%`
+            : '0%';
+
+          return (
+            <>
+              <ApplicationFunnelChart
+                funnel={funnel}
+                title="Candidate Application Pipeline Funnel"
+                filterBadge={dateRange !== 'all' ? (dateRange === '7d' ? '7 Days' : '30 Days') : 'All Time'}
+              />
+
+              {/* Recruitment Activity Stream */}
+              <div className="surface-card p-6 space-y-4 border-white/[0.08]">
+                <div className="flex items-center justify-between border-b border-outline-variant pb-3">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-amber-400" />
+                    <h2 className="text-sm font-bold text-content">Recruitment Sourcing Velocity</h2>
+                  </div>
+                  <span className="text-[11px] text-content-subtle">Real-time telemetry</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                  <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
+                    <span className="text-content-subtle block text-[11px]">Total Requisitions Managed</span>
+                    <span className="text-lg font-bold text-content">
+                      {jobs.length} postings
+                    </span>
+                    <p className="text-[11px] text-emerald-400">Requisitions active in discovery catalog</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
+                    <span className="text-content-subtle block text-[11px]">Inbound Swipe Conversion</span>
+                    <span className="text-lg font-bold text-content">
+                      {conversionRate}
+                    </span>
+                    <p className="text-[11px] text-content-subtle">Candidate interest converted to pipeline</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-surface-elevated/40 border border-outline-variant/60 space-y-1">
+                    <span className="text-content-subtle block text-[11px]">Active Pipeline Depth</span>
+                    <span className="text-lg font-bold text-emerald-400">
+                      {shortlistedCount + interviewCount} screened
+                    </span>
+                    <p className="text-[11px] text-content-subtle">Candidates currently in advanced stages</p>
+                  </div>
+                </div>
+              </div>
+            </>
+          );
+        })()}
+      </div>
 
     </div>
   );

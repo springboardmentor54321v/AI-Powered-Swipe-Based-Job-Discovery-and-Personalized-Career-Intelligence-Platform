@@ -1,7 +1,7 @@
 import React from 'react';
 import { Send, ArrowDown } from 'lucide-react';
 
-export default function ApplicationFunnelChart({ funnel = {}, title = "Application Conversion Funnel" }) {
+export default function ApplicationFunnelChart({ funnel = {}, title = "Application Conversion Funnel", filterBadge = null }) {
   const stages = [
     { key: 'saved', label: 'Saved Roles', count: funnel.saved ?? 0, color: 'from-amber-500/80 to-amber-600/80', textColor: 'text-amber-400' },
     { key: 'applied', label: 'Applied', count: funnel.applied ?? 0, color: 'from-blue-500/80 to-blue-600/80', textColor: 'text-blue-400' },
@@ -14,13 +14,18 @@ export default function ApplicationFunnelChart({ funnel = {}, title = "Applicati
 
   return (
     <div className="surface-card p-6 rounded-3xl border border-white/[0.08] bg-[#12131a] space-y-5">
-      <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
         <div>
           <h3 className="text-sm font-bold text-white">{title}</h3>
           <p className="text-xs text-content-muted mt-0.5">
             Stage progression and conversion ratios
           </p>
         </div>
+        {filterBadge && (
+          <span className="text-[10px] text-content-subtle bg-white/[0.03] px-2.5 py-1 rounded-xl border border-white/[0.06] self-start sm:self-auto">
+            {filterBadge}
+          </span>
+        )}
       </div>
 
       {!hasData ? (

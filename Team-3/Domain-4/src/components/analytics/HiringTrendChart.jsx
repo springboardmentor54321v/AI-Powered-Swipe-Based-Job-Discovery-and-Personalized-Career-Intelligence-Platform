@@ -1,22 +1,36 @@
 import React from 'react';
 import { TrendingUp, Building2, Rocket } from 'lucide-react';
 
-export default function HiringTrendChart({ trends = {}, title = "Market Hiring Trends & Skill Demand" }) {
+export default function HiringTrendChart({ trends = {}, title = "Market Hiring Trends & Skill Demand", filterBadge = null }) {
   const topSkills = Array.isArray(trends.top_skills)
     ? trends.top_skills
     : Array.isArray(trends.topSkills)
     ? trends.topSkills
+    : Array.isArray(trends.top_in_demand_skills)
+    ? trends.top_in_demand_skills
     : [];
 
-  const maxCount = Math.max(...topSkills.map((s) => s.count || 1), 1);
-  const hasShare = typeof trends.startup_percentage === 'number';
-  const startupShare = hasShare ? trends.startup_percentage : null;
+  const rawShare = typeof trends.startup_percentage === 'number'
+    ? trends.startup_percentage
+    : typeof trends.hiring_activity_by_company_type?.startup_share_pct === 'number'
+    ? trends.hiring_activity_by_company_type.startup_share_pct
+    : null;
+
+  const hasShare = rawShare !== null;
+  const startupShare = hasShare ? Math.round(rawShare) : null;
   const mncShare = hasShare ? 100 - startupShare : null;
+
+  const maxCount = Math.max(
+    ...topSkills.map((s) => (typeof s === 'object' ? (s.count ?? s.demand_count ?? 1) : 1)),
+    1
+  );
+
   const hasData = topSkills.length > 0 || hasShare;
+  const isEngineError = Boolean(trends.error);
 
   return (
     <div className="surface-card p-6 rounded-3xl border border-white/[0.08] bg-[#12131a] space-y-6">
-      <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
         <div>
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-primary" />
@@ -26,7 +40,21 @@ export default function HiringTrendChart({ trends = {}, title = "Market Hiring T
             Active ecosystem requisitions across tech industry hubs
           </p>
         </div>
+        {filterBadge && (
+          <span className="text-[10px] text-content-subtle bg-white/[0.03] px-2.5 py-1 rounded-xl border border-white/[0.06] self-start sm:self-auto">
+            {filterBadge}
+          </span>
+        )}
       </div>
+
+      {isEngineError && (
+        <div className="p-3.5 rounded-2xl bg-amber-950/20 border border-amber-800/30 text-amber-300 text-xs flex items-start gap-2">
+          <span className="font-bold shrink-0">Note:</span>
+          <span>
+            {trends.error} — Backend intelligence engine unreachable in current Linux environment (cross-domain dependency on Domain-1/Domain-3).
+          </span>
+        </div>
+      )}
 
       {!hasData ? (
         <div className="py-12 text-center text-xs text-content-subtle border border-dashed border-white/[0.06] rounded-2xl">
@@ -72,8 +100,8 @@ export default function HiringTrendChart({ trends = {}, title = "Market Hiring T
 
               <div className="space-y-2.5">
                 {topSkills.map((item, idx) => {
-                  const skillName = typeof item === 'string' ? item : item.skill;
-                  const count = typeof item === 'object' && item.count !== undefined ? item.count : 0;
+                  const skillName = typeof item === 'string' ? item : (item.skill || item.name || 'Skill');
+                  const count = typeof item === 'object' ? (item.count ?? item.demand_count ?? 0) : 0;
                   const barWidth = Math.max(15, Math.round((count / maxCount) * 100));
 
                   return (
