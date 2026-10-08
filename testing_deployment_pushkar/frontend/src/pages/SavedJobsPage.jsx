@@ -487,7 +487,7 @@ export function SavedJobsPage() {
   if (isLoading) {
 
     return (
-      <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60">
+      <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60 dark:bg-zinc-950/60">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -497,9 +497,9 @@ export function SavedJobsPage() {
 
             <div className="space-y-3">
 
-              <div className="h-8 w-48 bg-slate-200 rounded-xl animate-pulse" />
+              <div className="h-8 w-48 bg-slate-200 dark:bg-zinc-700 rounded-xl animate-pulse" />
 
-              <div className="h-4 w-64 bg-slate-200 rounded-lg animate-pulse" />
+              <div className="h-4 w-64 bg-slate-200 dark:bg-zinc-700 rounded-lg animate-pulse" />
 
             </div>
 
@@ -515,18 +515,18 @@ export function SavedJobsPage() {
 
                 <div
                   key={item}
-                  className="bg-white rounded-2xl border border-slate-200 p-6 h-[330px] animate-pulse"
+                  className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 h-[330px] animate-pulse"
                 >
 
                   <div className="flex gap-3 mb-5">
 
-                    <div className="w-12 h-12 bg-slate-200 rounded-xl" />
+                    <div className="w-12 h-12 bg-slate-200 dark:bg-zinc-700 rounded-xl" />
 
                     <div className="space-y-2">
 
-                      <div className="h-3 w-24 bg-slate-200 rounded" />
+                      <div className="h-3 w-24 bg-slate-200 dark:bg-zinc-700 rounded" />
 
-                      <div className="h-5 w-36 bg-slate-200 rounded" />
+                      <div className="h-5 w-36 bg-slate-200 dark:bg-zinc-700 rounded" />
 
                     </div>
 
@@ -535,11 +535,11 @@ export function SavedJobsPage() {
 
                   <div className="space-y-3">
 
-                    <div className="h-4 bg-slate-100 rounded" />
+                    <div className="h-4 bg-slate-100 dark:bg-zinc-800 rounded" />
 
-                    <div className="h-4 bg-slate-100 rounded" />
+                    <div className="h-4 bg-slate-100 dark:bg-zinc-800 rounded" />
 
-                    <div className="h-4 w-3/4 bg-slate-100 rounded" />
+                    <div className="h-4 w-3/4 bg-slate-100 dark:bg-zinc-800 rounded" />
 
                   </div>
 
@@ -567,25 +567,25 @@ export function SavedJobsPage() {
   ) {
 
     return (
-      <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60 flex items-center justify-center px-4">
+      <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60 dark:bg-zinc-950/60 flex items-center justify-center px-4">
 
-        <div className="bg-white rounded-3xl border border-rose-100 shadow-sm p-8 text-center max-w-md w-full">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-rose-100 dark:border-rose-500/20 shadow-sm p-8 text-center max-w-md w-full">
 
-          <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4">
 
             <AlertCircle className="w-7 h-7" />
 
           </div>
 
 
-          <h2 className="text-lg font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50">
 
             Unable to load saved jobs
 
           </h2>
 
 
-          <p className="text-xs text-slate-500 mt-2 mb-6 leading-relaxed">
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-2 mb-6 leading-relaxed">
 
             {error}
 
@@ -597,7 +597,7 @@ export function SavedJobsPage() {
             onClick={() =>
               loadSavedJobs(true)
             }
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95"
           >
 
             <RefreshCw className="w-4 h-4" />
@@ -619,7 +619,7 @@ export function SavedJobsPage() {
 
   return (
 
-    <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60">
+    <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60 dark:bg-zinc-950/60">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -633,14 +633,14 @@ export function SavedJobsPage() {
 
             <div className="flex items-center gap-2 mb-1">
 
-              <div className="p-2 bg-emerald-50 text-emerald-700 rounded-xl">
+              <div className="p-2 bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 rounded-xl">
 
-                <Bookmark className="w-5 h-5 fill-emerald-600 text-emerald-600" />
+                <Bookmark className="w-5 h-5 fill-brand-600 text-brand-600 dark:text-brand-400" />
 
               </div>
 
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
 
                 Saved Jobs
 
@@ -649,7 +649,7 @@ export function SavedJobsPage() {
             </div>
 
 
-            <p className="text-xs sm:text-sm text-slate-500">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
 
               {savedJobs.length}{" "}
 
@@ -677,7 +677,7 @@ export function SavedJobsPage() {
                 isRefreshing
               }
               title="Refresh saved jobs"
-              className="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-emerald-700 hover:border-emerald-200 transition-all disabled:opacity-50"
+              className="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:text-brand-700 dark:hover:text-brand-300 hover:border-brand-200 dark:hover:border-brand-500/20 transition-all disabled:opacity-50"
             >
 
               <RefreshCw
@@ -695,7 +695,7 @@ export function SavedJobsPage() {
 
             {savedJobs.length > 0 && (
 
-              <div className="flex items-center gap-1.5 p-1 bg-slate-100 border border-slate-200 rounded-xl">
+              <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 rounded-xl">
 
                 {[
                   "All",
@@ -716,8 +716,8 @@ export function SavedJobsPage() {
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                         filterType ===
                         type
-                          ? "bg-white text-slate-900 shadow-2xs"
-                          : "text-slate-600 hover:text-slate-900"
+                          ? "bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 shadow-2xs"
+                          : "text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-zinc-50"
                       }`}
                     >
 
@@ -743,13 +743,13 @@ export function SavedJobsPage() {
 
         {error && savedJobs.length > 0 && (
 
-          <div className="mb-5 flex items-center justify-between gap-3 px-4 py-3 bg-rose-50 border border-rose-100 rounded-xl">
+          <div className="mb-5 flex items-center justify-between gap-3 px-4 py-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-xl">
 
             <div className="flex items-center gap-2">
 
               <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
 
-              <p className="text-xs text-rose-700">
+              <p className="text-xs text-rose-700 dark:text-rose-300">
 
                 {error}
 
@@ -763,7 +763,7 @@ export function SavedJobsPage() {
               onClick={() =>
                 loadSavedJobs(false)
               }
-              className="text-xs font-bold text-rose-700 hover:text-rose-900"
+              className="text-xs font-bold text-rose-700 dark:text-rose-300 hover:text-rose-900 dark:hover:text-rose-300"
             >
 
               Retry
@@ -781,9 +781,9 @@ export function SavedJobsPage() {
 
         {filteredSavedJobs.length === 0 ? (
 
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-12 text-center max-w-md mx-auto my-8">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-xs p-12 text-center max-w-md mx-auto my-8">
 
-            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto mb-4">
 
               {savedJobs.length === 0 ? (
                 <Bookmark className="w-8 h-8" />
@@ -794,7 +794,7 @@ export function SavedJobsPage() {
             </div>
 
 
-            <h2 className="text-lg font-bold text-slate-900 mb-1">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50 mb-1">
 
               {savedJobs.length === 0
                 ? "No saved jobs yet"
@@ -803,7 +803,7 @@ export function SavedJobsPage() {
             </h2>
 
 
-            <p className="text-xs text-slate-500 leading-relaxed mb-6">
+            <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed mb-6">
 
               {savedJobs.length === 0
                 ? "Use the bookmark button on jobs in Discover to save opportunities here for quick review."
@@ -816,7 +816,7 @@ export function SavedJobsPage() {
 
               <Link
                 to="/"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs active:scale-95 transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-xs active:scale-95 transition-all"
               >
 
                 <span>
@@ -836,7 +836,7 @@ export function SavedJobsPage() {
                     "All"
                   )
                 }
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-100 text-xs font-bold rounded-xl transition-all"
               >
 
                 Show All Jobs
@@ -903,9 +903,11 @@ export function SavedJobsPage() {
 
                 return (
 
+
                   <div
+                    data-testid="saved-job-card"
                     key={job.id}
-                    className="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-all p-6 flex flex-col justify-between"
+                    className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xs hover:shadow-md transition-all p-6 flex flex-col justify-between"
                   >
 
                     <div>
@@ -918,7 +920,7 @@ export function SavedJobsPage() {
 
                         <div className="flex items-center gap-3 min-w-0">
 
-                          <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 p-1 flex items-center justify-center overflow-hidden shrink-0">
+                          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 p-1 flex items-center justify-center overflow-hidden shrink-0">
 
                             {job.logo ? (
 
@@ -942,7 +944,7 @@ export function SavedJobsPage() {
 
                           <div className="min-w-0">
 
-                            <span className="block text-[11px] font-bold text-emerald-700 uppercase tracking-wider truncate">
+                            <span className="block text-[11px] font-bold text-brand-700 dark:text-brand-300 uppercase tracking-wider truncate">
 
                               {job.company ||
                                 "Company"}
@@ -950,7 +952,7 @@ export function SavedJobsPage() {
                             </span>
 
 
-                            <h3 className="text-base font-bold text-slate-900 line-clamp-1">
+                            <h3 className="text-base font-bold text-slate-900 dark:text-zinc-50 line-clamp-1">
 
                               {job.title ||
                                 "Untitled Job"}
@@ -974,7 +976,7 @@ export function SavedJobsPage() {
                           disabled={
                             isRemoving
                           }
-                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors shrink-0 disabled:opacity-50"
+                          className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors shrink-0 disabled:opacity-50"
                           title="Remove from saved"
                           aria-label="Remove job from saved"
                         >
@@ -1043,7 +1045,7 @@ export function SavedJobsPage() {
                           JOB DETAILS
                       ====================================== */}
 
-                      <div className="space-y-1.5 text-xs text-slate-600 my-3">
+                      <div className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-300 my-3">
 
                         <div className="flex items-center gap-1.5">
 
@@ -1061,7 +1063,7 @@ export function SavedJobsPage() {
 
                         {job.salary && (
 
-                          <div className="flex items-center gap-1.5 font-bold text-emerald-700">
+                          <div className="flex items-center gap-1.5 font-bold text-brand-700 dark:text-brand-300">
 
                             <IndianRupee className="w-3.5 h-3.5" />
 
@@ -1097,7 +1099,7 @@ export function SavedJobsPage() {
                                   key={
                                     skill
                                   }
-                                  className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[11px] font-medium rounded-md"
+                                  className="px-2 py-0.5 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 text-[11px] font-medium rounded-md"
                                 >
 
                                   {skill}
@@ -1133,13 +1135,13 @@ export function SavedJobsPage() {
                         ACTIONS
                     ======================================== */}
 
-                    <div className="pt-4 border-t border-slate-100 flex items-center gap-2">
+                    <div className="pt-4 border-t border-slate-100 dark:border-zinc-800 flex items-center gap-2">
 
                       {/* VIEW DETAILS */}
 
                       <Link
                         to={`/jobs/${job.id}`}
-                        className="flex-1 text-center py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs rounded-xl transition-colors"
+                        className="flex-1 text-center py-2.5 px-3 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-100 font-semibold text-xs rounded-xl transition-colors"
                       >
 
                         View Details
@@ -1160,7 +1162,7 @@ export function SavedJobsPage() {
                           isApplied ||
                           isApplying
                         }
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-100 disabled:text-slate-400 text-white font-bold text-xs rounded-xl shadow-2xs transition-all active:scale-95"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-100 dark:disabled:bg-zinc-800 disabled:text-slate-400 text-white font-bold text-xs rounded-xl shadow-2xs transition-all active:scale-95"
                       >
 
                         {isApplying ? (

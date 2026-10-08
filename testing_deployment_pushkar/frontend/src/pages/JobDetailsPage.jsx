@@ -19,6 +19,7 @@ import {
 
 import { jobService } from "../services/jobService";
 import { useApp } from "../context/AppContext";
+import { CompetitionBadge } from "../components/CompetitionBadge";
 
 export function JobDetailsPage() {
   const { id } = useParams();
@@ -85,9 +86,9 @@ export function JobDetailsPage() {
     return (
       <div className="min-h-[70vh] flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-brand-100 dark:border-brand-500/20 border-t-brand-600 rounded-full animate-spin mx-auto mb-4" />
 
-          <p className="text-sm font-semibold text-slate-600">
+          <p className="text-sm font-semibold text-slate-600 dark:text-zinc-300">
             Loading job details...
           </p>
         </div>
@@ -103,22 +104,22 @@ export function JobDetailsPage() {
     return (
       <div className="min-h-[70vh] flex items-center justify-center px-4">
         <div className="text-center max-w-lg">
-          <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-5">
+          <div className="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-5">
             <AlertCircle className="w-8 h-8" />
           </div>
 
-          <h1 className="text-2xl font-extrabold text-slate-900 mb-2">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-zinc-50 mb-2">
             Job Not Found
           </h1>
 
-          <p className="text-sm text-slate-500 mb-6">
+          <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6">
             {error ||
               "The requested job posting could not be found or has expired."}
           </p>
 
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Jobs
@@ -202,7 +203,7 @@ export function JobDetailsPage() {
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-emerald-600 transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-zinc-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
@@ -212,7 +213,7 @@ export function JobDetailsPage() {
           HEADER
       ===================================================== */}
 
-      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl shadow-sm overflow-hidden">
 
         <div className="p-6 sm:p-8">
 
@@ -222,20 +223,20 @@ export function JobDetailsPage() {
 
             <div className="flex items-start gap-4">
 
-              <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
-                <Building2 className="w-8 h-8 text-emerald-600" />
+              <div className="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 flex items-center justify-center shrink-0">
+                <Building2 className="w-8 h-8 text-brand-600 dark:text-brand-400" />
               </div>
 
               <div>
-                <p className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-1">
+                <p className="text-sm font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wide mb-1">
                   {job.company}
                 </p>
 
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
                   {job.title}
                 </h1>
 
-                <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-slate-500">
+                <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-slate-500 dark:text-zinc-400">
 
                   <span className="inline-flex items-center gap-1.5">
                     <MapPin className="w-4 h-4" />
@@ -251,6 +252,15 @@ export function JobDetailsPage() {
                     {employmentType}
                   </span>
 
+                </div>
+
+                <div className="mt-3 flex items-center gap-3 flex-wrap">
+                  <CompetitionBadge job={job} />
+                  {(job.posted_ago || job.postedAgo) && (
+                    <span className="text-[11px] text-slate-500 dark:text-zinc-400">
+                      Posted {job.posted_ago || job.postedAgo}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -273,8 +283,8 @@ export function JobDetailsPage() {
                   transition-all
                   ${
                     isSaved
-                      ? "bg-emerald-50 border-emerald-300 text-emerald-700"
-                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                      ? "bg-brand-50 dark:bg-brand-500/10 border-brand-300 text-brand-700 dark:text-brand-300"
+                      : "bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800/50"
                   }
                 `}
               >
@@ -293,7 +303,7 @@ export function JobDetailsPage() {
               <button
                 type="button"
                 onClick={handleApply}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
               >
                 <Send className="w-4 h-4" />
                 Apply
@@ -340,7 +350,7 @@ export function JobDetailsPage() {
             CONTENT
         =================================================== */}
 
-        <div className="border-t border-slate-100 p-6 sm:p-8">
+        <div className="border-t border-slate-100 dark:border-zinc-800 p-6 sm:p-8">
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10">
 
@@ -352,11 +362,11 @@ export function JobDetailsPage() {
 
               <section className="mb-8">
 
-                <h2 className="text-xl font-bold text-slate-900 mb-4">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-zinc-50 mb-4">
                   Job Description
                 </h2>
 
-                <div className="text-sm sm:text-base leading-7 text-slate-600 whitespace-pre-line">
+                <div className="text-sm sm:text-base leading-7 text-slate-600 dark:text-zinc-300 whitespace-pre-line">
                   {job.description}
                 </div>
 
@@ -366,11 +376,11 @@ export function JobDetailsPage() {
 
               <section className="mb-8">
 
-                <h2 className="text-xl font-bold text-slate-900 mb-4">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-zinc-50 mb-4">
                   Qualifications
                 </h2>
 
-                <div className="text-sm sm:text-base leading-7 text-slate-600 whitespace-pre-line">
+                <div className="text-sm sm:text-base leading-7 text-slate-600 dark:text-zinc-300 whitespace-pre-line">
                   {qualifications}
                 </div>
 
@@ -380,7 +390,7 @@ export function JobDetailsPage() {
 
               <section>
 
-                <h2 className="text-xl font-bold text-slate-900 mb-4">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-zinc-50 mb-4">
                   Required Skills
                 </h2>
 
@@ -390,14 +400,14 @@ export function JobDetailsPage() {
                     skills.map((skill, index) => (
                       <span
                         key={`${skill}-${index}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 rounded-lg text-sm font-semibold"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
                         {skill}
                       </span>
                     ))
                   ) : (
-                    <span className="text-sm text-slate-500">
+                    <span className="text-sm text-slate-500 dark:text-zinc-400">
                       No skills specified
                     </span>
                   )}
@@ -412,9 +422,9 @@ export function JobDetailsPage() {
 
             <aside>
 
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 sticky top-24">
+              <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 sticky top-24">
 
-                <h3 className="font-bold text-slate-900 mb-4">
+                <h3 className="font-bold text-slate-900 dark:text-zinc-50 mb-4">
                   Job Summary
                 </h3>
 
@@ -455,7 +465,7 @@ export function JobDetailsPage() {
                 <button
                   type="button"
                   onClick={handleApply}
-                  className="w-full mt-6 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all"
+                  className="w-full mt-6 flex items-center justify-center gap-2 px-4 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold text-sm transition-all"
                 >
                   Apply for this job
                   <ArrowRight className="w-4 h-4" />
@@ -484,7 +494,7 @@ function MetaCard({
   value,
 }) {
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+    <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl p-4">
 
       <div className="flex items-center gap-2 text-slate-400 mb-2">
         <Icon className="w-4 h-4" />
@@ -494,7 +504,7 @@ function MetaCard({
         </span>
       </div>
 
-      <p className="text-sm font-bold text-slate-900 break-words">
+      <p className="text-sm font-bold text-slate-900 dark:text-zinc-50 break-words">
         {value}
       </p>
 
@@ -521,7 +531,7 @@ function SummaryRow({
           {label}
         </p>
 
-        <p className="font-semibold text-slate-800 break-words">
+        <p className="font-semibold text-slate-800 dark:text-zinc-100 break-words">
           {value}
         </p>
       </div>
@@ -582,7 +592,7 @@ export default JobDetailsPage;
 //   if (loading) {
 //     return (
 //       <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-//         <p className="text-slate-500">Loading job details...</p>
+//         <p className="text-slate-500 dark:text-zinc-400">Loading job details...</p>
 //       </div>
 //     );
 //   }
@@ -590,13 +600,13 @@ export default JobDetailsPage;
 //   if (!job) {
 //     return (
 //       <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
-//         <h2 className="text-xl font-bold text-slate-900">Job Not Found</h2>
-//         <p className="text-sm text-slate-500">
+//         <h2 className="text-xl font-bold text-slate-900 dark:text-zinc-50">Job Not Found</h2>
+//         <p className="text-sm text-slate-500 dark:text-zinc-400">
 //           The requested job posting could not be found or has expired.
 //         </p>
 //         <Link
 //           to="/"
-//           className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors"
+//           className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-colors"
 //         >
 //           <ArrowLeft className="w-4 h-4" />
 //           <span>Back to Jobs</span>
@@ -620,7 +630,7 @@ export default JobDetailsPage;
 //         <button
 //           type="button"
 //           onClick={() => navigate(-1)}
-//           className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl transition-all shadow-2xs"
+//           className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-zinc-50 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 px-3.5 py-2 rounded-xl transition-all shadow-2xs"
 //         >
 //           <ArrowLeft className="w-4 h-4 text-slate-400" />
 //           <span>Back</span>
@@ -629,7 +639,7 @@ export default JobDetailsPage;
 //         <button
 //           type="button"
 //           onClick={handleShare}
-//           className="p-2 text-slate-500 hover:text-slate-900 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+//           className="p-2 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-50 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-all"
 //           title="Share job"
 //         >
 //           <Share2 className="w-4 h-4" />
@@ -637,10 +647,10 @@ export default JobDetailsPage;
 //       </div>
 
 //       {/* Main Job Hero Header Card */}
-//       <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs mb-8">
+//       <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-zinc-800 shadow-xs mb-8">
 //         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
 //           <div className="flex items-start gap-4">
-//             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-100 border border-slate-200 p-1 flex items-center justify-center overflow-hidden shrink-0">
+//             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 p-1 flex items-center justify-center overflow-hidden shrink-0">
 //               {job.logo ? (
 //                 <img
 //                   src={job.logo}
@@ -654,22 +664,22 @@ export default JobDetailsPage;
 
 //             <div>
 //               <div className="flex items-center gap-2">
-//                 <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+//                 <span className="text-xs font-bold text-brand-700 dark:text-brand-300 uppercase tracking-wider">
 //                   {job.company}
 //                 </span>
-//                 <span className="w-1 h-1 rounded-full bg-slate-300" />
-//                 <span className="text-xs font-semibold text-slate-500">{job.companyType}</span>
+//                 <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-600" />
+//                 <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">{job.companyType}</span>
 //               </div>
-//               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 tracking-tight">
+//               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 mt-1 tracking-tight">
 //                 {job.title}
 //               </h1>
 
-//               <div className="flex flex-wrap items-center gap-4 mt-3 text-xs sm:text-sm text-slate-600 font-medium">
+//               <div className="flex flex-wrap items-center gap-4 mt-3 text-xs sm:text-sm text-slate-600 dark:text-zinc-300 font-medium">
 //                 <span className="flex items-center gap-1.5">
 //                   <MapPin className="w-4 h-4 text-slate-400" />
 //                   {job.location}
 //                 </span>
-//                 <span className="flex items-center gap-1.5 font-bold text-emerald-700">
+//                 <span className="flex items-center gap-1.5 font-bold text-brand-700 dark:text-brand-300">
 //                   <IndianRupee className="w-4 h-4" />
 //                   <span>{job.salary}</span>
 //                 </span>
@@ -694,7 +704,7 @@ export default JobDetailsPage;
 //         </div>
 
 //         {/* Badges */}
-//         <div className="flex flex-wrap items-center gap-1.5 mt-6 pt-6 border-t border-slate-100">
+//         <div className="flex flex-wrap items-center gap-1.5 mt-6 pt-6 border-t border-slate-100 dark:border-zinc-800">
 //           <JobBadge type="fulltime" text={job.jobType} />
 //           {job.isFresherFriendly && <JobBadge type="fresher" text="Fresher Friendly" />}
 //           {job.isRemote && <JobBadge type="remote" text="Remote Available" />}
@@ -714,7 +724,7 @@ export default JobDetailsPage;
 //             onClick={() => setApplyModalJob(job)}
 //             disabled={isApplied}
 //             id="btn-job-details-apply"
-//             className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-100 disabled:text-slate-400 text-white rounded-xl font-bold text-sm shadow-xs active:scale-98 transition-all"
+//             className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 py-3 px-6 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-100 dark:disabled:bg-zinc-800 disabled:text-slate-400 text-white rounded-xl font-bold text-sm shadow-xs active:scale-98 transition-all"
 //           >
 //             <Send className="w-4 h-4" />
 //             <span>{isApplied ? "Application Submitted" : "Apply for this Job"}</span>
@@ -726,12 +736,12 @@ export default JobDetailsPage;
 //             id="btn-job-details-save"
 //             className={`w-full sm:w-auto flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-sm border active:scale-98 transition-all ${
 //               isSaved
-//                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-//                 : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
+//                 ? "bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 border-brand-200 dark:border-brand-500/20"
+//                 : "bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800/50 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-800"
 //             }`}
 //           >
 //             <Bookmark
-//               className={`w-4 h-4 ${isSaved ? "fill-emerald-600 text-emerald-600" : "text-slate-400"}`}
+//               className={`w-4 h-4 ${isSaved ? "fill-brand-600 text-brand-600 dark:text-brand-400" : "text-slate-400"}`}
 //             />
 //             <span>{isSaved ? "Saved in Jobs" : "Save Job"}</span>
 //           </button>
@@ -743,19 +753,19 @@ export default JobDetailsPage;
 //         {/* Main Details (2 cols) */}
 //         <div className="lg:col-span-2 space-y-6">
 //           {/* About the Role */}
-//           <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-xs space-y-3">
-//             <h2 className="text-lg font-bold text-slate-900">Job Overview</h2>
-//             <p className="text-sm text-slate-600 leading-relaxed">{job.description}</p>
+//           <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 sm:p-7 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-3">
+//             <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50">Job Overview</h2>
+//             <p className="text-sm text-slate-600 dark:text-zinc-300 leading-relaxed">{job.description}</p>
 //           </div>
 
 //           {/* Key Responsibilities */}
 //           {job.responsibilities && job.responsibilities.length > 0 && (
-//             <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-xs space-y-4">
-//               <h2 className="text-lg font-bold text-slate-900">Key Responsibilities</h2>
+//             <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 sm:p-7 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-4">
+//               <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50">Key Responsibilities</h2>
 //               <ul className="space-y-2.5">
 //                 {job.responsibilities.map((resp, idx) => (
-//                   <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-600">
-//                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+//                   <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-600 dark:text-zinc-300">
+//                     <CheckCircle2 className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0 mt-0.5" />
 //                     <span>{resp}</span>
 //                   </li>
 //                 ))}
@@ -765,13 +775,13 @@ export default JobDetailsPage;
 
 //           {/* Required Skills */}
 //           {job.requiredSkills && (
-//             <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-xs space-y-4">
-//               <h2 className="text-lg font-bold text-slate-900">Required Skills & Tech Stack</h2>
+//             <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 sm:p-7 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-4">
+//               <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50">Required Skills & Tech Stack</h2>
 //               <div className="flex flex-wrap gap-2">
 //                 {job.requiredSkills.map((sk) => (
 //                   <span
 //                     key={sk}
-//                     className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-semibold"
+//                     className="px-3 py-1.5 bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-500/20 rounded-xl text-xs font-semibold"
 //                   >
 //                     {sk}
 //                   </span>
@@ -779,7 +789,7 @@ export default JobDetailsPage;
 //               </div>
 
 //               {job.preferredSkills && (
-//                 <div className="pt-3 border-t border-slate-100">
+//                 <div className="pt-3 border-t border-slate-100 dark:border-zinc-800">
 //                   <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
 //                     Nice to Have
 //                   </p>
@@ -787,7 +797,7 @@ export default JobDetailsPage;
 //                     {job.preferredSkills.map((sk) => (
 //                       <span
 //                         key={sk}
-//                         className="px-3 py-1 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-medium"
+//                         className="px-3 py-1 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-medium"
 //                       >
 //                         {sk}
 //                       </span>
@@ -800,18 +810,18 @@ export default JobDetailsPage;
 
 //           {/* Benefits & Perks */}
 //           {job.benefits && (
-//             <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-xs space-y-4">
+//             <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 sm:p-7 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-4">
 //               <div className="flex items-center gap-2">
-//                 <Gift className="w-5 h-5 text-emerald-600" />
-//                 <h2 className="text-lg font-bold text-slate-900">Benefits & Perks</h2>
+//                 <Gift className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+//                 <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50">Benefits & Perks</h2>
 //               </div>
 //               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 //                 {job.benefits.map((benefit, idx) => (
 //                   <li
 //                     key={idx}
-//                     className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 flex items-center gap-2"
+//                     className="p-3 bg-slate-50 dark:bg-zinc-950 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs font-medium text-slate-700 dark:text-zinc-200 flex items-center gap-2"
 //                   >
-//                     <Award className="w-4 h-4 text-emerald-600 shrink-0" />
+//                     <Award className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" />
 //                     <span>{benefit}</span>
 //                   </li>
 //                 ))}
@@ -823,12 +833,12 @@ export default JobDetailsPage;
 //         {/* Sidebar Info & Match Insights (1 col) */}
 //         <div className="space-y-6">
 //           {/* Match Insight Card */}
-//           <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-sm space-y-4 border border-slate-800">
+//           <div className="bg-slate-900 dark:bg-zinc-800 text-white rounded-2xl p-6 shadow-sm space-y-4 border border-slate-800">
 //             <div className="flex items-center justify-between">
 //               <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
 //                 Match Analysis
 //               </span>
-//               <span className="text-sm font-bold text-emerald-400">
+//               <span className="text-sm font-bold text-brand-400">
 //                 {job.matchPercentage}% Compatibility
 //               </span>
 //             </div>
@@ -837,38 +847,38 @@ export default JobDetailsPage;
 //             </p>
 //             <Link
 //               to="/resume-analysis"
-//               className="inline-flex items-center justify-center w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors"
+//               className="inline-flex items-center justify-center w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-colors"
 //             >
 //               Analyze Resume for this Role
 //             </Link>
 //           </div>
 
 //           {/* Company Snapshot */}
-//           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
-//             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+//           <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-4">
+//             <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-50 uppercase tracking-wider">
 //               Company Snapshot
 //             </h3>
-//             <div className="space-y-3 text-xs text-slate-600">
-//               <div className="flex justify-between py-1 border-b border-slate-100">
+//             <div className="space-y-3 text-xs text-slate-600 dark:text-zinc-300">
+//               <div className="flex justify-between py-1 border-b border-slate-100 dark:border-zinc-800">
 //                 <span className="text-slate-400">Company</span>
-//                 <span className="font-semibold text-slate-800">{job.company}</span>
+//                 <span className="font-semibold text-slate-800 dark:text-zinc-100">{job.company}</span>
 //               </div>
-//               <div className="flex justify-between py-1 border-b border-slate-100">
+//               <div className="flex justify-between py-1 border-b border-slate-100 dark:border-zinc-800">
 //                 <span className="text-slate-400">Type</span>
-//                 <span className="font-semibold text-slate-800">{job.companyType}</span>
+//                 <span className="font-semibold text-slate-800 dark:text-zinc-100">{job.companyType}</span>
 //               </div>
-//               <div className="flex justify-between py-1 border-b border-slate-100">
+//               <div className="flex justify-between py-1 border-b border-slate-100 dark:border-zinc-800">
 //                 <span className="text-slate-400">Location</span>
-//                 <span className="font-semibold text-slate-800">{job.location}</span>
+//                 <span className="font-semibold text-slate-800 dark:text-zinc-100">{job.location}</span>
 //               </div>
-//               <div className="flex justify-between py-1 border-b border-slate-100">
+//               <div className="flex justify-between py-1 border-b border-slate-100 dark:border-zinc-800">
 //                 <span className="text-slate-400">Competition</span>
-//                 <span className="font-semibold text-emerald-700">{job.competition}</span>
+//                 <span className="font-semibold text-brand-700 dark:text-brand-300">{job.competition}</span>
 //               </div>
 //             </div>
 
-//             <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center gap-2 text-xs text-emerald-800 font-medium">
-//               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+//             <div className="p-3 bg-brand-50 dark:bg-brand-500/10 rounded-xl border border-brand-100 dark:border-brand-500/20 flex items-center gap-2 text-xs text-brand-800 dark:text-brand-300 font-medium">
+//               <ShieldCheck className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" />
 //               <span>Verified Employer on SwipeX</span>
 //             </div>
 //           </div>

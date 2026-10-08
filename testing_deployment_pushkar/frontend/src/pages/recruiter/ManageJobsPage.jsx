@@ -173,11 +173,11 @@ export function ManageJobsPage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
             Manage Job Openings
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
             Monitor, view, and manage your company's
             job requisitions.
           </p>
@@ -197,7 +197,7 @@ export function ManageJobsPage() {
           SEARCH + FILTER
       ========================= */}
 
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
 
         {/* Search */}
         <div className="relative w-full sm:w-80">
@@ -210,7 +210,7 @@ export function ManageJobsPage() {
             onChange={(e) =>
               setSearchQuery(e.target.value)
             }
-            className="w-full pl-9 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-medium focus:bg-white dark:focus:bg-zinc-900 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -227,7 +227,7 @@ export function ManageJobsPage() {
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap ${
                   statusFilter === status
                     ? "bg-blue-600 text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700"
                 }`}
               >
                 {status}
@@ -243,27 +243,27 @@ export function ManageJobsPage() {
 
       {isLoading ? (
         /* Loading */
-        <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center">
-          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 p-12 text-center">
+          <div className="w-8 h-8 border-4 border-blue-200 dark:border-blue-500/20 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
 
-          <h3 className="text-sm font-bold text-slate-800">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100">
             Loading your jobs...
           </h3>
 
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
             Fetching your job postings from SwipeX.
           </p>
         </div>
       ) : loadError ? (
         /* Error */
-        <div className="bg-white rounded-3xl border border-rose-200 p-12 text-center">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-rose-200 dark:border-rose-500/20 p-12 text-center">
           <XCircle className="w-12 h-12 text-rose-300 mx-auto mb-3" />
 
-          <h3 className="text-base font-bold text-slate-800">
+          <h3 className="text-base font-bold text-slate-800 dark:text-zinc-100">
             Unable to load jobs
           </h3>
 
-          <p className="text-xs text-rose-600 mt-1">
+          <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">
             {loadError}
           </p>
 
@@ -277,16 +277,16 @@ export function ManageJobsPage() {
         </div>
       ) : filteredJobs.length === 0 ? (
         /* Empty */
-        <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 p-12 text-center">
           <Briefcase className="w-12 h-12 text-slate-300 mx-auto mb-3" />
 
-          <h3 className="text-base font-bold text-slate-800">
+          <h3 className="text-base font-bold text-slate-800 dark:text-zinc-100">
             {recruiterJobs.length === 0
               ? "No jobs posted yet"
               : "No jobs matched your criteria"}
           </h3>
 
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto">
             {recruiterJobs.length === 0
               ? "Create your first job opening to start attracting candidates."
               : "Try adjusting your search query or status filter."}
@@ -309,7 +309,7 @@ export function ManageJobsPage() {
           {filteredJobs.map((job) => (
             <div
               key={job.id}
-              className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:border-blue-200 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+              className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-5 shadow-xs hover:border-blue-200 dark:hover:border-blue-500/20 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4"
             >
 
               {/* =========================
@@ -320,21 +320,21 @@ export function ManageJobsPage() {
 
                 <div className="flex flex-wrap items-center gap-2.5">
 
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-zinc-50 truncate">
                     {job.title}
                   </h3>
 
                   <span
                     className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                       job.status === "Active"
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                        : "bg-slate-100 text-slate-600 border border-slate-200"
+                        ? "bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-500/20"
+                        : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-800"
                     }`}
                   >
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
                         job.status === "Active"
-                          ? "bg-emerald-500"
+                          ? "bg-brand-500"
                           : "bg-slate-400"
                       }`}
                     />
@@ -346,12 +346,12 @@ export function ManageJobsPage() {
                 </div>
 
                 {/* Company */}
-                <p className="text-xs font-semibold text-slate-700">
+                <p className="text-xs font-semibold text-slate-700 dark:text-zinc-200">
                   {job.company}
                 </p>
 
                 {/* Meta */}
-                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-zinc-400">
 
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-slate-400" />
@@ -366,7 +366,7 @@ export function ManageJobsPage() {
 
                   <span>•</span>
 
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-800 dark:text-zinc-100">
                     {job.salaryRange}
                   </span>
 
@@ -384,7 +384,7 @@ export function ManageJobsPage() {
                       (skill) => (
                         <span
                           key={skill}
-                          className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-medium"
+                          className="px-2 py-0.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded-md text-[10px] font-medium"
                         >
                           {skill}
                         </span>
@@ -398,12 +398,12 @@ export function ManageJobsPage() {
                   ACTIONS
               ========================= */}
 
-              <div className="flex flex-wrap items-center gap-2 lg:border-l lg:border-slate-100 lg:pl-6 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 lg:border-l lg:border-slate-100 dark:lg:border-zinc-800 lg:pl-6 shrink-0">
 
                 {/* Applicants */}
                 <Link
                   to="/recruiter/applicants"
-                  className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/15 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold transition-colors"
                 >
                   <Users className="w-4 h-4" />
 
@@ -418,7 +418,7 @@ export function ManageJobsPage() {
                   onClick={() =>
                     setViewDetailsJob(job)
                   }
-                  className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
+                  className="p-2 text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
                   title="View Details"
                 >
                   <Eye className="w-4 h-4" />
@@ -428,7 +428,7 @@ export function ManageJobsPage() {
                 <button
                   type="button"
                   disabled
-                  className="p-2 text-slate-300 bg-slate-50 rounded-xl cursor-not-allowed"
+                  className="p-2 text-slate-300 bg-slate-50 dark:bg-zinc-950 rounded-xl cursor-not-allowed"
                   title="Edit will be connected to backend next"
                 >
                   <Edit2 className="w-4 h-4" />
@@ -438,7 +438,7 @@ export function ManageJobsPage() {
                 <button
                   type="button"
                   disabled
-                  className="p-2 text-slate-300 bg-slate-50 rounded-xl cursor-not-allowed"
+                  className="p-2 text-slate-300 bg-slate-50 dark:bg-zinc-950 rounded-xl cursor-not-allowed"
                   title="Status management will be connected to backend next"
                 >
                   <Power className="w-4 h-4" />
@@ -450,7 +450,7 @@ export function ManageJobsPage() {
                   onClick={() =>
                     setDeleteConfirmId(job.id)
                   }
-                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                  className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors"
                   title="Delete Job"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -469,16 +469,16 @@ export function ManageJobsPage() {
       {viewDetailsJob && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in">
 
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-200 animate-in zoom-in-95">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-200 dark:border-zinc-800 animate-in zoom-in-95">
 
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
 
               <div>
-                <h3 className="text-base font-bold text-slate-900">
+                <h3 className="text-base font-bold text-slate-900 dark:text-zinc-50">
                   {viewDetailsJob.title}
                 </h3>
 
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
                   {viewDetailsJob.company}
                 </p>
               </div>
@@ -488,7 +488,7 @@ export function ManageJobsPage() {
                 onClick={() =>
                   setViewDetailsJob(null)
                 }
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -499,22 +499,22 @@ export function ManageJobsPage() {
 
               {/* Location */}
               <div>
-                <p className="font-bold text-slate-500 uppercase text-[10px]">
+                <p className="font-bold text-slate-500 dark:text-zinc-400 uppercase text-[10px]">
                   Location
                 </p>
 
-                <p className="text-slate-800 font-semibold mt-0.5">
+                <p className="text-slate-800 dark:text-zinc-100 font-semibold mt-0.5">
                   {viewDetailsJob.location}
                 </p>
               </div>
 
               {/* Employment */}
               <div>
-                <p className="font-bold text-slate-500 uppercase text-[10px]">
+                <p className="font-bold text-slate-500 dark:text-zinc-400 uppercase text-[10px]">
                   Employment
                 </p>
 
-                <p className="text-slate-800 font-semibold mt-0.5">
+                <p className="text-slate-800 dark:text-zinc-100 font-semibold mt-0.5">
                   {viewDetailsJob.employmentType}
                   {" • "}
                   {viewDetailsJob.experienceLevel}
@@ -525,11 +525,11 @@ export function ManageJobsPage() {
 
               {/* Salary */}
               <div>
-                <p className="font-bold text-slate-500 uppercase text-[10px]">
+                <p className="font-bold text-slate-500 dark:text-zinc-400 uppercase text-[10px]">
                   Compensation
                 </p>
 
-                <p className="text-slate-800 font-semibold mt-0.5">
+                <p className="text-slate-800 dark:text-zinc-100 font-semibold mt-0.5">
                   {viewDetailsJob.salaryRange}
                 </p>
               </div>
@@ -537,11 +537,11 @@ export function ManageJobsPage() {
               {/* Deadline */}
               {viewDetailsJob.deadline && (
                 <div>
-                  <p className="font-bold text-slate-500 uppercase text-[10px]">
+                  <p className="font-bold text-slate-500 dark:text-zinc-400 uppercase text-[10px]">
                     Application Deadline
                   </p>
 
-                  <p className="text-slate-800 font-semibold mt-0.5">
+                  <p className="text-slate-800 dark:text-zinc-100 font-semibold mt-0.5">
                     {new Date(
                       viewDetailsJob.deadline
                     ).toLocaleDateString()}
@@ -551,11 +551,11 @@ export function ManageJobsPage() {
 
               {/* Description */}
               <div>
-                <p className="font-bold text-slate-500 uppercase text-[10px]">
+                <p className="font-bold text-slate-500 dark:text-zinc-400 uppercase text-[10px]">
                   Role Overview
                 </p>
 
-                <p className="text-slate-700 leading-relaxed mt-0.5 whitespace-pre-line">
+                <p className="text-slate-700 dark:text-zinc-200 leading-relaxed mt-0.5 whitespace-pre-line">
                   {viewDetailsJob.description ||
                     "No description provided."}
                 </p>
@@ -563,11 +563,11 @@ export function ManageJobsPage() {
 
               {/* Qualifications */}
               <div>
-                <p className="font-bold text-slate-500 uppercase text-[10px]">
+                <p className="font-bold text-slate-500 dark:text-zinc-400 uppercase text-[10px]">
                   Qualifications
                 </p>
 
-                <p className="text-slate-700 leading-relaxed mt-0.5 whitespace-pre-line">
+                <p className="text-slate-700 dark:text-zinc-200 leading-relaxed mt-0.5 whitespace-pre-line">
                   {viewDetailsJob.qualifications ||
                     "No qualifications specified."}
                 </p>
@@ -575,7 +575,7 @@ export function ManageJobsPage() {
 
               {/* Skills */}
               <div>
-                <p className="font-bold text-slate-500 uppercase text-[10px] mb-1">
+                <p className="font-bold text-slate-500 dark:text-zinc-400 uppercase text-[10px] mb-1">
                   Required Skills
                 </p>
 
@@ -584,7 +584,7 @@ export function ManageJobsPage() {
                     (skill) => (
                       <span
                         key={skill}
-                        className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold"
+                        className="px-2 py-0.5 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 rounded text-[10px] font-bold"
                       >
                         {skill}
                       </span>
@@ -595,14 +595,14 @@ export function ManageJobsPage() {
 
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex justify-end">
+            <div className="pt-3 border-t border-slate-100 dark:border-zinc-800 flex justify-end">
 
               <button
                 type="button"
                 onClick={() =>
                   setViewDetailsJob(null)
                 }
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+                className="px-4 py-2 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded-xl text-xs font-bold transition-colors"
               >
                 Close
               </button>
@@ -619,18 +619,18 @@ export function ManageJobsPage() {
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in">
 
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-200 animate-in zoom-in-95 text-center">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-200 dark:border-zinc-800 animate-in zoom-in-95 text-center">
 
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
 
             <div>
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-zinc-50">
                 Delete Job Requisition?
               </h3>
 
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 leading-relaxed">
                 Are you sure you want to delete this job
                 posting? Candidates will no longer be able
                 to discover or apply to this role.
@@ -644,7 +644,7 @@ export function ManageJobsPage() {
                 onClick={() =>
                   setDeleteConfirmId(null)
                 }
-                className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+                className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded-xl text-xs font-bold transition-colors"
               >
                 Keep Job
               </button>

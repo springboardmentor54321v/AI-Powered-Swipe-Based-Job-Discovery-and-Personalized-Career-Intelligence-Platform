@@ -7,6 +7,7 @@ import {
   Briefcase,
   UserCheck,
   Clock,
+  Zap,
 } from "lucide-react";
 
 import { useApp } from "../context/AppContext";
@@ -46,6 +47,11 @@ export const FILTER_PILLS = [
     id: "Recently Posted",
     label: "Recent",
     icon: Clock,
+  },
+  {
+    id: "Low Competition",
+    label: "Low competition",
+    icon: Zap,
   },
 ];
 
@@ -91,6 +97,7 @@ export function FilterBar() {
         isInternship: false,
         isFresherFriendly: false,
         recentlyPosted: false,
+        lowCompetition: false,
       }));
 
       return;
@@ -173,6 +180,11 @@ export function FilterBar() {
     // RECENTLY POSTED
     // --------------------------------------------------------
 
+    if (pillId === "Low Competition") {
+      setFilters((previous) => ({ ...previous, lowCompetition: true }));
+      return;
+    }
+
     if (pillId === "Recently Posted") {
 
       setFilters((previous) => ({
@@ -228,17 +240,17 @@ export function FilterBar() {
                 ${
                   isActive
                     ? `
-                      bg-emerald-600
+                      bg-brand-600
                       text-white
-                      border-emerald-600
+                      border-brand-600
                       shadow-sm
                     `
                     : `
-                      bg-white
-                      text-slate-600
-                      border-slate-200
-                      hover:bg-slate-50
-                      hover:text-slate-900
+                      bg-white dark:bg-zinc-900
+                      text-slate-600 dark:text-zinc-300
+                      border-slate-200 dark:border-zinc-800
+                      hover:bg-slate-50 dark:hover:bg-zinc-800/50
+                      hover:text-slate-900 dark:hover:text-zinc-50
                     `
                 }
               `}
@@ -251,8 +263,8 @@ export function FilterBar() {
 
                   ${
                     isActive
-                      ? "text-emerald-100"
-                      : "text-slate-500"
+                      ? "text-brand-100"
+                      : "text-slate-500 dark:text-zinc-400"
                   }
                 `}
               />

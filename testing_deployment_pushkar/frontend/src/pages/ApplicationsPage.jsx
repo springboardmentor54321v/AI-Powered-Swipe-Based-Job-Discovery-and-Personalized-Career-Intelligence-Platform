@@ -360,7 +360,7 @@ export function ApplicationsPage() {
   if (isLoading) {
 
     return (
-      <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60">
+      <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60 dark:bg-zinc-950/60">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -368,9 +368,9 @@ export function ApplicationsPage() {
 
           <div className="mb-8 space-y-3">
 
-            <div className="h-8 w-64 bg-slate-200 rounded-xl animate-pulse" />
+            <div className="h-8 w-64 bg-slate-200 dark:bg-zinc-700 rounded-xl animate-pulse" />
 
-            <div className="h-4 w-96 max-w-full bg-slate-200 rounded-lg animate-pulse" />
+            <div className="h-4 w-96 max-w-full bg-slate-200 dark:bg-zinc-700 rounded-lg animate-pulse" />
 
           </div>
 
@@ -384,7 +384,7 @@ export function ApplicationsPage() {
 
                 <div
                   key={item}
-                  className="h-32 bg-white border border-slate-200 rounded-2xl animate-pulse"
+                  className="h-32 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl animate-pulse"
                 />
 
               )
@@ -395,7 +395,7 @@ export function ApplicationsPage() {
 
           {/* Search Skeleton */}
 
-          <div className="h-11 w-full sm:w-96 bg-slate-200 rounded-xl mb-6 animate-pulse" />
+          <div className="h-11 w-full sm:w-96 bg-slate-200 dark:bg-zinc-700 rounded-xl mb-6 animate-pulse" />
 
 
           {/* Application Skeleton */}
@@ -407,7 +407,7 @@ export function ApplicationsPage() {
 
                 <div
                   key={item}
-                  className="h-36 bg-white border border-slate-200 rounded-2xl animate-pulse"
+                  className="h-36 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl animate-pulse"
                 />
 
               )
@@ -432,25 +432,25 @@ export function ApplicationsPage() {
   ) {
 
     return (
-      <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60 flex items-center justify-center px-4">
+      <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60 dark:bg-zinc-950/60 flex items-center justify-center px-4">
 
-        <div className="bg-white rounded-3xl border border-rose-100 shadow-sm p-8 text-center max-w-md w-full">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-rose-100 dark:border-rose-500/20 shadow-sm p-8 text-center max-w-md w-full">
 
-          <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4">
 
             <AlertCircle className="w-7 h-7" />
 
           </div>
 
 
-          <h2 className="text-lg font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50">
 
             Unable to load applications
 
           </h2>
 
 
-          <p className="text-xs text-slate-500 mt-2 mb-6 leading-relaxed">
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-2 mb-6 leading-relaxed">
 
             {error}
 
@@ -462,7 +462,7 @@ export function ApplicationsPage() {
             onClick={() =>
               loadApplications(true)
             }
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95"
           >
 
             <RefreshCw className="w-4 h-4" />
@@ -484,7 +484,7 @@ export function ApplicationsPage() {
 
   return (
 
-    <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60">
+    <div className="min-h-[calc(100dvh-4rem)] bg-slate-50/60 dark:bg-zinc-950/60">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-200">
 
@@ -498,14 +498,14 @@ export function ApplicationsPage() {
 
             <div className="flex items-center gap-2 mb-1">
 
-              <div className="p-2 bg-emerald-50 text-emerald-700 rounded-xl">
+              <div className="p-2 bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 rounded-xl">
 
                 <Briefcase className="w-5 h-5" />
 
               </div>
 
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
 
                 Job Applications
 
@@ -514,7 +514,7 @@ export function ApplicationsPage() {
             </div>
 
 
-            <p className="text-xs sm:text-sm text-slate-500">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
 
               Track your applications, recruiter responses, interviews, and hiring progress in one place.
 
@@ -535,7 +535,7 @@ export function ApplicationsPage() {
             disabled={
               isRefreshing
             }
-            className="self-start flex items-center justify-center gap-2 px-3.5 py-2.5 bg-white border border-slate-200 hover:border-emerald-200 hover:text-emerald-700 text-slate-600 text-xs font-semibold rounded-xl transition-all disabled:opacity-50"
+            className="self-start flex items-center justify-center gap-2 px-3.5 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-brand-200 dark:hover:border-brand-500/20 hover:text-brand-700 dark:hover:text-brand-300 text-slate-600 dark:text-zinc-300 text-xs font-semibold rounded-xl transition-all disabled:opacity-50"
           >
 
             <RefreshCw
@@ -571,8 +571,8 @@ export function ApplicationsPage() {
             className={`p-5 rounded-2xl border text-left transition-all ${
               selectedStatus ===
               "Applied"
-                ? "bg-slate-900 text-white border-slate-900 shadow-md"
-                : "bg-white text-slate-900 border-slate-200 hover:border-slate-300 shadow-2xs"
+                ? "bg-slate-900 dark:bg-zinc-800 text-white border-slate-900 shadow-md"
+                : "bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 shadow-2xs"
             }`}
           >
 
@@ -594,8 +594,8 @@ export function ApplicationsPage() {
                 className={`w-4 h-4 ${
                   selectedStatus ===
                   "Applied"
-                    ? "text-emerald-400"
-                    : "text-blue-600"
+                    ? "text-brand-400"
+                    : "text-blue-600 dark:text-blue-400"
                 }`}
               />
 
@@ -614,7 +614,7 @@ export function ApplicationsPage() {
                 selectedStatus ===
                 "Applied"
                   ? "text-slate-300"
-                  : "text-slate-500"
+                  : "text-slate-500 dark:text-zinc-400"
               }`}
             >
               In initial review
@@ -635,8 +635,8 @@ export function ApplicationsPage() {
             className={`p-5 rounded-2xl border text-left transition-all ${
               selectedStatus ===
               "Shortlisted"
-                ? "bg-emerald-700 text-white border-emerald-700 shadow-md"
-                : "bg-white text-slate-900 border-slate-200 hover:border-emerald-200 shadow-2xs"
+                ? "bg-brand-700 text-white border-brand-700 shadow-md"
+                : "bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 border-slate-200 dark:border-zinc-800 hover:border-brand-200 dark:hover:border-brand-500/20 shadow-2xs"
             }`}
           >
 
@@ -646,7 +646,7 @@ export function ApplicationsPage() {
                 className={`text-xs font-bold uppercase tracking-wider ${
                   selectedStatus ===
                   "Shortlisted"
-                    ? "text-emerald-100"
+                    ? "text-brand-100"
                     : "text-slate-400"
                 }`}
               >
@@ -658,8 +658,8 @@ export function ApplicationsPage() {
                 className={`w-4 h-4 ${
                   selectedStatus ===
                   "Shortlisted"
-                    ? "text-emerald-200"
-                    : "text-emerald-600"
+                    ? "text-brand-200"
+                    : "text-brand-600 dark:text-brand-400"
                 }`}
               />
 
@@ -677,8 +677,8 @@ export function ApplicationsPage() {
               className={`text-[11px] mt-1 ${
                 selectedStatus ===
                 "Shortlisted"
-                  ? "text-emerald-100"
-                  : "text-slate-500"
+                  ? "text-brand-100"
+                  : "text-slate-500 dark:text-zinc-400"
               }`}
             >
               Profile accepted
@@ -700,7 +700,7 @@ export function ApplicationsPage() {
               selectedStatus ===
               "Interview"
                 ? "bg-purple-700 text-white border-purple-700 shadow-md"
-                : "bg-white text-slate-900 border-slate-200 hover:border-purple-200 shadow-2xs"
+                : "bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 border-slate-200 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-500/20 shadow-2xs"
             }`}
           >
 
@@ -723,7 +723,7 @@ export function ApplicationsPage() {
                   selectedStatus ===
                   "Interview"
                     ? "text-purple-200"
-                    : "text-purple-600"
+                    : "text-purple-600 dark:text-purple-400"
                 }`}
               />
 
@@ -742,7 +742,7 @@ export function ApplicationsPage() {
                 selectedStatus ===
                 "Interview"
                   ? "text-purple-100"
-                  : "text-slate-500"
+                  : "text-slate-500 dark:text-zinc-400"
               }`}
             >
               Active rounds
@@ -763,8 +763,8 @@ export function ApplicationsPage() {
             className={`p-5 rounded-2xl border text-left transition-all ${
               selectedStatus ===
               "Rejected"
-                ? "bg-slate-800 text-white border-slate-800 shadow-md"
-                : "bg-white text-slate-900 border-slate-200 hover:border-slate-300 shadow-2xs"
+                ? "bg-slate-800 dark:bg-zinc-700 text-white border-slate-800 shadow-md"
+                : "bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 shadow-2xs"
             }`}
           >
 
@@ -806,7 +806,7 @@ export function ApplicationsPage() {
                 selectedStatus ===
                 "Rejected"
                   ? "text-slate-300"
-                  : "text-slate-500"
+                  : "text-slate-500 dark:text-zinc-400"
               }`}
             >
               Closed / Completed
@@ -841,7 +841,7 @@ export function ApplicationsPage() {
                 )
               }
               placeholder="Search applications..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-medium text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
             />
 
           </div>
@@ -849,7 +849,7 @@ export function ApplicationsPage() {
 
           {/* STATUS FILTER */}
 
-          <div className="flex items-center gap-1 p-1 bg-slate-100 border border-slate-200 rounded-xl self-start sm:self-auto overflow-x-auto no-scrollbar max-w-full">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 rounded-xl self-start sm:self-auto overflow-x-auto no-scrollbar max-w-full">
 
             {[
               "All",
@@ -873,8 +873,8 @@ export function ApplicationsPage() {
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                     selectedStatus ===
                     status
-                      ? "bg-white text-slate-900 shadow-2xs font-bold"
-                      : "text-slate-600 hover:text-slate-900"
+                      ? "bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 shadow-2xs font-bold"
+                      : "text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-zinc-50"
                   }`}
                 >
 
@@ -898,13 +898,13 @@ export function ApplicationsPage() {
           applications.length >
             0 && (
 
-            <div className="mb-5 flex items-center justify-between gap-3 px-4 py-3 bg-rose-50 border border-rose-100 rounded-xl">
+            <div className="mb-5 flex items-center justify-between gap-3 px-4 py-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-xl">
 
               <div className="flex items-center gap-2">
 
                 <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
 
-                <p className="text-xs text-rose-700">
+                <p className="text-xs text-rose-700 dark:text-rose-300">
 
                   {error}
 
@@ -920,7 +920,7 @@ export function ApplicationsPage() {
                     false
                   )
                 }
-                className="text-xs font-bold text-rose-700 hover:text-rose-900"
+                className="text-xs font-bold text-rose-700 dark:text-rose-300 hover:text-rose-900 dark:hover:text-rose-300"
               >
                 Retry
               </button>
@@ -937,16 +937,16 @@ export function ApplicationsPage() {
         {filteredApplications.length ===
         0 ? (
 
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-12 text-center max-w-md mx-auto my-8">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xs p-12 text-center max-w-md mx-auto my-8">
 
-            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto mb-4">
 
               <Briefcase className="w-8 h-8" />
 
             </div>
 
 
-            <h2 className="text-lg font-bold text-slate-900 mb-1">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50 mb-1">
 
               {applications.length ===
               0
@@ -956,7 +956,7 @@ export function ApplicationsPage() {
             </h2>
 
 
-            <p className="text-xs text-slate-500 leading-relaxed mb-6">
+            <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed mb-6">
 
               {applications.length ===
               0
@@ -974,7 +974,7 @@ export function ApplicationsPage() {
 
               <Link
                 to="/"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs active:scale-95 transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-xs active:scale-95 transition-all"
               >
 
                 <span>
@@ -997,7 +997,7 @@ export function ApplicationsPage() {
                     ""
                   );
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-100 text-xs font-bold rounded-xl transition-all"
               >
 
                 Clear Filters

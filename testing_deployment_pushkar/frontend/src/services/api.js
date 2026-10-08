@@ -1,4 +1,5 @@
 import axios from "axios";
+import { API_BASE_URL } from "./http";
 import {
   INITIAL_JOBS,
   INITIAL_USER,
@@ -12,7 +13,7 @@ import { INITIAL_COMPANIES } from "../utils/companiesMockData";
 
 // Configured Axios instance placeholder for easy backend integration
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json"
   },

@@ -1,8 +1,6 @@
 import axios from "axios";
 
-const JOB_API_URL =
-  import.meta.env.VITE_JOB_API_BASE_URL ||
-  "http://127.0.0.1:5002/api/v1";
+import { API_BASE_URL as JOB_API_URL } from "./http";
 
 
 // ============================================================
@@ -287,17 +285,31 @@ export const jobService = {
   },
 
 
+  // Moving an application to a new stage notifies the candidate.
+  // extra: { notes?: string, message?: string }
   updateApplicationStatus: async (
     applicationId,
-    status
+    status,
+    extra = {}
   ) => {
 
     const response =
       await jobApi.patch(
         `/jobs/applications/${applicationId}`,
         {
-          status,
+          ...(status ? { status } : {}),
+          ...extra,
         }
+      );
+
+    return response.data;
+  },
+
+  getApplication: async (applicationId) => {
+
+    const response =
+      await jobApi.get(
+        `/jobs/applications/${applicationId}`
       );
 
     return response.data;

@@ -177,7 +177,7 @@ export function RecruiterSidebar({
 
   return (
     <aside
-      className={`flex flex-col h-full bg-white border-r border-slate-200 ${
+      className={`flex flex-col h-full bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 ${
         mobile ? "w-full" : "w-64"
       }`}
     >
@@ -186,7 +186,7 @@ export function RecruiterSidebar({
           BRAND HEADER
       ========================= */}
 
-      <div className="h-16 px-5 flex items-center justify-between border-b border-slate-100">
+      <div className="h-16 px-5 flex items-center justify-between border-b border-slate-100 dark:border-zinc-800">
 
         <Link
           to="/recruiter"
@@ -202,20 +202,20 @@ export function RecruiterSidebar({
 
             <div className="flex items-center gap-1.5">
 
-              <span className="text-base font-bold text-slate-900 tracking-tight">
+              <span className="text-base font-bold text-slate-900 dark:text-zinc-50 tracking-tight">
                 Swipe
-                <span className="text-blue-600">
+                <span className="text-blue-600 dark:text-blue-400">
                   X
                 </span>
               </span>
 
-              <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[10px] font-bold">
+              <span className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/20 rounded text-[10px] font-bold">
                 Recruiter
               </span>
 
             </div>
 
-            <span className="text-[10px] text-slate-500 font-medium">
+            <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-medium">
               Employer Talent Portal
             </span>
 
@@ -228,23 +228,23 @@ export function RecruiterSidebar({
           RECRUITER PROFILE CARD
       ========================= */}
 
-      <div className="p-3 mx-3 mt-3 bg-slate-50 rounded-2xl border border-slate-200/80">
+      <div className="p-3 mx-3 mt-3 bg-slate-50 dark:bg-zinc-950 rounded-2xl border border-slate-200/80 dark:border-zinc-800/80">
 
         <div className="flex items-center gap-2.5">
 
-          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center shrink-0">
 
-            <Building2 className="w-5 h-5 text-blue-600" />
+            <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
 
           </div>
 
           <div className="flex-1 min-w-0">
 
-            <h4 className="text-xs font-bold text-slate-900 truncate">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-50 truncate">
               {companyName}
             </h4>
 
-            <p className="text-[11px] text-slate-500 truncate">
+            <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate">
               {recruiterName}
             </p>
 
@@ -276,8 +276,8 @@ export function RecruiterSidebar({
               className={({ isActive }) =>
                 `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
-                    ? "bg-blue-50 text-blue-700 font-bold shadow-xs border border-blue-100"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                    ? "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 font-bold shadow-xs border border-blue-100 dark:border-blue-500/20"
+                    : "text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-zinc-50 hover:bg-slate-100/80 dark:hover:bg-zinc-800/80"
                 }`
               }
             >
@@ -294,7 +294,7 @@ export function RecruiterSidebar({
 
               {item.badge !== null &&
                 item.badge !== undefined && (
-                  <span className="px-2 py-0.5 bg-blue-100/80 text-blue-700 rounded-full text-[10px] font-bold">
+                  <span className="px-2 py-0.5 bg-blue-100/80 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 rounded-full text-[10px] font-bold">
                     {item.badge}
                   </span>
                 )}
@@ -309,13 +309,13 @@ export function RecruiterSidebar({
           FOOTER
       ========================= */}
 
-      <div className="p-3 border-t border-slate-200/80 bg-slate-50/50 space-y-2">
+      <div className="p-3 border-t border-slate-200/80 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-zinc-950/50 space-y-2">
 
         <button
           type="button"
           onClick={handleLogout}
           id="btn-recruiter-logout"
-          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors"
         >
 
           <LogOut className="w-4 h-4" />

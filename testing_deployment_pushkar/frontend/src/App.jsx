@@ -32,6 +32,7 @@ import { ApplicationsPage } from "./pages/ApplicationsPage";
 import { RecommendationsPage } from "./pages/RecommendationsPage";
 import { ResumeAnalysisPage } from "./pages/ResumeAnalysisPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
+import { AlertPreferencesPage } from "./pages/AlertPreferencesPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { CompaniesPage } from "./pages/CompaniesPage";
@@ -226,7 +227,7 @@ function JobSeekerLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-600 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-50 font-sans selection:bg-brand-600 selection:text-white">
 
       {/* ===================================================
           NAVBAR
@@ -274,13 +275,13 @@ function JobSeekerLayout() {
               FOOTER
               ================================================= */}
 
-          <footer className="border-t border-slate-200 bg-white py-6 mt-12">
+          <footer className="border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-6 mt-12">
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-zinc-400">
 
               <div className="flex items-center gap-2">
 
-                <span className="font-extrabold text-slate-900 text-sm tracking-tight">
+                <span className="font-extrabold text-slate-900 dark:text-zinc-50 text-sm tracking-tight">
                   SwipeX
                 </span>
 
@@ -288,7 +289,7 @@ function JobSeekerLayout() {
                   •
                 </span>
 
-                <span className="font-medium text-slate-600 text-center sm:text-left">
+                <span className="font-medium text-slate-600 dark:text-zinc-300 text-center sm:text-left">
                   Intelligent Swipe-Based Career & Talent Acquisition Platform
                 </span>
 
@@ -336,7 +337,7 @@ function JobSeekerLayout() {
 
 function PublicLayout() {
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans">
+    <div className="min-h-screen bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 font-sans">
 
       <Navbar />
 
@@ -614,6 +615,11 @@ function AppContent() {
             />
 
             <Route
+              path="/notifications/preferences"
+              element={<AlertPreferencesPage />}
+            />
+
+            <Route
               path="/dashboard"
               element={<DashboardPage />}
             />
@@ -797,52 +803,52 @@ function AppContent() {
 
 export function App() {
 
-  const [
-    showSplash,
-    setShowSplash,
-  ] = useState(true);
+  // const [
+  //   showSplash,
+  //   setShowSplash,
+  // ] = useState(true);
 
 
   // -------------------------------------------------------
   // SPLASH SCREEN
   // -------------------------------------------------------
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    const splashShown =
-      sessionStorage.getItem(
-        "swipex_splash_shown"
-      );
+  //   const splashShown =
+  //     sessionStorage.getItem(
+  //       "swipex_splash_shown"
+  //     );
 
-    if (splashShown) {
-      setShowSplash(false);
-    }
+  //   if (splashShown) {
+  //     setShowSplash(false);
+  //   }
 
-  }, []);
+  // }, []);
 
 
-  const handleSplashComplete = () => {
+  // const handleSplashComplete = () => {
 
-    sessionStorage.setItem(
-      "swipex_splash_shown",
-      "true"
-    );
+  //   sessionStorage.setItem(
+  //     "swipex_splash_shown",
+  //     "true"
+  //   );
 
-    setShowSplash(false);
+  //   setShowSplash(false);
 
-  };
+  // };
 
 
   return (
     <AppProvider>
 
-      {showSplash && (
+      {/* {showSplash && (
         <SplashScreen
           onComplete={
             handleSplashComplete
           }
         />
-      )}
+      )} */}
 
       <Router>
 
@@ -953,7 +959,7 @@ export default App;
 //   }, [location.pathname]);
 
 //   return (
-//     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-600 selection:text-white">
+//     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-50 font-sans selection:bg-brand-600 selection:text-white">
 //       {/* =====================================================
 //           TOP NAVBAR
 //           ===================================================== */}
@@ -984,16 +990,16 @@ export default App;
 //           {/* =================================================
 //               FOOTER
 //               ================================================= */}
-//           <footer className="border-t border-slate-200 bg-white py-6 mt-12">
-//             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+//           <footer className="border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-6 mt-12">
+//             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-zinc-400">
 //               <div className="flex items-center gap-2">
-//                 <span className="font-extrabold text-slate-900 text-sm tracking-tight">
+//                 <span className="font-extrabold text-slate-900 dark:text-zinc-50 text-sm tracking-tight">
 //                   SwipeX
 //                 </span>
 
 //                 <span className="text-slate-300">•</span>
 
-//                 <span className="font-medium text-slate-600 text-center sm:text-left">
+//                 <span className="font-medium text-slate-600 dark:text-zinc-300 text-center sm:text-left">
 //                   Intelligent Swipe-Based Career & Talent Acquisition Platform
 //                 </span>
 //               </div>
@@ -1025,7 +1031,7 @@ export default App;
 // }
 // function PublicLayout() {
 //     return (
-//       <div className="min-h-screen bg-white text-slate-900 font-sans">
+//       <div className="min-h-screen bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 font-sans">
 //         <Navbar />
 //         <main>
 //           <Outlet />
@@ -1278,19 +1284,19 @@ export default App;
 // //   const { isFilterModalOpen, setIsFilterModalOpen, applyModalJob, setApplyModalJob } = useApp();
 
 // //   return (
-// //     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-emerald-600 selection:text-white">
+// //     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-50 flex flex-col font-sans selection:bg-brand-600 selection:text-white">
 // //       <Navbar />
 
 // //       <main className="flex-1">
 // //         <Outlet />
 // //       </main>
 
-// //       <footer className="border-t border-slate-200 bg-white py-6 mt-12">
-// //         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+// //       <footer className="border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-6 mt-12">
+// //         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-zinc-400">
 // //           <div className="flex items-center gap-2">
-// //             <span className="font-extrabold text-slate-900 text-sm tracking-tight">SwipeX</span>
+// //             <span className="font-extrabold text-slate-900 dark:text-zinc-50 text-sm tracking-tight">SwipeX</span>
 // //             <span className="text-slate-300">•</span>
-// //             <span className="font-medium text-slate-600">
+// //             <span className="font-medium text-slate-600 dark:text-zinc-300">
 // //               Intelligent Swipe-Based Career & Talent Acquisition Platform
 // //             </span>
 // //           </div>

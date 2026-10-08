@@ -1,4 +1,3 @@
-import axios from "axios";
 
 /**
  * Swipe Service
@@ -6,13 +5,6 @@ import axios from "axios";
  * with timestamped event logging and backend API connectivity.
  */
 
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  timeout: 8000
-});
 
 const SWIPE_STORAGE_KEY = "swipex_swipe_history";
 
@@ -40,17 +32,8 @@ export async function recordSwipe(jobId, action) {
     console.warn("Failed to persist swipe record to localStorage:", error);
   }
 
-  // Background API attempt: POST /swipes
-  try {
-    await apiClient.post("/swipes", {
-      job_id: jobId,
-      action: action
-    });
-  } catch (apiErr) {
-    // Graceful fallback when backend endpoint is not yet deployed
-    console.info("Swipe saved locally (Backend /swipes currently offline):", apiErr?.message);
-  }
-
+  // The authoritative swipe is stored by the job service through jobService.swipeJob();
+  // this module only keeps a local history for the UI.
   return swipeRecord;
 }
 
@@ -69,13 +52,6 @@ export async function undoSwipe(jobId) {
     }
   } catch (error) {
     console.warn("Failed to update localStorage on undo:", error);
-  }
-
-  // Attempt backend undo
-  try {
-    await apiClient.post("/swipes/undo", { job_id: jobId });
-  } catch (err) {
-    console.info("Undo handled locally (Backend /swipes/undo offline):", err?.message);
   }
 
   return { success: true, jobId };

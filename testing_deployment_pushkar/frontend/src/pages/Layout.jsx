@@ -12,7 +12,7 @@ export default function Layout() {
     useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950">
 
       {/* Navbar */}
       <Navbar

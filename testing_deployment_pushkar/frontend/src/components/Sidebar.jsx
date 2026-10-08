@@ -96,8 +96,8 @@ export function Sidebar({
             collapsed ? "justify-center px-0 h-10 w-10 mx-auto" : "justify-between px-3 py-2.5"
           } rounded-xl text-sm font-semibold transition-all duration-150 ${
             isActive
-              ? "bg-emerald-50 text-emerald-700 shadow-2xs font-bold"
-              : "text-slate-600 hover:bg-slate-100/70 hover:text-slate-900"
+              ? "bg-brand-600 text-white shadow-md shadow-brand-600/25 font-bold dark:bg-zinc-800 dark:shadow-none"
+              : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-100"
           }`
         }
       >
@@ -111,8 +111,8 @@ export function Sidebar({
               <Icon
                 className={`w-4 h-4 shrink-0 transition-colors ${
                   isActive
-                    ? "text-emerald-600"
-                    : "text-slate-400 group-hover:text-slate-700"
+                    ? "text-white"
+                    : "text-slate-400 group-hover:text-slate-700 dark:group-hover:text-zinc-200"
                 }`}
               />
 
@@ -125,8 +125,8 @@ export function Sidebar({
               <span
                 className={`min-w-5 h-5 px-1.5 flex items-center justify-center rounded-full text-[10px] font-bold ${
                   item.highlightBadge
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-slate-100 text-slate-600"
+                    ? "bg-brand-100 dark:bg-brand-500/15 text-brand-700 dark:text-brand-300"
+                    : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300"
                 }`}
               >
                 {item.badge}
@@ -134,7 +134,7 @@ export function Sidebar({
             )}
 
             {collapsed && (
-              <span className="fixed left-20 ml-2 px-2.5 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
+              <span className="fixed left-20 ml-2 px-2.5 py-1 bg-slate-900 dark:bg-zinc-800 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
                 {item.label}
               </span>
             )}
@@ -149,14 +149,14 @@ export function Sidebar({
       {/* Mobile Backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-800/40 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-300"
           onClick={onMobileClose}
           aria-hidden="true"
         />
       )}
 
       <aside
-        className={`fixed lg:sticky top-0 lg:top-16 left-0 z-50 lg:z-30 h-screen lg:h-[calc(100vh-4rem)] bg-white border-r border-slate-200/80 flex flex-col transition-all duration-300 ease-in-out select-none ${
+        className={`fixed lg:sticky top-0 lg:top-16 left-0 z-50 lg:z-30 h-screen lg:h-[calc(100vh-4rem)] bg-white dark:bg-zinc-900 border-r border-slate-200/80 dark:border-zinc-800/80 flex flex-col transition-all duration-300 ease-in-out select-none ${
           collapsed ? "lg:w-[72px]" : "lg:w-64"
         } ${
           mobileOpen
@@ -165,13 +165,13 @@ export function Sidebar({
         }`}
       >
         {/* Mobile Header */}
-        <div className="lg:hidden flex items-center justify-between px-4 h-16 border-b border-slate-100">
+        <div className="lg:hidden flex items-center justify-between px-4 h-16 border-b border-slate-100 dark:border-zinc-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-black text-xs shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-violet-500 text-white flex items-center justify-center font-black text-xs shadow-xs">
               SX
             </div>
-            <span className="font-extrabold text-sm text-slate-900 tracking-tight">
-              Swipe<span className="text-emerald-600">X</span>
+            <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-50 tracking-tight">
+              Swipe<span className="text-brand-600 dark:text-brand-400">X</span>
             </span>
           </div>
 
@@ -179,7 +179,7 @@ export function Sidebar({
             type="button"
             onClick={onMobileClose}
             aria-label="Close navigation"
-            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -201,15 +201,15 @@ export function Sidebar({
 
           {/* ATS Score Card */}
           {/* {!collapsed ? (
-            <div className="rounded-2xl bg-slate-900 text-white p-3.5 space-y-2.5 shadow-sm">
+            <div className="rounded-2xl bg-slate-900 dark:bg-zinc-800 text-white p-3.5 space-y-2.5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <Award className="w-4 h-4 text-emerald-400" />
+                  <Award className="w-4 h-4 text-brand-400" />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
                     ATS Score
                   </span>
                 </div>
-                <span className="text-xs font-black px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30">
+                <span className="text-xs font-black px-2 py-0.5 rounded-md bg-brand-500/20 text-brand-400 ring-1 ring-brand-500/30">
                   {resumeAnalysis?.atsScore || 82}%
                 </span>
               </div>
@@ -221,7 +221,7 @@ export function Sidebar({
               <Link
                 to="/resume-analysis"
                 onClick={onMobileClose}
-                className="flex items-center justify-between w-full py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold transition-colors"
+                className="flex items-center justify-between w-full py-1.5 px-3 bg-brand-600 hover:bg-brand-500 rounded-lg text-xs font-bold transition-colors"
               >
                 <span>Improve ATS</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -232,7 +232,7 @@ export function Sidebar({
               to="/resume-analysis"
               title="Resume ATS Score"
               onClick={onMobileClose}
-              className="flex justify-center p-2.5 rounded-xl bg-slate-900 text-emerald-400 hover:bg-slate-800 transition-colors mx-auto w-10 h-10 items-center"
+              className="flex justify-center p-2.5 rounded-xl bg-slate-900 dark:bg-zinc-800 text-brand-400 hover:bg-slate-800 dark:hover:bg-zinc-700 transition-colors mx-auto w-10 h-10 items-center"
             >
               <Award className="w-4 h-4" />
             </Link>
@@ -247,7 +247,7 @@ export function Sidebar({
               <Link
                 to="/dashboard"
                 onClick={onMobileClose}
-                className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-50 transition-colors"
               >
                 <div className="flex items-center gap-2.5">
                   <TrendingUp className="w-3.5 h-3.5 text-slate-400" />
@@ -260,7 +260,7 @@ export function Sidebar({
         </div>
 
         {/* Bottom Section: Settings & Sign Out */}
-        <div className="p-3 border-t border-slate-100 bg-white space-y-1">
+        <div className="p-3 border-t border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1">
           {bottomItems.map((item) => (
             <NavItem key={item.to} item={item} />
           ))}
@@ -272,13 +272,13 @@ export function Sidebar({
             title={collapsed ? "Sign Out" : undefined}
             className={`group w-full flex items-center ${
               collapsed ? "justify-center h-10 w-10 mx-auto" : "gap-3 px-3 py-2.5"
-            } rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors`}
+            } rounded-xl text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors`}
           >
             <LogOut className="w-4 h-4 shrink-0 transition-transform group-hover:-translate-x-0.5" />
             {!collapsed && <span className="text-[13px]">Sign Out</span>}
 
             {collapsed && (
-              <span className="fixed left-20 ml-2 px-2.5 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
+              <span className="fixed left-20 ml-2 px-2.5 py-1 bg-slate-900 dark:bg-zinc-800 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
                 Sign Out
               </span>
             )}
@@ -289,7 +289,7 @@ export function Sidebar({
             type="button"
             onClick={onToggle}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="hidden lg:flex w-full items-center justify-center gap-2 mt-2 py-2 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all text-xs font-bold"
+            className="hidden lg:flex w-full items-center justify-center gap-2 mt-2 py-2 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/70 dark:border-zinc-800/70 text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-800 dark:hover:text-zinc-100 transition-all text-xs font-bold"
           >
             {collapsed ? (
               <ChevronRight className="w-4 h-4" />
@@ -409,8 +409,8 @@ export default Sidebar;
 //             collapsed ? "justify-center px-0 h-10 w-10 mx-auto" : "justify-between px-3 py-2.5"
 //           } rounded-xl text-sm font-semibold transition-all duration-150 ${
 //             isActive
-//               ? "bg-emerald-50 text-emerald-700 shadow-2xs font-bold"
-//               : "text-slate-600 hover:bg-slate-100/70 hover:text-slate-900"
+//               ? "bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 shadow-2xs font-bold"
+//               : "text-slate-600 dark:text-zinc-300 hover:bg-slate-100/70 dark:hover:bg-zinc-800/70 hover:text-slate-900 dark:hover:text-zinc-50"
 //           }`
 //         }
 //       >
@@ -424,8 +424,8 @@ export default Sidebar;
 //               <Icon
 //                 className={`w-4 h-4 shrink-0 transition-colors ${
 //                   isActive
-//                     ? "text-emerald-600"
-//                     : "text-slate-400 group-hover:text-slate-700"
+//                     ? "text-brand-600 dark:text-brand-400"
+//                     : "text-slate-400 group-hover:text-slate-700 dark:group-hover:text-zinc-200"
 //                 }`}
 //               />
 
@@ -438,8 +438,8 @@ export default Sidebar;
 //               <span
 //                 className={`min-w-5 h-5 px-1.5 flex items-center justify-center rounded-full text-[10px] font-bold ${
 //                   item.highlightBadge
-//                     ? "bg-emerald-100 text-emerald-700"
-//                     : "bg-slate-100 text-slate-600"
+//                     ? "bg-brand-100 dark:bg-brand-500/15 text-brand-700 dark:text-brand-300"
+//                     : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300"
 //                 }`}
 //               >
 //                 {item.badge}
@@ -448,7 +448,7 @@ export default Sidebar;
 
 //             {/* Tooltip for desktop collapsed view */}
 //             {collapsed && (
-//               <span className="fixed left-20 ml-2 px-2.5 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
+//               <span className="fixed left-20 ml-2 px-2.5 py-1 bg-slate-900 dark:bg-zinc-800 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
 //                 {item.label}
 //               </span>
 //             )}
@@ -463,14 +463,14 @@ export default Sidebar;
 //       {/* Mobile Backdrop */}
 //       {mobileOpen && (
 //         <div
-//           className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-300"
+//           className="fixed inset-0 bg-slate-900/40 dark:bg-zinc-800/40 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-300"
 //           onClick={onMobileClose}
 //           aria-hidden="true"
 //         />
 //       )}
 
 //       <aside
-//         className={`fixed lg:sticky top-0 lg:top-16 left-0 z-50 lg:z-30 h-screen lg:h-[calc(100vh-4rem)] bg-white border-r border-slate-200/80 flex flex-col transition-all duration-300 ease-in-out select-none ${
+//         className={`fixed lg:sticky top-0 lg:top-16 left-0 z-50 lg:z-30 h-screen lg:h-[calc(100vh-4rem)] bg-white dark:bg-zinc-900 border-r border-slate-200/80 dark:border-zinc-800/80 flex flex-col transition-all duration-300 ease-in-out select-none ${
 //           collapsed ? "lg:w-[72px]" : "lg:w-64"
 //         } ${
 //           mobileOpen
@@ -479,13 +479,13 @@ export default Sidebar;
 //         }`}
 //       >
 //         {/* Mobile-Only Drawer Header */}
-//         <div className="lg:hidden flex items-center justify-between px-4 h-16 border-b border-slate-100">
+//         <div className="lg:hidden flex items-center justify-between px-4 h-16 border-b border-slate-100 dark:border-zinc-800">
 //           <div className="flex items-center gap-2.5">
-//             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-black text-xs shadow-xs">
+//             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-violet-500 text-white flex items-center justify-center font-black text-xs shadow-xs">
 //               SX
 //             </div>
-//             <span className="font-extrabold text-sm text-slate-900 tracking-tight">
-//               Swipe<span className="text-emerald-600">X</span>
+//             <span className="font-extrabold text-sm text-slate-900 dark:text-zinc-50 tracking-tight">
+//               Swipe<span className="text-brand-600 dark:text-brand-400">X</span>
 //             </span>
 //           </div>
 
@@ -493,7 +493,7 @@ export default Sidebar;
 //             type="button"
 //             onClick={onMobileClose}
 //             aria-label="Close navigation"
-//             className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+//             className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
 //           >
 //             <X className="w-5 h-5" />
 //           </button>
@@ -508,9 +508,9 @@ export default Sidebar;
 //             title={collapsed ? "Profile" : undefined}
 //             className={`group flex items-center ${
 //               collapsed ? "justify-center p-1.5" : "gap-3 p-2.5"
-//             } rounded-2xl bg-slate-50 border border-slate-200/60 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all`}
+//             } rounded-2xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800/60 hover:border-brand-300 hover:bg-brand-50/30 dark:hover:bg-brand-500/10 transition-all`}
 //           >
-//             <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center overflow-hidden shrink-0 font-bold ring-1 ring-emerald-600/10">
+//             <div className="w-9 h-9 rounded-xl bg-brand-100 dark:bg-brand-500/15 text-brand-700 dark:text-brand-300 flex items-center justify-center overflow-hidden shrink-0 font-bold ring-1 ring-brand-600/10">
 //               {user?.avatar ? (
 //                 <img
 //                   src={user.avatar}
@@ -518,13 +518,13 @@ export default Sidebar;
 //                   className="w-full h-full object-cover"
 //                 />
 //               ) : (
-//                 <User className="w-4 h-4 text-emerald-600" />
+//                 <User className="w-4 h-4 text-brand-600 dark:text-brand-400" />
 //               )}
 //             </div>
 
 //             {!collapsed && (
 //               <div className="min-w-0 flex-1">
-//                 <p className="text-xs font-bold text-slate-900 truncate">
+//                 <p className="text-xs font-bold text-slate-900 dark:text-zinc-50 truncate">
 //                   {user?.name || "Candidate"}
 //                 </p>
 //                 <p className="text-[11px] text-slate-400 truncate">
@@ -534,7 +534,7 @@ export default Sidebar;
 //             )}
 
 //             {collapsed && (
-//               <span className="fixed left-20 ml-2 px-2.5 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
+//               <span className="fixed left-20 ml-2 px-2.5 py-1 bg-slate-900 dark:bg-zinc-800 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
 //                 {user?.name || "Profile"}
 //               </span>
 //             )}
@@ -555,15 +555,15 @@ export default Sidebar;
 
 //           {/* ATS Score Card */}
 //           {!collapsed ? (
-//             <div className="rounded-2xl bg-slate-900 text-white p-3.5 space-y-2.5 shadow-sm">
+//             <div className="rounded-2xl bg-slate-900 dark:bg-zinc-800 text-white p-3.5 space-y-2.5 shadow-sm">
 //               <div className="flex items-center justify-between">
 //                 <div className="flex items-center gap-1.5">
-//                   <Award className="w-4 h-4 text-emerald-400" />
+//                   <Award className="w-4 h-4 text-brand-400" />
 //                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
 //                     ATS Score
 //                   </span>
 //                 </div>
-//                 <span className="text-xs font-black px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30">
+//                 <span className="text-xs font-black px-2 py-0.5 rounded-md bg-brand-500/20 text-brand-400 ring-1 ring-brand-500/30">
 //                   {resumeAnalysis?.atsScore || 82}%
 //                 </span>
 //               </div>
@@ -575,7 +575,7 @@ export default Sidebar;
 //               <Link
 //                 to="/resume-analysis"
 //                 onClick={onMobileClose}
-//                 className="flex items-center justify-between w-full py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold transition-colors"
+//                 className="flex items-center justify-between w-full py-1.5 px-3 bg-brand-600 hover:bg-brand-500 rounded-lg text-xs font-bold transition-colors"
 //               >
 //                 <span>Improve ATS</span>
 //                 <ChevronRight className="w-3.5 h-3.5" />
@@ -586,7 +586,7 @@ export default Sidebar;
 //               to="/resume-analysis"
 //               title="Resume ATS Score"
 //               onClick={onMobileClose}
-//               className="flex justify-center p-2.5 rounded-xl bg-slate-900 text-emerald-400 hover:bg-slate-800 transition-colors mx-auto w-10 h-10 items-center"
+//               className="flex justify-center p-2.5 rounded-xl bg-slate-900 dark:bg-zinc-800 text-brand-400 hover:bg-slate-800 dark:hover:bg-zinc-700 transition-colors mx-auto w-10 h-10 items-center"
 //             >
 //               <Award className="w-4 h-4" />
 //             </Link>
@@ -601,7 +601,7 @@ export default Sidebar;
 //               <Link
 //                 to="/dashboard"
 //                 onClick={onMobileClose}
-//                 className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+//                 className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-50 transition-colors"
 //               >
 //                 <div className="flex items-center gap-2.5">
 //                   <TrendingUp className="w-3.5 h-3.5 text-slate-400" />
@@ -614,7 +614,7 @@ export default Sidebar;
 //         </div>
 
 //         {/* Bottom Section: Settings & Sign Out */}
-//         <div className="p-3 border-t border-slate-100 bg-white space-y-1">
+//         <div className="p-3 border-t border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1">
 //           {bottomItems.map((item) => (
 //             <NavItem key={item.to} item={item} />
 //           ))}
@@ -626,13 +626,13 @@ export default Sidebar;
 //             title={collapsed ? "Sign Out" : undefined}
 //             className={`group w-full flex items-center ${
 //               collapsed ? "justify-center h-10 w-10 mx-auto" : "gap-3 px-3 py-2.5"
-//             } rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors`}
+//             } rounded-xl text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors`}
 //           >
 //             <LogOut className="w-4 h-4 shrink-0 transition-transform group-hover:-translate-x-0.5" />
 //             {!collapsed && <span className="text-[13px]">Sign Out</span>}
 
 //             {collapsed && (
-//               <span className="fixed left-20 ml-2 px-2.5 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
+//               <span className="fixed left-20 ml-2 px-2.5 py-1 bg-slate-900 dark:bg-zinc-800 text-white text-[11px] font-medium rounded-lg whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
 //                 Sign Out
 //               </span>
 //             )}
@@ -643,7 +643,7 @@ export default Sidebar;
 //             type="button"
 //             onClick={onToggle}
 //             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-//             className="hidden lg:flex w-full items-center justify-center gap-2 mt-2 py-2 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all text-xs font-bold"
+//             className="hidden lg:flex w-full items-center justify-center gap-2 mt-2 py-2 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/70 dark:border-zinc-800/70 text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-slate-800 dark:hover:text-zinc-100 transition-all text-xs font-bold"
 //           >
 //             {collapsed ? (
 //               <ChevronRight className="w-4 h-4" />
@@ -681,30 +681,30 @@ export default Sidebar;
 //   return (
 //     <aside className="w-72 hidden xl:flex flex-col gap-5 shrink-0 py-6 pr-6">
 //       {/* Profile Card */}
-//       <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+//       <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-slate-200 dark:border-zinc-800 shadow-xs">
 //         <div className="flex items-center gap-3 mb-4">
-//           <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 font-bold overflow-hidden shrink-0 flex items-center justify-center">
+//           <div className="w-12 h-12 rounded-xl bg-brand-100 dark:bg-brand-500/15 text-brand-700 dark:text-brand-300 font-bold overflow-hidden shrink-0 flex items-center justify-center">
 //             {user?.avatar ? (
 //               <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
 //             ) : (
-//               <User className="w-6 h-6 text-emerald-700" />
+//               <User className="w-6 h-6 text-brand-700 dark:text-brand-300" />
 //             )}
 //           </div>
 //           <div className="min-w-0">
-//             <h3 className="font-bold text-slate-900 text-sm truncate">{user?.name || "Candidate"}</h3>
-//             <p className="text-xs text-slate-500 truncate">{user?.role || "Software Developer"}</p>
+//             <h3 className="font-bold text-slate-900 dark:text-zinc-50 text-sm truncate">{user?.name || "Candidate"}</h3>
+//             <p className="text-xs text-slate-500 dark:text-zinc-400 truncate">{user?.role || "Software Developer"}</p>
 //           </div>
 //         </div>
 
 //         {/* Profile Completion Gauge */}
-//         <div className="space-y-1.5 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+//         <div className="space-y-1.5 mb-4 bg-slate-50 dark:bg-zinc-950 p-3 rounded-xl border border-slate-100 dark:border-zinc-800">
 //           <div className="flex items-center justify-between text-xs font-semibold">
-//             <span className="text-slate-600">Profile Readiness</span>
-//             <span className="text-emerald-700 font-bold">{user?.profileCompletion || 85}%</span>
+//             <span className="text-slate-600 dark:text-zinc-300">Profile Readiness</span>
+//             <span className="text-brand-700 dark:text-brand-300 font-bold">{user?.profileCompletion || 85}%</span>
 //           </div>
-//           <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+//           <div className="h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-full overflow-hidden">
 //             <div
-//               className="h-full bg-emerald-600 rounded-full transition-all duration-500"
+//               className="h-full bg-brand-600 rounded-full transition-all duration-500"
 //               style={{ width: `${user?.profileCompletion || 85}%` }}
 //             />
 //           </div>
@@ -714,36 +714,36 @@ export default Sidebar;
 //         <div className="grid grid-cols-2 gap-2 text-center">
 //           <Link
 //             to="/saved"
-//             className="p-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors group"
+//             className="p-2.5 bg-slate-50 dark:bg-zinc-950 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl border border-slate-200 dark:border-zinc-800 transition-colors group"
 //           >
-//             <p className="text-xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors">
+//             <p className="text-xl font-extrabold text-slate-900 dark:text-zinc-50 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
 //               {savedJobs?.length || 0}
 //             </p>
-//             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Saved Jobs</p>
+//             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Saved Jobs</p>
 //           </Link>
 
 //           <Link
 //             to="/applications"
-//             className="p-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors group"
+//             className="p-2.5 bg-slate-50 dark:bg-zinc-950 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl border border-slate-200 dark:border-zinc-800 transition-colors group"
 //           >
-//             <p className="text-xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors">
+//             <p className="text-xl font-extrabold text-slate-900 dark:text-zinc-50 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
 //               {applications?.length || 0}
 //             </p>
-//             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Applications</p>
+//             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Applications</p>
 //           </Link>
 //         </div>
 //       </div>
 
 //       {/* ATS Optimizer Card */}
-//       <div className="bg-slate-900 text-white rounded-2xl p-5 shadow-sm space-y-3 border border-slate-800">
+//       <div className="bg-slate-900 dark:bg-zinc-800 text-white rounded-2xl p-5 shadow-sm space-y-3 border border-slate-800">
 //         <div className="flex items-center justify-between">
 //           <div className="flex items-center gap-2">
-//             <Award className="w-4 h-4 text-emerald-400" />
+//             <Award className="w-4 h-4 text-brand-400" />
 //             <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
 //               ATS Score
 //             </span>
 //           </div>
-//           <span className="text-xs font-bold bg-slate-800 px-2.5 py-0.5 rounded-lg text-emerald-400 border border-slate-700">
+//           <span className="text-xs font-bold bg-slate-800 dark:bg-zinc-700 px-2.5 py-0.5 rounded-lg text-brand-400 border border-slate-700">
 //             {resumeAnalysis?.atsScore || 82}%
 //           </span>
 //         </div>
@@ -754,7 +754,7 @@ export default Sidebar;
 
 //         <Link
 //           to="/resume-analysis"
-//           className="flex items-center justify-between w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-xs font-bold text-white transition-colors"
+//           className="flex items-center justify-between w-full py-2 px-3 bg-brand-600 hover:bg-brand-700 rounded-xl text-xs font-bold text-white transition-colors"
 //         >
 //           <span>Run Resume ATS Check</span>
 //           <ChevronRight className="w-3.5 h-3.5" />
@@ -762,30 +762,30 @@ export default Sidebar;
 //       </div>
 
 //       {/* Quick Shortcuts */}
-//       <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-1">
+//       <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-1">
 //         <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
 //           Quick Shortcuts
 //         </p>
 
 //         <Link
 //           to="/recommendations"
-//           className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 transition-colors"
+//           className="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-zinc-800/50 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-200 transition-colors"
 //         >
 //           <div className="flex items-center gap-2.5">
-//             <Sparkles className="w-4 h-4 text-emerald-600" />
+//             <Sparkles className="w-4 h-4 text-brand-600 dark:text-brand-400" />
 //             <span>AI Role Matches</span>
 //           </div>
-//           <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+//           <span className="text-[10px] font-bold text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-500/20">
 //             4 New
 //           </span>
 //         </Link>
 
 //         <Link
 //           to="/dashboard"
-//           className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 transition-colors"
+//           className="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-zinc-800/50 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-200 transition-colors"
 //         >
 //           <div className="flex items-center gap-2.5">
-//             <TrendingUp className="w-4 h-4 text-slate-500" />
+//             <TrendingUp className="w-4 h-4 text-slate-500 dark:text-zinc-400" />
 //             <span>Career Analytics</span>
 //           </div>
 //           <ChevronRight className="w-3.5 h-3.5 text-slate-400" />

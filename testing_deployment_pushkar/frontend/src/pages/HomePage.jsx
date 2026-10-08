@@ -179,17 +179,17 @@ const steps = [
 
 export function HomePage() {
   return (
-    <div className="min-h-screen bg-white text-slate-900 overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 overflow-hidden">
 
       {/* =====================================================
           HERO
           ===================================================== */}
-      <section className="relative bg-slate-50 border-b border-slate-200">
+      <section className="relative bg-slate-50 dark:bg-zinc-950 border-b border-slate-200 dark:border-zinc-800">
 
         {/* Decorative background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-emerald-100/60 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-[450px] h-[450px] rounded-full bg-emerald-50 blur-3xl" />
+          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-brand-100/60 dark:bg-brand-500/15 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-[450px] h-[450px] rounded-full bg-brand-50 dark:bg-brand-500/10 blur-3xl" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -199,21 +199,21 @@ export function HomePage() {
             {/* LEFT */}
             <div>
 
-              <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold mb-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 text-brand-700 dark:text-brand-300 text-xs font-bold mb-6">
                 <Sparkles className="w-3.5 h-3.5" />
                 AI-Powered Career Platform
               </div>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-950 leading-[0.98]">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-950 dark:text-zinc-50 leading-[0.98]">
                 Get Hired.
                 <br />
 
-                <span className="text-emerald-600">
+                <span className="text-brand-600 dark:text-brand-400">
                   Get Ahead.
                 </span>
               </h1>
 
-              <p className="mt-7 text-lg sm:text-xl text-slate-600 leading-relaxed max-w-xl">
+              <p className="mt-7 text-lg sm:text-xl text-slate-600 dark:text-zinc-300 leading-relaxed max-w-xl">
                 SwipeX helps students and job seekers discover the right
                 opportunities, improve their resumes and connect with
                 companies that are looking for their skills.
@@ -224,7 +224,7 @@ export function HomePage() {
 
                 <Link
                   to="/signup"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all hover:-translate-y-0.5"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-lg shadow-brand-600/20 transition-all hover:-translate-y-0.5"
                 >
                   Start Your Career
                   <ArrowRight className="w-4 h-4" />
@@ -232,7 +232,7 @@ export function HomePage() {
 
                 <Link
                   to="/discover"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm transition-all"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 font-bold text-sm transition-all"
                 >
                   Explore Jobs
                   <Search className="w-4 h-4" />
@@ -241,20 +241,20 @@ export function HomePage() {
               </div>
 
               {/* Trust */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-8 text-xs font-semibold text-slate-500">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-8 text-xs font-semibold text-slate-500 dark:text-zinc-400">
 
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <CheckCircle2 className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                   Free to get started
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <CheckCircle2 className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                   AI career assistance
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <CheckCircle2 className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                   Personalized jobs
                 </div>
 
@@ -265,7 +265,7 @@ export function HomePage() {
             <div className="relative">
 
               {/* Main card */}
-              <div className="relative bg-white rounded-3xl border border-slate-200 shadow-2xl shadow-slate-900/10 p-5 sm:p-6 max-w-xl mx-auto">
+              <div className="relative bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-2xl shadow-slate-900/10 p-5 sm:p-6 max-w-xl mx-auto">
 
                 {/* Header */}
                 <div className="flex items-center justify-between mb-5">
@@ -275,41 +275,41 @@ export function HomePage() {
                       Your Matches
                     </p>
 
-                    <h3 className="text-xl font-extrabold text-slate-900 mt-1">
+                    <h3 className="text-xl font-extrabold text-slate-900 dark:text-zinc-50 mt-1">
                       Jobs For You
                     </h3>
                   </div>
 
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center">
                     <Sparkles className="w-5 h-5" />
                   </div>
 
                 </div>
 
                 {/* Job card */}
-                <div className="rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 p-5 shadow-sm">
 
                   <div className="flex items-start justify-between">
 
                     <div className="flex items-center gap-3">
 
-                      <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+                      <div className="w-12 h-12 rounded-xl bg-slate-900 dark:bg-zinc-800 text-white flex items-center justify-center font-bold">
                         TN
                       </div>
 
                       <div>
-                        <h4 className="font-bold text-slate-900">
+                        <h4 className="font-bold text-slate-900 dark:text-zinc-50">
                           Software Engineer
                         </h4>
 
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
                           TechNova
                         </p>
                       </div>
 
                     </div>
 
-                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700">
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300">
                       96% Match
                     </span>
 
@@ -321,7 +321,7 @@ export function HomePage() {
                       (skill) => (
                         <span
                           key={skill}
-                          className="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-100 text-[10px] font-semibold text-slate-600"
+                          className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 text-[10px] font-semibold text-slate-600 dark:text-zinc-300"
                         >
                           {skill}
                         </span>
@@ -330,14 +330,14 @@ export function HomePage() {
 
                   </div>
 
-                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100 dark:border-zinc-800">
 
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400">
                       <MapPin className="w-3.5 h-3.5" />
                       Bengaluru / Remote
                     </div>
 
-                    <span className="text-xs font-bold text-slate-900">
+                    <span className="text-xs font-bold text-slate-900 dark:text-zinc-50">
                       ₹8–14 LPA
                     </span>
 
@@ -348,9 +348,9 @@ export function HomePage() {
                 {/* Bottom cards */}
                 <div className="grid grid-cols-2 gap-3 mt-3">
 
-                  <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                  <div className="rounded-2xl bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 p-4">
                     <div className="flex items-center gap-2">
-                      <Target className="w-4 h-4 text-emerald-600" />
+                      <Target className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                       <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
                         Match Score
                       </span>
@@ -361,15 +361,15 @@ export function HomePage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-900 text-white p-4">
+                  <div className="rounded-2xl bg-slate-900 dark:bg-zinc-800 text-white p-4">
                     <div className="flex items-center gap-2">
-                      <FileCheck className="w-4 h-4 text-emerald-400" />
+                      <FileCheck className="w-4 h-4 text-brand-400" />
                       <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
                         ATS Score
                       </span>
                     </div>
 
-                    <p className="text-2xl font-black mt-2 text-emerald-400">
+                    <p className="text-2xl font-black mt-2 text-brand-400">
                       88%
                     </p>
                   </div>
@@ -379,9 +379,9 @@ export function HomePage() {
               </div>
 
               {/* Floating success card */}
-              <div className="hidden sm:flex absolute -left-8 bottom-8 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 items-center gap-3">
+              <div className="hidden sm:flex absolute -left-8 bottom-8 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-4 items-center gap-3">
 
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-500/15 text-brand-700 dark:text-brand-300 flex items-center justify-center">
                   <TrendingUp className="w-5 h-5" />
                 </div>
 
@@ -389,7 +389,7 @@ export function HomePage() {
                   <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
                     Profile Growth
                   </p>
-                  <p className="text-sm font-extrabold text-slate-900">
+                  <p className="text-sm font-extrabold text-slate-900 dark:text-zinc-50">
                     +32% this month
                   </p>
                 </div>
@@ -397,9 +397,9 @@ export function HomePage() {
               </div>
 
               {/* Floating placed card */}
-              <div className="hidden sm:flex absolute -right-6 -top-6 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 items-center gap-3">
+              <div className="hidden sm:flex absolute -right-6 -top-6 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xl p-4 items-center gap-3">
 
-                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
 
@@ -407,7 +407,7 @@ export function HomePage() {
                   <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
                     Recently Hired
                   </p>
-                  <p className="text-sm font-extrabold text-slate-900">
+                  <p className="text-sm font-extrabold text-slate-900 dark:text-zinc-50">
                     Software Engineer
                   </p>
                 </div>
@@ -423,7 +423,7 @@ export function HomePage() {
       {/* =====================================================
           HIRING COMPANIES
           ===================================================== */}
-      <section className="py-14 border-b border-slate-100 bg-white">
+      <section className="py-14 border-b border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -436,9 +436,9 @@ export function HomePage() {
             {hiringCompanies.map((company, index) => (
               <div
                 key={company}
-                className="h-16 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-center gap-2 hover:bg-white hover:border-emerald-200 hover:shadow-sm transition-all"
+                className="h-16 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/50 flex items-center justify-center gap-2 hover:bg-white dark:hover:bg-zinc-900 hover:border-brand-200 dark:hover:border-brand-500/20 hover:shadow-sm transition-all"
               >
-                <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold">
+                <div className="w-8 h-8 rounded-lg bg-slate-900 dark:bg-zinc-800 text-white flex items-center justify-center text-[10px] font-bold">
                   {company
                     .split(" ")
                     .map((word) => word[0])
@@ -446,7 +446,7 @@ export function HomePage() {
                     .slice(0, 2)}
                 </div>
 
-                <span className="text-xs sm:text-sm font-bold text-slate-700">
+                <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-zinc-200">
                   {company}
                 </span>
               </div>
@@ -460,7 +460,7 @@ export function HomePage() {
       {/* =====================================================
           STATS
           ===================================================== */}
-      <section className="py-16 bg-slate-50">
+      <section className="py-16 bg-slate-50 dark:bg-zinc-950">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -472,17 +472,17 @@ export function HomePage() {
               return (
                 <div
                   key={stat.label}
-                  className="bg-white rounded-2xl border border-slate-200 p-6 text-center hover:shadow-md transition-shadow"
+                  className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 text-center hover:shadow-md transition-shadow"
                 >
-                  <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                  <div className="w-11 h-11 rounded-xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto">
                     <Icon className="w-5 h-5" />
                   </div>
 
-                  <p className="text-3xl sm:text-4xl font-black text-slate-900 mt-4">
+                  <p className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-zinc-50 mt-4">
                     {stat.value}
                   </p>
 
-                  <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-zinc-400 mt-1">
                     {stat.label}
                   </p>
                 </div>
@@ -498,25 +498,25 @@ export function HomePage() {
       {/* =====================================================
           HOW IT WORKS
           ===================================================== */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white dark:bg-zinc-900">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="max-w-2xl mx-auto text-center">
 
-            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-600">
+            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
               <Zap className="w-4 h-4" />
               Simple process
             </span>
 
-            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-950 mt-4">
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-950 dark:text-zinc-50 mt-4">
               Your next opportunity is
-              <span className="text-emerald-600">
+              <span className="text-brand-600 dark:text-brand-400">
                 {" "}four steps away.
               </span>
             </h2>
 
-            <p className="text-slate-500 mt-5 leading-relaxed">
+            <p className="text-slate-500 dark:text-zinc-400 mt-5 leading-relaxed">
               SwipeX combines job discovery, AI career intelligence
               and application tracking into one simple experience.
             </p>
@@ -532,7 +532,7 @@ export function HomePage() {
               return (
                 <div
                   key={step.number}
-                  className="relative rounded-2xl border border-slate-200 bg-white p-6 hover:-translate-y-1 hover:shadow-lg transition-all"
+                  className="relative rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 hover:-translate-y-1 hover:shadow-lg transition-all"
                 >
 
                   <div className="flex items-center justify-between">
@@ -541,17 +541,17 @@ export function HomePage() {
                       {step.number}
                     </span>
 
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center">
                       <Icon className="w-5 h-5" />
                     </div>
 
                   </div>
 
-                  <h3 className="text-lg font-extrabold text-slate-900 mt-6">
+                  <h3 className="text-lg font-extrabold text-slate-900 dark:text-zinc-50 mt-6">
                     {step.title}
                   </h3>
 
-                  <p className="text-sm text-slate-500 leading-relaxed mt-2">
+                  <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed mt-2">
                     {step.description}
                   </p>
 
@@ -568,7 +568,7 @@ export function HomePage() {
       {/* =====================================================
           AI FEATURES
           ===================================================== */}
-      <section className="py-24 bg-slate-50">
+      <section className="py-24 bg-slate-50 dark:bg-zinc-950">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -576,19 +576,19 @@ export function HomePage() {
 
             <div>
 
-              <span className="text-xs font-bold uppercase tracking-widest text-emerald-600">
+              <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
                 Career Intelligence
               </span>
 
-              <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-950 mt-4 leading-tight">
+              <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-950 dark:text-zinc-50 mt-4 leading-tight">
                 Stop applying
                 <br />
-                <span className="text-emerald-600">
+                <span className="text-brand-600 dark:text-brand-400">
                   everywhere.
                 </span>
               </h2>
 
-              <p className="text-slate-500 leading-relaxed mt-6 max-w-lg">
+              <p className="text-slate-500 dark:text-zinc-400 leading-relaxed mt-6 max-w-lg">
                 SwipeX helps you understand where your profile fits,
                 what you should improve and which opportunities are
                 actually worth your time.
@@ -596,7 +596,7 @@ export function HomePage() {
 
               <Link
                 to="/signup"
-                className="inline-flex items-center gap-2 mt-7 text-sm font-bold text-emerald-700 hover:text-emerald-800"
+                className="inline-flex items-center gap-2 mt-7 text-sm font-bold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-300"
               >
                 Build my career profile
                 <ArrowRight className="w-4 h-4" />
@@ -613,18 +613,18 @@ export function HomePage() {
                 return (
                   <div
                     key={feature.title}
-                    className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg hover:border-emerald-200 transition-all"
+                    className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 hover:shadow-lg hover:border-brand-200 dark:hover:border-brand-500/20 transition-all"
                   >
 
-                    <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <div className="w-11 h-11 rounded-xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center">
                       <Icon className="w-5 h-5" />
                     </div>
 
-                    <h3 className="text-base font-extrabold text-slate-900 mt-5">
+                    <h3 className="text-base font-extrabold text-slate-900 dark:text-zinc-50 mt-5">
                       {feature.title}
                     </h3>
 
-                    <p className="text-sm text-slate-500 leading-relaxed mt-2">
+                    <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed mt-2">
                       {feature.description}
                     </p>
 
@@ -643,7 +643,7 @@ export function HomePage() {
       {/* =====================================================
           TOP PLACED STUDENTS
           ===================================================== */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white dark:bg-zinc-900">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -651,15 +651,15 @@ export function HomePage() {
 
             <div>
 
-              <span className="text-xs font-bold uppercase tracking-widest text-emerald-600">
+              <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
                 Success Stories
               </span>
 
-              <h2 className="text-4xl font-black tracking-tight text-slate-950 mt-3">
+              <h2 className="text-4xl font-black tracking-tight text-slate-950 dark:text-zinc-50 mt-3">
                 Students who got hired
               </h2>
 
-              <p className="text-slate-500 mt-3 max-w-xl">
+              <p className="text-slate-500 dark:text-zinc-400 mt-3 max-w-xl">
                 Meet some of the candidates who turned their skills
                 into real career opportunities.
               </p>
@@ -668,7 +668,7 @@ export function HomePage() {
 
             <Link
               to="/signup"
-              className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700"
+              className="inline-flex items-center gap-2 text-sm font-bold text-brand-700 dark:text-brand-300"
             >
               Start your journey
               <ArrowRight className="w-4 h-4" />
@@ -682,16 +682,16 @@ export function HomePage() {
             {placedStudents.map((student) => (
               <div
                 key={student.name}
-                className="group rounded-2xl border border-slate-200 bg-white overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all"
+                className="group rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all"
               >
 
-                <div className="h-20 bg-slate-900 relative">
+                <div className="h-20 bg-slate-900 dark:bg-zinc-800 relative">
 
-                  <div className="absolute -bottom-7 left-5 w-14 h-14 rounded-2xl bg-emerald-100 border-4 border-white text-emerald-700 flex items-center justify-center font-black">
+                  <div className="absolute -bottom-7 left-5 w-14 h-14 rounded-2xl bg-brand-100 dark:bg-brand-500/15 border-4 border-white dark:border-zinc-800 text-brand-700 dark:text-brand-300 flex items-center justify-center font-black">
                     {student.initials}
                   </div>
 
-                  <span className="absolute top-4 right-4 flex items-center gap-1 text-[10px] font-bold text-emerald-300">
+                  <span className="absolute top-4 right-4 flex items-center gap-1 text-[10px] font-bold text-brand-300">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Hired
                   </span>
@@ -700,33 +700,33 @@ export function HomePage() {
 
                 <div className="p-5 pt-11">
 
-                  <h3 className="font-extrabold text-slate-900">
+                  <h3 className="font-extrabold text-slate-900 dark:text-zinc-50">
                     {student.name}
                   </h3>
 
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
                     {student.role}
                   </p>
 
                   <div className="flex items-center gap-2 mt-4">
 
-                    <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                      <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                    <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+                      <Building2 className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />
                     </div>
 
-                    <span className="text-xs font-bold text-slate-700">
+                    <span className="text-xs font-bold text-slate-700 dark:text-zinc-200">
                       {student.company}
                     </span>
 
                   </div>
 
-                  <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">
+                  <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100 dark:border-zinc-800">
 
                     <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
                       Package
                     </span>
 
-                    <span className="text-sm font-black text-emerald-600">
+                    <span className="text-sm font-black text-brand-600 dark:text-brand-400">
                       {student.package}
                     </span>
 
@@ -737,7 +737,7 @@ export function HomePage() {
                     {student.skills.map((skill) => (
                       <span
                         key={skill}
-                        className="px-2 py-1 rounded-md bg-slate-50 border border-slate-100 text-[9px] font-semibold text-slate-500"
+                        className="px-2 py-1 rounded-md bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 text-[9px] font-semibold text-slate-500 dark:text-zinc-400"
                       >
                         {skill}
                       </span>
@@ -758,21 +758,21 @@ export function HomePage() {
       {/* =====================================================
           TESTIMONIALS
           ===================================================== */}
-      <section className="py-24 bg-slate-50">
+      <section className="py-24 bg-slate-50 dark:bg-zinc-950">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center max-w-2xl mx-auto">
 
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-600">
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
               What candidates say
             </span>
 
-            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-950 mt-4">
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-950 dark:text-zinc-50 mt-4">
               Built for the people
               <br />
               looking for their
-              <span className="text-emerald-600">
+              <span className="text-brand-600 dark:text-brand-400">
                 {" "}next opportunity.
               </span>
             </h2>
@@ -785,7 +785,7 @@ export function HomePage() {
             {testimonials.map((testimonial) => (
               <div
                 key={testimonial.name}
-                className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-shadow"
+                className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 hover:shadow-lg transition-shadow"
               >
 
                 <div className="flex gap-1 text-amber-400">
@@ -797,22 +797,22 @@ export function HomePage() {
                   ))}
                 </div>
 
-                <p className="text-sm text-slate-600 leading-relaxed mt-5">
+                <p className="text-sm text-slate-600 dark:text-zinc-300 leading-relaxed mt-5">
                   “{testimonial.quote}”
                 </p>
 
-                <div className="flex items-center gap-3 mt-7 pt-5 border-t border-slate-100">
+                <div className="flex items-center gap-3 mt-7 pt-5 border-t border-slate-100 dark:border-zinc-800">
 
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">
+                  <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-500/15 text-brand-700 dark:text-brand-300 flex items-center justify-center text-xs font-black">
                     {testimonial.initials}
                   </div>
 
                   <div>
-                    <p className="text-sm font-bold text-slate-900">
+                    <p className="text-sm font-bold text-slate-900 dark:text-zinc-50">
                       {testimonial.name}
                     </p>
 
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">
                       {testimonial.role} · {testimonial.company}
                     </p>
                   </div>
@@ -831,19 +831,19 @@ export function HomePage() {
       {/* =====================================================
           RECRUITER CTA
           ===================================================== */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white dark:bg-zinc-900">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          <div className="relative overflow-hidden rounded-3xl bg-slate-950 p-8 sm:p-12 lg:p-16">
+          <div className="relative overflow-hidden rounded-3xl bg-slate-950 dark:bg-zinc-900 p-8 sm:p-12 lg:p-16">
 
-            <div className="absolute -right-32 -top-32 w-96 h-96 rounded-full bg-emerald-600/20 blur-3xl" />
+            <div className="absolute -right-32 -top-32 w-96 h-96 rounded-full bg-brand-600/20 blur-3xl" />
 
             <div className="relative grid lg:grid-cols-2 gap-10 items-center">
 
               <div>
 
-                <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-400">
+                <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-400">
                   <Building2 className="w-4 h-4" />
                   For employers
                 </span>
@@ -851,7 +851,7 @@ export function HomePage() {
                 <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tight mt-4">
                   Find the talent
                   <br />
-                  <span className="text-emerald-400">
+                  <span className="text-brand-400">
                     your company needs.
                   </span>
                 </h2>
@@ -863,7 +863,7 @@ export function HomePage() {
 
                 <Link
                   to="/recruiter"
-                  className="inline-flex items-center gap-2 mt-7 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition-colors"
+                  className="inline-flex items-center gap-2 mt-7 px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold transition-colors"
                 >
                   Start Hiring
                   <ArrowRight className="w-4 h-4" />
@@ -875,7 +875,7 @@ export function HomePage() {
               <div className="grid grid-cols-2 gap-3">
 
                 <div className="rounded-2xl bg-white/5 border border-white/10 p-5">
-                  <Users className="w-5 h-5 text-emerald-400" />
+                  <Users className="w-5 h-5 text-brand-400" />
                   <p className="text-2xl font-black text-white mt-4">
                     2.5K+
                   </p>
@@ -885,7 +885,7 @@ export function HomePage() {
                 </div>
 
                 <div className="rounded-2xl bg-white/5 border border-white/10 p-5">
-                  <Target className="w-5 h-5 text-emerald-400" />
+                  <Target className="w-5 h-5 text-brand-400" />
                   <p className="text-2xl font-black text-white mt-4">
                     92%
                   </p>
@@ -895,7 +895,7 @@ export function HomePage() {
                 </div>
 
                 <div className="rounded-2xl bg-white/5 border border-white/10 p-5">
-                  <Briefcase className="w-5 h-5 text-emerald-400" />
+                  <Briefcase className="w-5 h-5 text-brand-400" />
                   <p className="text-2xl font-black text-white mt-4">
                     10K+
                   </p>
@@ -905,7 +905,7 @@ export function HomePage() {
                 </div>
 
                 <div className="rounded-2xl bg-white/5 border border-white/10 p-5">
-                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                  <ShieldCheck className="w-5 h-5 text-brand-400" />
                   <p className="text-2xl font-black text-white mt-4">
                     AI
                   </p>
@@ -927,28 +927,28 @@ export function HomePage() {
       {/* =====================================================
           FINAL CTA
           ===================================================== */}
-      <section className="py-24 bg-emerald-50 border-y border-emerald-100">
+      <section className="py-24 bg-brand-50 dark:bg-brand-500/10 border-y border-brand-100 dark:border-brand-500/20">
 
         <div className="max-w-3xl mx-auto px-4 text-center">
 
-          <div className="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-600/20">
+          <div className="w-14 h-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-brand-600/20">
             <Sparkles className="w-7 h-7" />
           </div>
 
-          <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-950 mt-6">
+          <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-950 dark:text-zinc-50 mt-6">
             Your next opportunity
             <br />
             could be one swipe away.
           </h2>
 
-          <p className="text-slate-600 mt-5 leading-relaxed">
+          <p className="text-slate-600 dark:text-zinc-300 mt-5 leading-relaxed">
             Build your profile, discover better opportunities and
             take control of your career with SwipeX.
           </p>
 
           <Link
             to="/signup"
-            className="inline-flex items-center gap-2 mt-8 px-7 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all"
+            className="inline-flex items-center gap-2 mt-8 px-7 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-lg shadow-brand-600/20 transition-all"
           >
             Get Started with SwipeX
             <ArrowRight className="w-4 h-4" />
@@ -962,7 +962,7 @@ export function HomePage() {
       {/* =====================================================
           FOOTER
           ===================================================== */}
-      <footer className="bg-white border-t border-slate-200">
+      <footer className="bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
@@ -976,17 +976,17 @@ export function HomePage() {
                 className="inline-flex items-center gap-2.5"
               >
 
-                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold">
+                <div className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold">
                   SX
                 </div>
 
-                <span className="text-xl font-black text-slate-900">
-                  Swipe<span className="text-emerald-600">X</span>
+                <span className="text-xl font-black text-slate-900 dark:text-zinc-50">
+                  Swipe<span className="text-brand-600 dark:text-brand-400">X</span>
                 </span>
 
               </Link>
 
-              <p className="text-sm text-slate-500 leading-relaxed mt-4 max-w-md">
+              <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed mt-4 max-w-md">
                 AI-powered job discovery and career assistance
                 designed to help students and professionals find
                 better opportunities.
@@ -1006,28 +1006,28 @@ export function HomePage() {
 
                 <Link
                   to="/discover"
-                  className="text-sm text-slate-600 hover:text-emerald-600"
+                  className="text-sm text-slate-600 dark:text-zinc-300 hover:text-brand-600 dark:hover:text-brand-400"
                 >
                   Find Jobs
                 </Link>
 
                 <Link
                   to="/recommendations"
-                  className="text-sm text-slate-600 hover:text-emerald-600"
+                  className="text-sm text-slate-600 dark:text-zinc-300 hover:text-brand-600 dark:hover:text-brand-400"
                 >
                   AI Recommendations
                 </Link>
 
                 <Link
                   to="/resume-analysis"
-                  className="text-sm text-slate-600 hover:text-emerald-600"
+                  className="text-sm text-slate-600 dark:text-zinc-300 hover:text-brand-600 dark:hover:text-brand-400"
                 >
                   Resume ATS
                 </Link>
 
                 <Link
                   to="/signup"
-                  className="text-sm text-slate-600 hover:text-emerald-600"
+                  className="text-sm text-slate-600 dark:text-zinc-300 hover:text-brand-600 dark:hover:text-brand-400"
                 >
                   Create Profile
                 </Link>
@@ -1048,21 +1048,21 @@ export function HomePage() {
 
                 <Link
                   to="/companies"
-                  className="text-sm text-slate-600 hover:text-emerald-600"
+                  className="text-sm text-slate-600 dark:text-zinc-300 hover:text-brand-600 dark:hover:text-brand-400"
                 >
                   Explore Companies
                 </Link>
 
                 <Link
                   to="/recruiter"
-                  className="text-sm text-slate-600 hover:text-emerald-600"
+                  className="text-sm text-slate-600 dark:text-zinc-300 hover:text-brand-600 dark:hover:text-brand-400"
                 >
                   Recruiter Portal
                 </Link>
 
                 <Link
                   to="/recruiter/post-job"
-                  className="text-sm text-slate-600 hover:text-emerald-600"
+                  className="text-sm text-slate-600 dark:text-zinc-300 hover:text-brand-600 dark:hover:text-brand-400"
                 >
                   Post a Job
                 </Link>
@@ -1074,7 +1074,7 @@ export function HomePage() {
           </div>
 
 
-          <div className="border-t border-slate-100 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="border-t border-slate-100 dark:border-zinc-800 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
 
             <p className="text-xs text-slate-400">
               © {new Date().getFullYear()} SwipeX. All rights reserved.
