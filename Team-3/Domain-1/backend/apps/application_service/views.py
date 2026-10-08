@@ -18,10 +18,12 @@ class JobApplicantsView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ApplicationSerializer
 
+    from drf_spectacular.utils import extend_schema
+    @extend_schema(tags=['Jobs'])
     def get(self, request, job_id):
         # In a real scenario, check if recruiter owns the job. 
         # Since jobs are mock/forwarded, we assume auth via JWT roles.
-        if request.user.role != "RECRUITER":
+        if str(request.user.role).lower() != "recruiter":
             return Response(status=403)
         apps = Application.objects.filter(job_id=job_id)
         return Response(ApplicationSerializer(apps, many=True).data)
@@ -31,7 +33,7 @@ class ApplicationStatusUpdateView(generics.GenericAPIView):
     serializer_class = ApplicationSerializer
 
     def patch(self, request, pk):
-        if request.user.role != "RECRUITER":
+        if str(request.user.role).lower() != "recruiter":
             return Response(status=403)
             
         try:
@@ -39,8 +41,19 @@ class ApplicationStatusUpdateView(generics.GenericAPIView):
             new_status = request.data.get("status")
             if new_status and new_status != app.status:
                 # Trigger DB event (trigger does it, but we can also fire email)
+                from_status = app.status
                 app.status = new_status
                 app.save()
+                
+                # Fallback: create event if DB trigger didn't
+                ApplicationStatusEvent.objects.create(
+                    application=app,
+                    job_id=app.job_id,
+                    applicant=app.applicant,
+                    from_status=from_status,
+                    to_status=new_status,
+                    actor_id=request.user.id
+                )
                 
                 # Notification fallback (Email)
                 send_mail(
@@ -61,7 +74,7 @@ class ApplicationHistoryView(generics.GenericAPIView):
     def get(self, request, pk):
         try:
             app = Application.objects.get(pk=pk)
-            if request.user.role == "JOB_SEEKER" and app.applicant != request.user:
+            if str(request.user.role).lower() == "job_seeker" and app.applicant != request.user:
                 return Response(status=403)
             events = ApplicationStatusEvent.objects.filter(application=app).order_by('-occurred_at')
             return Response(ApplicationStatusEventSerializer(events, many=True).data)

@@ -21,7 +21,7 @@ class SeekerAnalyticsView(APIView):
     permission_classes = [IsAuthenticated]
     @extend_schema(responses={200: dict})
     def get(self, request):
-        if request.user.role != "JOB_SEEKER":
+        if str(request.user.role).lower() != "job_seeker":
             return Response(status=403)
             
         candidate = {"user_id": str(request.user.id), "skills": ["Python"]}
@@ -36,7 +36,7 @@ class RecruiterFunnelView(APIView):
     permission_classes = [IsAuthenticated]
     @extend_schema(responses={200: dict})
     def get(self, request):
-        if request.user.role != "RECRUITER":
+        if str(request.user.role).lower() != "recruiter":
             return Response(status=403)
         # Mocking Postgres query since we can't easily query the unmanaged schema without full model mappings for daily aggregates here
         return Response({"job_id": request.GET.get('job_id'), "funnel": "data"})
@@ -45,7 +45,7 @@ class AdminTrendsView(APIView):
     permission_classes = [IsAuthenticated]
     @extend_schema(responses={200: dict})
     def get(self, request):
-        if request.user.role != "ADMIN":
+        if str(request.user.role).lower() != "admin":
             return Response(status=403)
         if trends_engine:
             return Response(trends_engine.generate_hiring_trends([]))

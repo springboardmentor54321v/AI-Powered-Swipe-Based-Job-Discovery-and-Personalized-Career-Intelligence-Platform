@@ -1,0 +1,2297 @@
+openapi: 3.0.3
+info:
+  title: SwipeX Backend API
+  version: 3.0.0
+  description: |-
+    SwipeX: Swipe-Based Intelligent Job Discovery and Career Assistance Platform.
+    Milestone 1 — Authentication, Identity & RBAC API.
+    Milestone 2 — Authentication, RBAC, Jobs, Search, Companies, Swipe, Recruiter CRUD, Matching Engine & Resume/ATS Gateway.
+    Milestone 3 — Resume Upload, Versioning, ATS Scoring & AI Suggestions.
+paths:
+  /api/v1/alert-preferences/:
+    get:
+      operationId: api_v1_alert_preferences_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: api_v1_alert_preferences_update
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/analytics/admin/hiring-trends:
+    get:
+      operationId: api_v1_analytics_admin_hiring_trends_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/analytics/recruiter/job-funnel:
+    get:
+      operationId: api_v1_analytics_recruiter_job_funnel_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/analytics/seeker/resume-performance:
+    get:
+      operationId: api_v1_analytics_seeker_resume_performance_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/applications/:
+    get:
+      operationId: api_v1_applications_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Application'
+          description: ''
+  /api/v1/applications/{id}/history:
+    get:
+      operationId: api_v1_applications_history_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStatusEvent'
+          description: ''
+  /api/v1/applications/{id}/status:
+    patch:
+      operationId: api_v1_applications_status_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedApplication'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+          description: ''
+  /api/v1/ats/score:
+    post:
+      operationId: m3_ats_score
+      description: 'Calculates a blended ATS compatibility score for a parsed resume
+        against a job posting. Uses Intern 4''s scoring engine: final_ats_score =
+        (keyword_score × 0.40) + (semantic_score × 0.60). Requires the resume to be
+        parsed first (POST /resumes/{id}/parse). Protected: JOB_SEEKER role only.
+        Ownership-enforced.'
+      summary: Compute ATS Score — Resume vs Job (M3)
+      tags:
+      - ATS Scoring (M3)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resume_id:
+                  type: string
+                  format: uuid
+                  description: UUID of the Resume or ResumeVersion
+                job_id:
+                  type: string
+                  description: Job ID to score against (matches jobId in dataset)
+              required:
+              - resume_id
+              - job_id
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ATSScoreResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/login:
+    post:
+      operationId: api_v1_auth_login_create
+      description: Authenticates user credentials and returns access token, refresh
+        token, and user role.
+      summary: User Login
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/me:
+    get:
+      operationId: api_v1_auth_me_retrieve
+      description: Returns current authenticated user identity and role from JWT token.
+      summary: Get Current User Profile
+      tags:
+      - Authentication
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUser'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/oauth/google:
+    get:
+      operationId: api_v1_auth_oauth_google_retrieve
+      description: Initiates Google OAuth2 authorization flow. Redirects to Google
+        or returns setup instructions if unconfigured.
+      summary: Initiate Google OAuth2 Sign-In
+      tags:
+      - Authentication
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoogleOAuthResponse'
+          description: ''
+        '302':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
+  /api/v1/auth/oauth/google/callback:
+    get:
+      operationId: api_v1_auth_oauth_google_callback_retrieve
+      description: Handles Google OAuth2 redirect callback with authorization code
+        and exchanges it for tokens.
+      summary: Google OAuth2 Callback
+      parameters:
+      - in: query
+        name: code
+        schema:
+          type: string
+        description: Authorization code returned by Google OAuth2
+        required: true
+      tags:
+      - Authentication
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/refresh:
+    post:
+      operationId: api_v1_auth_refresh_create
+      description: Obtains a newly minted access token using a valid refresh token.
+      summary: Refresh Access Token
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshToken'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/register:
+    post:
+      operationId: api_v1_auth_register_create
+      description: Creates a new user account with hashed password and assigned role
+        (job_seeker or recruiter).
+      summary: Register User Account
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/test/admin-only:
+    get:
+      operationId: api_v1_auth_test_admin_only_retrieve
+      description: Protected test endpoint accessible exclusively by ADMIN role.
+      summary: Admin Role Verification
+      tags:
+      - RBAC Verification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/test/job-seeker-only:
+    get:
+      operationId: api_v1_auth_test_job_seeker_only_retrieve
+      description: Protected test endpoint accessible exclusively by JOB_SEEKER role.
+      summary: Candidate Role Verification
+      tags:
+      - RBAC Verification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/test/recruiter-only:
+    get:
+      operationId: api_v1_auth_test_recruiter_only_retrieve
+      description: Protected test endpoint accessible exclusively by RECRUITER role.
+      summary: Recruiter Role Verification
+      tags:
+      - RBAC Verification
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/companies/:
+    get:
+      operationId: list_companies
+      description: Public directory endpoint. Retrieves list of employer companies,
+        industry sectors, headquarters, and company metadata.
+      summary: List Companies
+      parameters:
+      - in: query
+        name: company_type
+        schema:
+          type: string
+        description: Filter by organizational tier (e.g. Startup, Enterprise, MNC)
+      - in: query
+        name: industry
+        schema:
+          type: string
+        description: Filter by industry sector (e.g. Software, Financial Services,
+          Healthcare)
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: 'Page number for pagination (default: 1)'
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 'Number of companies per page (default: 20, max: 100)'
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Keyword search across company name
+      tags:
+      - Companies
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/companies/{company_id}:
+    get:
+      operationId: get_company_detail
+      description: Public endpoint. Fetches detailed profile of a specific company
+        including industry, headquarters, and active jobs count.
+      summary: Get Company Details by ID
+      parameters:
+      - in: path
+        name: company_id
+        schema:
+          type: string
+        description: Unique identifier of the company (e.g. 1)
+        required: true
+      tags:
+      - Companies
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/jobs/:
+    get:
+      operationId: list_jobs
+      description: Public endpoint. Fetches paginated job listings with optional multi-criteria
+        filtering and freshness/competition fields from the downstream Job Service.
+      summary: List Job Postings
+      parameters:
+      - in: query
+        name: company_type
+        schema:
+          type: string
+        description: Filter by company type (e.g. Startup, Enterprise, MNC)
+      - in: query
+        name: location
+        schema:
+          type: string
+        description: Filter jobs by location substring (e.g. Hyderabad, Bengaluru)
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: 'Page number for paginated results (default: 1)'
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 'Number of items per page (default: 20, max: 100)'
+      - in: query
+        name: remote
+        schema:
+          type: boolean
+        description: Filter by remote status (true / false)
+      - in: query
+        name: salary_max
+        schema:
+          type: integer
+        description: Maximum annual salary filter (in INR)
+      - in: query
+        name: salary_min
+        schema:
+          type: integer
+        description: Minimum annual salary filter (in INR)
+      - in: query
+        name: skills
+        schema:
+          type: string
+        description: Comma-separated skill keywords to match (e.g. Python,Django,React)
+      - in: query
+        name: type
+        schema:
+          type: string
+        description: Employment type (e.g. Full-time, Internship, Contract)
+      tags:
+      - Jobs
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    post:
+      operationId: create_job_posting
+      description: Protected endpoint for RECRUITER and ADMIN roles. Creates a new
+        job posting in the downstream Job Service.
+      summary: Create Job Posting (Recruiter)
+      tags:
+      - Jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/jobs/{job_id}:
+    get:
+      operationId: get_job_detail
+      description: Public endpoint. Fetches comprehensive job details including description,
+        company info, compensation, and freshness/competition fields from the downstream
+        Job Service.
+      summary: Get Job Details by ID
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: string
+        description: Unique identifier of the job posting (e.g. 101)
+        required: true
+      tags:
+      - Jobs
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: update_job_posting
+      description: Protected endpoint for RECRUITER and ADMIN roles. Updates fields
+        on an existing job posting in the downstream Job Service.
+      summary: Update Job Posting (Recruiter)
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobUpdate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: delete_job_posting
+      description: Protected endpoint for RECRUITER and ADMIN roles. Deletes a job
+        posting in the downstream Job Service.
+      summary: Delete Job Posting (Recruiter)
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '204':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/jobs/{job_id}/applications:
+    get:
+      operationId: api_v1_jobs_applications_retrieve
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+          description: ''
+  /api/v1/jobs/{job_id}/competition:
+    get:
+      operationId: api_v1_jobs_competition_retrieve
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Jobs
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/jobs/search:
+    get:
+      operationId: search_jobs
+      description: 'Advanced search endpoint matching jobs across multiple dimensions:
+        keyword search across title/description, location, experience level, salary
+        brackets, and required skills.'
+      summary: Search and Filter Jobs
+      parameters:
+      - in: query
+        name: experience_level
+        schema:
+          type: string
+        description: Required experience band (Fresher, Junior, Mid-Level, Senior,
+          Lead)
+      - in: query
+        name: is_remote
+        schema:
+          type: boolean
+        description: Filter for remote positions only
+      - in: query
+        name: job_type
+        schema:
+          type: string
+        description: Employment contract type (Full-time, Part-time, Internship, Contract)
+      - in: query
+        name: keyword
+        schema:
+          type: string
+        description: Free-text search term matched against job title and description
+      - in: query
+        name: location
+        schema:
+          type: string
+        description: City, region, or location string
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: 'Page number for paginated search results (default: 1)'
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 'Number of items returned per page (default: 20, max: 100)'
+      - in: query
+        name: salary_max
+        schema:
+          type: integer
+        description: Maximum annual compensation
+      - in: query
+        name: salary_min
+        schema:
+          type: integer
+        description: Minimum annual compensation
+      - in: query
+        name: skills
+        schema:
+          type: string
+        description: Comma-separated required skill tokens
+      tags:
+      - Jobs
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/matching/:
+    get:
+      operationId: get_matching_recommendations
+      description: Gateway endpoint connecting to Intern 4's Domain-3 Matching Engine.
+        Returns ranked job recommendations with heuristic match percentages.
+      summary: Run Matching Engine
+      parameters:
+      - in: query
+        name: resume_id
+        schema:
+          type: string
+        description: Uploaded Resume UUID to generate heuristic or AI matching scores
+          for
+      - in: query
+        name: user_id
+        schema:
+          type: string
+        description: Candidate User ID
+      tags:
+      - Matching Engine
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/notifications/:
+    get:
+      operationId: api_v1_notifications_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/notifications/{id}/read:
+    patch:
+      operationId: api_v1_notifications_read_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/notifications/preferences:
+    get:
+      operationId: api_v1_notifications_preferences_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: api_v1_notifications_preferences_update
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/notifications/unread-count:
+    get:
+      operationId: api_v1_notifications_unread_count_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/resumes/:
+    get:
+      operationId: m3_list_resumes
+      description: 'Retrieve all resumes owned by the authenticated Job Seeker. Returns
+        resume metadata including version history. Ownership-enforced: only the user''s
+        own resumes are returned.'
+      summary: List My Resumes (M3)
+      tags:
+      - Resume (M3)
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/resumes/{resume_id}/parse:
+    post:
+      operationId: m3_parse_resume
+      description: 'Extracts raw text and NLP-detected skills from a previously uploaded
+        resume file. Requires valid JWT and JOB_SEEKER role. Enforces strict ownership:
+        a candidate can only parse their own resume.'
+      summary: Parse Resume Document & Extract Skills (M3)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: UUID of the Resume or ResumeVersion to parse
+        required: true
+      - in: path
+        name: resume_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Resume (M3)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeParseResponse'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumeParseResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/resumes/{resume_id}/versions/{version_id}:
+    get:
+      operationId: m3_get_resume_version
+      description: Return version metadata and parsed skills for the owning Job Seeker.
+      summary: Get Resume Version Details
+      parameters:
+      - in: path
+        name: resume_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: version_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Resume (M3)
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/resumes/recommendations:
+    get:
+      operationId: m3_upgraded_recommendations
+      description: 'Returns upgraded job recommendations using semantic similarity
+        and swipe-history heuristic. Optionally accepts a resume_id to personalize
+        recommendations based on parsed resume content. Protected: JOB_SEEKER role
+        only.'
+      summary: AI-Powered Job Recommendations (M3)
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: 'Max number of recommendations (default: 5)'
+      - in: query
+        name: resume_id
+        schema:
+          type: string
+          format: uuid
+        description: Resume UUID for personalized semantic matching
+      tags:
+      - Recommendations (M3)
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationsResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/resumes/upload:
+    post:
+      operationId: m3_upload_resume
+      description: 'Upload a resume file (PDF/DOCX). Creates a Resume record on first
+        upload, or adds a new version to the existing Resume. Previous versions are
+        preserved. Protected: JOB_SEEKER role only.'
+      summary: Upload Candidate Resume (M3)
+      tags:
+      - Resume (M3)
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Resume file (PDF or DOCX, max 5 MB)
+                label:
+                  type: string
+                  description: Optional human-readable label for this version
+              required:
+              - file
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumeUploadResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/suggestions/:
+    post:
+      operationId: m3_ai_suggestions
+      description: 'Generates AI-powered resume optimization suggestions by comparing
+        extracted resume skills against a target job''s requirements. Uses Intern
+        4''s ResumeSuggestionsModule with free rule-based fallback. Requires the resume
+        to be parsed first. Protected: JOB_SEEKER role only. Ownership-enforced.'
+      summary: AI Resume Optimization Suggestions (M3)
+      tags:
+      - AI Suggestions (M3)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resume_id:
+                  type: string
+                  format: uuid
+                  description: UUID of the Resume or ResumeVersion
+                job_id:
+                  type: string
+                  description: Optional job ID for job-targeted suggestions
+              required:
+              - resume_id
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestionsResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/swipes/:
+    post:
+      operationId: record_candidate_swipe
+      description: Allows a JOB_SEEKER to apply, save, or skip a job posting. Protected
+        endpoint requiring Bearer JWT. The authenticated user's identity is securely
+        injected — client-supplied identity headers are stripped.
+      summary: Record Candidate Swipe
+      tags:
+      - Swipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SwipeAction'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/swipes/history:
+    get:
+      operationId: get_candidate_swipe_history
+      description: Protected endpoint for JOB_SEEKER role. Retrieves the authenticated
+        candidate's recorded swipe history from the downstream Swipe Service.
+      summary: Get Candidate Swipe History
+      tags:
+      - Swipes
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /health:
+    get:
+      operationId: health_retrieve
+      description: Verifies Django backend process is alive and responding.
+      summary: Service Health Check
+      tags:
+      - System
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+components:
+  schemas:
+    ATSScoreResponse:
+      type: object
+      description: |-
+        Serializes the response from POST /api/v1/ats/score.
+        Returns blended ATS score with keyword and semantic components.
+
+        Formula (from Intern 4):
+            final_ats_score = (0.40 × keyword_match_score) + (0.60 × semantic_similarity_score)
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+        version_id:
+          type: string
+          format: uuid
+        job_id:
+          type: string
+        job_title:
+          type: string
+        keyword_score:
+          type: number
+          format: double
+        semantic_similarity:
+          type: number
+          format: double
+        semantic_score:
+          type: number
+          format: double
+        final_ats_score:
+          type: number
+          format: double
+        matched_skills:
+          type: array
+          items:
+            type: string
+        missing_skills:
+          type: array
+          items:
+            type: string
+        matched_keywords:
+          type: array
+          items:
+            type: string
+        missing_keywords:
+          type: array
+          items:
+            type: string
+        below_threshold:
+          type: boolean
+        threshold:
+          type: number
+          format: double
+        detail:
+          type: string
+      required:
+      - below_threshold
+      - final_ats_score
+      - job_id
+      - keyword_score
+      - matched_keywords
+      - matched_skills
+      - missing_keywords
+      - missing_skills
+      - resume_id
+      - semantic_score
+      - semantic_similarity
+      - threshold
+      - version_id
+    ActionEnum:
+      enum:
+      - apply
+      - save
+      - skip
+      - right
+      - left
+      type: string
+      description: |-
+        * `apply` - apply
+        * `save` - save
+        * `skip` - skip
+        * `right` - right
+        * `left` - left
+    Application:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        job_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          maxLength: 50
+        resume_score:
+          type: number
+          format: double
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        applicant:
+          type: integer
+      required:
+      - applicant
+      - created_at
+      - job_id
+      - updated_at
+    ApplicationStatusEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        job_id:
+          type: string
+          format: uuid
+        from_status:
+          type: string
+          nullable: true
+          maxLength: 50
+        to_status:
+          type: string
+          maxLength: 50
+        actor_id:
+          type: string
+          format: uuid
+          nullable: true
+        occurred_at:
+          type: string
+          format: date-time
+          readOnly: true
+        metadata: {}
+        application:
+          type: string
+          format: uuid
+        applicant:
+          type: integer
+      required:
+      - applicant
+      - application
+      - id
+      - job_id
+      - occurred_at
+      - to_status
+    CurrentUser:
+      type: object
+      description: |-
+        Serializer for GET /api/v1/auth/me
+        Returns current user identity and role.
+      properties:
+        user_id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          description: Full name of user
+          maxLength: 255
+        role:
+          type: string
+          readOnly: true
+      required:
+      - name
+      - role
+      - user_id
+    ExtractedSkill:
+      type: object
+      description: |-
+        Serializes a skill extracted from a resume version.
+        Maps to Intern 3's resume_skills table.
+      properties:
+        skill_name:
+          type: string
+          readOnly: true
+        normalized_name:
+          type: string
+          readOnly: true
+        source:
+          type: string
+          description: Extraction source (parsed, manual, nlp_ner)
+          maxLength: 50
+        confidence:
+          type: number
+          format: double
+          nullable: true
+          description: Extraction confidence score (0.0 - 1.0 or percentage)
+      required:
+      - normalized_name
+      - skill_name
+    GoogleOAuthResponse:
+      type: object
+      description: Response serializer for GET /api/v1/auth/oauth/google when unconfigured
+      properties:
+        message:
+          type: string
+        status:
+          type: string
+        detail:
+          type: string
+        configured_redirect_uri:
+          type: string
+        target_provider:
+          type: string
+      required:
+      - configured_redirect_uri
+      - detail
+      - message
+      - status
+      - target_provider
+    JobCreate:
+      type: object
+      description: Validates job requisition creation payload submitted by Recruiters.
+      properties:
+        title:
+          type: string
+          description: Position title (e.g. Senior Backend Engineer)
+          maxLength: 255
+        company:
+          type: string
+          default: Independent Recruiter
+          maxLength: 255
+        company_id:
+          type: integer
+          default: 1
+        company_type:
+          type: string
+          default: Startup
+        location:
+          type: string
+          default: Remote
+        is_remote:
+          type: boolean
+          default: false
+        remote:
+          type: boolean
+          default: false
+        salary_min:
+          type: integer
+          minimum: 0
+          default: 500000
+        salary_max:
+          type: integer
+          minimum: 0
+          default: 1000000
+        skills:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+          default: Exciting career opportunity.
+        job_type:
+          type: string
+          default: Full-time
+        experience_level:
+          type: string
+          default: Mid-Level
+        industry:
+          type: string
+          default: Technology
+      required:
+      - title
+    JobUpdate:
+      type: object
+      description: Validates job posting update payload submitted by Recruiters.
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        company:
+          type: string
+          maxLength: 255
+        location:
+          type: string
+        is_remote:
+          type: boolean
+        remote:
+          type: boolean
+        salary_min:
+          type: integer
+          minimum: 0
+        salary_max:
+          type: integer
+          minimum: 0
+        skills:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+        job_type:
+          type: string
+        experience_level:
+          type: string
+    Login:
+      type: object
+      description: |-
+        Serializer for POST /api/v1/auth/login
+        Authenticates email and password, returning JWT access & refresh tokens.
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - password
+    LoginResponse:
+      type: object
+      description: Response serializer for POST /api/v1/auth/login
+      properties:
+        access_token:
+          type: string
+          description: JWT access token
+        refresh_token:
+          type: string
+          description: JWT refresh token
+        role:
+          type: string
+          description: User role (e.g. job_seeker, recruiter, admin)
+      required:
+      - access_token
+      - refresh_token
+      - role
+    MessageResponse:
+      type: object
+      description: Generic status/message response serializer for protected role endpoints
+      properties:
+        status:
+          type: string
+          description: Status indicator (e.g. success)
+        message:
+          type: string
+          description: Informational message
+        user_id:
+          type: string
+          description: User ID
+        role:
+          type: string
+          description: User role
+      required:
+      - message
+      - status
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          maxLength: 50
+        title:
+          type: string
+          maxLength: 180
+        body:
+          type: string
+          maxLength: 4000
+        payload: {}
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        delivered_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        user:
+          type: integer
+      required:
+      - body
+      - created_at
+      - title
+      - type
+      - user
+    PatchedApplication:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        job_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          maxLength: 50
+        resume_score:
+          type: number
+          format: double
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        applicant:
+          type: integer
+    RecommendationItem:
+      type: object
+      description: |-
+        Serializes a single job recommendation from Intern 4's
+        UpgradedRecommendationEngine.
+      properties:
+        job_id:
+          type: integer
+        job_title:
+          type: string
+        company:
+          type: string
+        required_skills:
+          type: array
+          items:
+            type: string
+        semantic_similarity_score:
+          type: number
+          format: double
+        swipe_boost:
+          type: number
+          format: double
+        final_match_percentage:
+          type: number
+          format: double
+        match_type:
+          type: string
+      required:
+      - company
+      - final_match_percentage
+      - job_id
+      - job_title
+      - required_skills
+      - semantic_similarity_score
+      - swipe_boost
+    RecommendationsResponse:
+      type: object
+      description: |-
+        Serializes the response from GET /api/v1/recommendations/.
+        Returns upgraded AI-powered job recommendations with semantic
+        similarity and swipe-history blending.
+      properties:
+        user_id:
+          type: string
+        resume_id:
+          type: string
+          format: uuid
+          nullable: true
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecommendationItem'
+        count:
+          type: integer
+        match_type:
+          type: string
+        detail:
+          type: string
+      required:
+      - count
+      - match_type
+      - recommendations
+      - user_id
+    RefreshToken:
+      type: object
+      description: |-
+        Serializer for POST /api/v1/auth/refresh
+        Validates refresh token and returns a newly minted access token.
+      properties:
+        refresh_token:
+          type: string
+      required:
+      - refresh_token
+    RefreshTokenResponse:
+      type: object
+      description: Response serializer for POST /api/v1/auth/refresh
+      properties:
+        access_token:
+          type: string
+          description: Newly minted JWT access token
+      required:
+      - access_token
+    Register:
+      type: object
+      description: |-
+        Serializer for POST /api/v1/auth/register
+        Validates input, checks duplicate emails, enforces role constraints,
+        hashes the password, and creates the user.
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+          minLength: 6
+        role:
+          type: string
+          default: job_seeker
+      required:
+      - email
+      - name
+      - password
+    RegisterResponse:
+      type: object
+      description: Response serializer for POST /api/v1/auth/register
+      properties:
+        user_id:
+          type: string
+          description: Unique identifier of newly registered user
+      required:
+      - user_id
+    ResumeParseResponse:
+      type: object
+      description: |-
+        Serializes the response from POST /api/v1/resumes/{id}/parse.
+        Returns parsed_text, extracted_skills, and structured skill details.
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+        version_id:
+          type: string
+          format: uuid
+        version_number:
+          type: integer
+        original_filename:
+          type: string
+        parsed_status:
+          type: string
+        parsed_text:
+          type: string
+        extracted_skills:
+          type: array
+          items:
+            type: string
+        parsed_skills:
+          type: array
+          items:
+            type: string
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtractedSkill'
+        parsed_at:
+          type: string
+          format: date-time
+        detail:
+          type: string
+      required:
+      - extracted_skills
+      - original_filename
+      - parsed_at
+      - parsed_skills
+      - parsed_status
+      - parsed_text
+      - resume_id
+      - version_id
+      - version_number
+    ResumeUploadResponse:
+      type: object
+      description: |-
+        Serializes the upload response per the Day-1 contract's
+        ResumeUploadResponse schema.
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+        version_id:
+          type: string
+          format: uuid
+        version_number:
+          type: integer
+        original_filename:
+          type: string
+        content_type:
+          type: string
+        file_size_bytes:
+          type: integer
+        sha256_hash:
+          type: string
+        label:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+        uploaded_at:
+          type: string
+          format: date-time
+        extraction_status:
+          type: string
+      required:
+      - content_type
+      - extraction_status
+      - file_size_bytes
+      - is_active
+      - label
+      - original_filename
+      - resume_id
+      - sha256_hash
+      - uploaded_at
+      - version_id
+      - version_number
+    SuggestionItem:
+      type: object
+      description: |-
+        Serializes a single AI-generated resume optimization suggestion.
+        Maps to the Day-1 contract's suggestion item schema.
+      properties:
+        category:
+          type: string
+        priority:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+        related_skills:
+          type: array
+          items:
+            type: string
+          nullable: true
+      required:
+      - category
+      - detail
+      - priority
+      - title
+    SuggestionsResponse:
+      type: object
+      description: |-
+        Serializes the response from POST /api/v1/suggestions/.
+        Returns AI-generated resume optimization suggestions per the Day-1 contract.
+        Supports both LLM-powered and free rule-based fallback modes.
+      properties:
+        resume_id:
+          type: string
+          format: uuid
+        job_id:
+          type: string
+          nullable: true
+        job_title:
+          type: string
+        source:
+          type: string
+        keyword_match_pct:
+          type: number
+          format: double
+        matched_skills:
+          type: array
+          items:
+            type: string
+        missing_skills:
+          type: array
+          items:
+            type: string
+        suggestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SuggestionItem'
+        generated_at:
+          type: string
+          format: date-time
+        detail:
+          type: string
+      required:
+      - generated_at
+      - keyword_match_pct
+      - matched_skills
+      - missing_skills
+      - resume_id
+      - source
+      - suggestions
+    SwipeAction:
+      type: object
+      description: Validates the swipe request body per the Milestone 2 API contract.
+      properties:
+        job_id:
+          type: integer
+          minimum: 1
+          description: Target job ID to swipe on (e.g. 101)
+        action:
+          allOf:
+          - $ref: '#/components/schemas/ActionEnum'
+          description: |-
+            Swipe action: apply, save, skip (or legacy: right, left)
+
+            * `apply` - apply
+            * `save` - save
+            * `skip` - skip
+            * `right` - right
+            * `left` - left
+      required:
+      - action
+      - job_id
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -7,6 +7,7 @@ from django.db import connection
 class CompetitionDetailView(APIView):
     permission_classes = [AllowAny]
     
+    @extend_schema(responses={200: dict}, tags=['Jobs'])
     def get(self, request, job_id):
         with connection.cursor() as cursor:
             cursor.execute('''
