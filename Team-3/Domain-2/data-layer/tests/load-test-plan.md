@@ -6,7 +6,7 @@ Run this plan against a disposable database only.
 2. From 20 concurrent workers, insert non-overlapping `(job_id, applicant_id)`
    application sets, committing every insert or small batch.
 3. Assert `jobs.applicant_count = count(*)` for that job and compare the stored
-   level with `app.competition_level(count(*), jobs.created_at)`.
+   level with `app.competition_level(count(*) FILTER (WHERE status <> 'saved'), jobs.posted_at)`.
 4. Concurrently delete 100 applications, then move 100 remaining applications to
    a second job. Repeat the assertion for both jobs.
 5. Run `sql/integrity_checks.sql`, then run `EXPLAIN (ANALYZE, BUFFERS)` on the

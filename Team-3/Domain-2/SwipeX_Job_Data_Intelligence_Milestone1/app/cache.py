@@ -1,8 +1,11 @@
 """Redis-first cache with a local development fallback."""
 import json
+import logging
 import os
 import time
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 try:
     from redis import Redis
@@ -25,8 +28,12 @@ class JobFeedCache:
 
     def get(self, key: str) -> Any | None:
         if self._redis:
-            raw = self._redis.get(key)
-            return json.loads(raw) if raw else None
+            try:
+                raw = self._redis.get(key)
+                return json.loads(raw) if raw else None
+            except Exception:
+                logger.warning("Redis cache read failed; falling back to local cache", exc_info=True)
+                self._redis = None
         entry = self._local.get(key)
         if not entry or entry[0] < time.time():
             self._local.pop(key, None)
@@ -35,16 +42,24 @@ class JobFeedCache:
 
     def set(self, key: str, value: Any, ttl: int = 60) -> None:
         if self._redis:
-            self._redis.setex(key, ttl, json.dumps(value, default=str))
-        else:
-            self._local[key] = (time.time() + ttl, value)
+            try:
+                self._redis.setex(key, ttl, json.dumps(value, default=str))
+                return
+            except Exception:
+                logger.warning("Redis cache write failed; falling back to local cache", exc_info=True)
+                self._redis = None
+        self._local[key] = (time.time() + ttl, value)
 
     def invalidate_jobs(self) -> None:
         if self._redis:
-            for key in self._redis.scan_iter("jobs:*"):
-                self._redis.delete(key)
-        else:
-            self._local.clear()
+            try:
+                for key in self._redis.scan_iter("jobs:*"):
+                    self._redis.delete(key)
+                return
+            except Exception:
+                logger.warning("Redis cache invalidation failed; clearing local cache", exc_info=True)
+                self._redis = None
+        self._local.clear()
 
 
 cache = JobFeedCache()

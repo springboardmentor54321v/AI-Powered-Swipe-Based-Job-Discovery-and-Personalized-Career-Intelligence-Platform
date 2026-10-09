@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 from contextlib import asynccontextmanager
 from typing import Annotated
 
@@ -10,8 +11,11 @@ from sqlalchemy.orm import Session, joinedload
 from .cache import cache
 from .database import Base, engine, get_db
 from .models import Company, Job, Swipe
-from .schemas import JobDetail, JobOut, SwipeCreate, SwipeCreated, SwipeHistoryItem
+from .schemas import JobCreate, JobDetail, JobOut, SwipeCreate, SwipeCreated, SwipeHistoryItem
 from .seed import seed_database
+
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -30,14 +34,13 @@ app = FastAPI(title="SwipeX Job & Swipe Service", version="1.0.0", lifespan=life
 
 
 def serialize_job(job: Job, detail: bool = False) -> dict:
-    competition = "Low" if job.applicant_count < 50 else "Medium" if job.applicant_count < 100 else "High"
     result = {
         "job_id": job.id, "title": job.title, "company": job.company.name,
         "company_type": job.company.company_type, "location": job.location,
         "remote": job.is_remote, "salary_range": {"min": job.salary_min, "max": job.salary_max},
         "skills": job.skills.split("|"), "posted_at": job.posted_at, "posted_time": job.posted_at,
         "experience_level": job.experience_level, "applicant_count": job.applicant_count,
-        "competition_level": competition,
+        "competition_level": job.competition_level,
     }
     if detail:
         result.update(description=job.description, industry=job.company.industry)
@@ -81,7 +84,7 @@ def apply_job_filters(
         if requested:
             statement = statement.where(or_(*[Job.skills.ilike(f"%{skill}%") for skill in requested]))
     if low_competition:
-        statement = statement.where(Job.applicant_count < 50)
+        statement = statement.where(Job.competition_level == "low")
     if recently_posted:
         from datetime import datetime, timedelta, timezone
         statement = statement.where(Job.posted_at >= datetime.now(timezone.utc) - timedelta(days=7))
@@ -212,6 +215,38 @@ def get_job(job_id: int, db: Session = Depends(get_db)) -> dict:
     job = db.scalar(select(Job).options(joinedload(Job.company)).where(Job.id == job_id))
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+    return serialize_job(job, detail=True)
+
+
+@app.post("/api/v1/jobs", status_code=status.HTTP_201_CREATED)
+def create_job(
+    payload: JobCreate,
+    user_id: int = Depends(user_id_from_gateway),
+    db: Session = Depends(get_db),
+) -> dict:
+    company = db.get(Company, payload.company_id)
+    if not company:
+        raise HTTPException(status_code=400, detail="Company not found")
+    job = Job(
+        company_id=company.id,
+        title=payload.title,
+        description=payload.description,
+        employment_type=payload.employment_type,
+        location=payload.location,
+        is_remote=payload.is_remote,
+        salary_min=payload.salary_min,
+        salary_max=payload.salary_max,
+        skills="|".join(dict.fromkeys(skill.strip() for skill in payload.skills if skill.strip())),
+        experience_level=payload.experience_level,
+        recruiter_id=user_id,
+    )
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+    try:
+        cache.invalidate_jobs()
+    except Exception:
+        logger.warning("Job created but cache invalidation failed", exc_info=True)
     return serialize_job(job, detail=True)
 
 

@@ -17,7 +17,7 @@ DDL rights on schema `app` and the stated public tables.
 
 - Hourly: `SELECT app.refresh_analytics(current_date - 180);`
 - Daily after midnight: recompute competition whose age can change its level:
-  `UPDATE public.jobs SET competition_level=app.competition_level(applicant_count, created_at), competition_updated_at=now() WHERE status='open';`
+  `UPDATE public.jobs SET competition_level=app.competition_level(applicant_count, posted_at), competition_updated_at=now();`
 - Daily: remove expired notifications in bounded batches and refresh backup.
 - Weekly: `ANALYZE public.jobs, public.applications, app.notification` and inspect
   slow-query statistics.

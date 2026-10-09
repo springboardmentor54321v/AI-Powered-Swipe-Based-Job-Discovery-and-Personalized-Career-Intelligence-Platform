@@ -3,7 +3,7 @@
 | Object | Purpose | Retention / owner |
 |---|---|---|
 | `app.notification` | User-visible delivery record; payload holds typed IDs only, never resume PII | Delete expired records nightly; Product |
-| `app.alert_preference` | Per-user, type, channel opt-in and quiet hours | Deleted with user; Product |
+| `app.alert_preference` | Per-user, type, channel opt-in, match threshold, and quiet hours | Deleted with user; Product |
 | `app.application_status_event` | Immutable application audit/history | Retain per hiring policy; Recruiting |
 | `jobs.applicant_count` | Transactionally maintained denormalized count | Derived from applications; Platform |
 | `jobs.competition_level` | Derived label: low, medium, high, very_high | Recalculated on application changes; Platform |
@@ -20,9 +20,14 @@
 | high | 50+ applicants, or 20+ after 7 days |
 | very_high | 100+ applicants, or 50+ after 14 days |
 
-Thresholds are deliberately ordered from highest to lowest in `app.competition_level`.
-Job age is based on `jobs.created_at`; a scheduled recomputation is required for
-level changes caused solely by age (see maintenance notes).
+Thresholds are deliberately ordered from highest to lowest in `app.competition_level`;
+only applications beyond `saved` count as applicants. Job age is measured from
+`jobs.posted_at`; a scheduled recomputation is required for age-only level changes.
+
+The M4 application lifecycle does not contain a terminal `hired` status, so the
+daily `hires` aggregate remains zero until that state is added to the agreed API
+contract. Per-version resume views/applies are also not stored by the current
+schema; the analytics API leaves those metrics empty instead of inferring them.
 
 ## Index rationale
 

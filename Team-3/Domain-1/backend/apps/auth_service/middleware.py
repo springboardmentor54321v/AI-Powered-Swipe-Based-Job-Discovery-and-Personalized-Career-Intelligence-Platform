@@ -1,20 +1,19 @@
 import urllib.parse
-import jwt
-from django.conf import settings
 from channels.middleware import BaseMiddleware
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from .jwt_utils import decode_token
 
 User = get_user_model()
 
 @database_sync_to_async
 def get_user_from_token(token):
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        user_id = payload.get("user_id")
-        if user_id:
-            return User.objects.get(id=user_id)
+        payload = decode_token(token, expected_type="access")
+        user_id = payload.get("sub")
+        if user_id and str(user_id).isdigit():
+            return User.objects.select_related("role").get(id=int(user_id), is_active=True)
     except Exception:
         pass
     return AnonymousUser()

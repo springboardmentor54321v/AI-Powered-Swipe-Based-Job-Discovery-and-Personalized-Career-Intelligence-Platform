@@ -1,0 +1,14 @@
+.git
+.github
+**/.git
+**/.venv
+**/venv
+**/node_modules
+**/dist
+**/__pycache__
+**/.pytest_cache
+**/.env
+**/.env.*
+**/backups
+**/Milestone1.zip
+*.log

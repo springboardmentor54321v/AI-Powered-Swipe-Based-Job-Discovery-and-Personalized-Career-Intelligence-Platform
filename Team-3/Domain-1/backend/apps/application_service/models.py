@@ -4,8 +4,9 @@ import uuid
 
 class Application(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    job_id = models.UUIDField()
+    job_id = models.IntegerField()
     applicant = models.ForeignKey(User, on_delete=models.CASCADE, db_column="applicant_id")
+    resume_version_id = models.UUIDField(null=True, blank=True)
     status = models.CharField(max_length=50, default="applied")
     resume_score = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -18,11 +19,11 @@ class Application(models.Model):
 class ApplicationStatusEvent(models.Model):
     id = models.BigAutoField(primary_key=True)
     application = models.ForeignKey(Application, on_delete=models.CASCADE, db_column="application_id")
-    job_id = models.UUIDField()
+    job_id = models.IntegerField()
     applicant = models.ForeignKey(User, on_delete=models.CASCADE, db_column="applicant_id")
     from_status = models.CharField(max_length=50, null=True, blank=True)
     to_status = models.CharField(max_length=50)
-    actor_id = models.UUIDField(null=True, blank=True)
+    actor_id = models.BigIntegerField(null=True, blank=True)
     occurred_at = models.DateTimeField(auto_now_add=True)
     metadata = models.JSONField(default=dict)
 

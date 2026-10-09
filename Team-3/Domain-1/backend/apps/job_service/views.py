@@ -635,12 +635,32 @@ class RecordSwipeView(APIView):
 
         patched = PatchedRequest(request, downstream_body)
 
-        return forward_to_downstream(
+        response = forward_to_downstream(
             request=patched,
             target_base_url=getattr(settings, "JOB_SERVICE_URL", "http://127.0.0.1:8001"),
             subpath="api/v1/swipes",
             service_name="Swipe Service",
         )
+        if response.status_code < 400 and action in {"apply", "save", "right"}:
+            from apps.application_service.models import Application
+            from apps.resume_service.models import ResumeVersion
+
+            application_status = "saved" if action == "save" else "applied"
+            resume_version = ResumeVersion.objects.filter(
+                resume__owner=request.user,
+            ).order_by("-version_number").first()
+            application, created = Application.objects.get_or_create(
+                job_id=validated["job_id"],
+                applicant=request.user,
+                defaults={
+                    "status": application_status,
+                    "resume_version_id": resume_version.id if resume_version else None,
+                },
+            )
+            if not created and application.status == "saved" and application_status == "applied":
+                application.status = "applied"
+                application.save(update_fields=["status", "updated_at"])
+        return response
 
 
 class SwipeHistoryView(APIView):

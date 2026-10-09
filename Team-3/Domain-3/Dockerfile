@@ -5,7 +5,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
+COPY resume_service.py .
+COPY data/cleaned_jobs.csv ./data/cleaned_jobs.csv
 
 EXPOSE 8000
 CMD ["uvicorn", "resume_service:app", "--host", "0.0.0.0", "--port", "8000"]

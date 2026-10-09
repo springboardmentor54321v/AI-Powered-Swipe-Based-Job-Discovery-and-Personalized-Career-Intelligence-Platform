@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -36,6 +36,9 @@ class Job(Base):
     skills: Mapped[str] = mapped_column(Text)  # JSON-free, pipe-delimited normalized skills
     experience_level: Mapped[str] = mapped_column(String(40), default="Fresher")
     applicant_count: Mapped[int] = mapped_column(Integer, default=0)
+    recruiter_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    competition_level: Mapped[str] = mapped_column(String(16), default="low")
+    competition_updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
     company: Mapped[Company] = relationship(back_populates="jobs")
     swipes: Mapped[list["Swipe"]] = relationship(back_populates="job", cascade="all, delete-orphan")

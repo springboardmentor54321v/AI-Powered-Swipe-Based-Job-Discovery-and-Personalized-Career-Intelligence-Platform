@@ -88,15 +88,17 @@ The API Gateway (`http://127.0.0.1:8000`) will be extended to proxy the new Mile
 
 *Backing Tables:* `public.applications` (existing), `app.application_status_event`
 
-### 3.1 List Own Applications (Job Seeker)
+The integrated schema uses integer `jobs.id`, bigint `users.id`, and UUID application IDs. The M4 application lifecycle is `saved`, `applied`, `shortlisted`, `interview`, and `rejected`.
+
+### 3.1 List Applications (Role Scoped)
 - **Endpoint**: `GET /api/v1/applications/`
-- **Auth/RBAC**: `JOB_SEEKER` only
-- **Response**: List of applications with current `status` (`applied`, `screened`, `interviewed`, `offered`, `hired`, `rejected`).
+- **Auth/RBAC**: `JOB_SEEKER` sees own applications; `RECRUITER` sees applications for owned jobs; `ADMIN` sees all.
+- **Response**: List of applications with current status from the M4 lifecycle above.
 
 ### 3.2 List Applicants for a Job (Recruiter)
 - **Endpoint**: `GET /api/v1/jobs/{job_id}/applications`
 - **Auth/RBAC**: `RECRUITER` (Must own the job posting)
-- **Response**: List of applicants with their resume profiles and current `status`.
+- **Response**: `GET /api/v1/jobs/{job_id}/applications` returns applications for that owned job; job IDs are integers.
 
 ### 3.3 Update Application Status (Recruiter)
 - **Endpoint**: `PATCH /api/v1/applications/{id}/status`
@@ -104,11 +106,11 @@ The API Gateway (`http://127.0.0.1:8000`) will be extended to proxy the new Mile
 - **Request Body**:
 ```json
 {
-  "status": "interviewed",
-  "metadata": {"interview_date": "2026-10-15"}
+  "status": "interview",
+  "metadata": {}
 }
 ```
-- **Behavior**: Updates `public.applications.status`. Triggers Intern 3's DB trigger to create `app.application_status_event`. Emits notification.
+- **Behavior**: Enforces job ownership and allowed transitions. Updates `public.applications.status`; the database trigger records history and the service persists an in-app notification, attempts email, and publishes to the authenticated WebSocket group.
 
 ### 3.4 Get Application Timeline
 - **Endpoint**: `GET /api/v1/applications/{id}/history`
@@ -127,11 +129,14 @@ The API Gateway (`http://127.0.0.1:8000`) will be extended to proxy the new Mile
 - **Response**: `200 OK`
 ```json
 {
-  "total_applications": 15,
-  "average_resume_score": 78.5,
-  "interview_rate": 0.20
+  "application_funnel": {"saved": 0, "applied": 0, "shortlisted": 0, "interview": 0, "rejected": 0},
+  "resume_performance": [],
+  "skill_gaps": {"matched_skills": [], "missing_skills": []},
+  "period_days": "30"
 }
 ```
+
+Applications are associated with the active resume version at submission. Per-version job views are not recorded and are reported as zero until a view event is implemented.
 
 ### 4.2 Recruiter Job Funnel
 - **Endpoint**: `GET /api/v1/analytics/recruiter/job-funnel?job_id={id}`
@@ -155,7 +160,7 @@ The API Gateway (`http://127.0.0.1:8000`) will be extended to proxy the new Mile
 - **Response**: `200 OK`
 ```json
 {
-  "job_id": "uuid",
+  "job_id": 101,
   "applicant_count": 12,
   "competition_level": "medium",
   "competition_updated_at": "timestamp"

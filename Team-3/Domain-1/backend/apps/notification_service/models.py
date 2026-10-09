@@ -19,10 +19,12 @@ class Notification(models.Model):
         db_table = 'app"."notification'
 
 class AlertPreference(models.Model):
+    id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id")
     alert_type = models.CharField(max_length=50)
     channel = models.CharField(max_length=50)
     enabled = models.BooleanField(default=True)
+    match_threshold = models.FloatField(null=True, blank=True)
     quiet_start = models.TimeField(null=True, blank=True)
     quiet_end = models.TimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
