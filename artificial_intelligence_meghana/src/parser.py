@@ -4,12 +4,12 @@ import pdfplumber
 import docx
 
 def clean_text(text: str) -> str:
-    """Normalize whitespace and clean text."""
+    """Normalize line endings while preserving intentional whitespace and paragraph breaks."""
     if not text:
         return ""
-    # Normalize consecutive whitespaces to a single space, maintaining clean plain text
-    cleaned = re.sub(r'\s+', ' ', text)
+    cleaned = text.replace("\r\n", "\n").replace("\r", "\n")
     return cleaned.strip()
+
 
 def extract_text_from_pdf(pdf_source) -> str:
     """
@@ -34,7 +34,7 @@ def extract_text_from_pdf(pdf_source) -> str:
 
         with pdfplumber.open(pdf_file) as pdf:
             if not pdf.pages:
-                raise ValueError("PDF file contains no pages.")
+                return ""
             
             for page in pdf.pages:
                 page_text = page.extract_text()
@@ -43,7 +43,7 @@ def extract_text_from_pdf(pdf_source) -> str:
                     
         full_text = "\n".join(extracted_text).strip()
         if not full_text:
-            raise ValueError("No readable text could be extracted from the PDF.")
+            return ""
             
         return clean_text(full_text)
         
@@ -81,7 +81,7 @@ def extract_text_from_docx(docx_source) -> str:
                 
         full_text = "\n".join(extracted_text).strip()
         if not full_text:
-            raise ValueError("No readable text could be extracted from the DOCX.")
+            return ""
             
         return clean_text(full_text)
         
