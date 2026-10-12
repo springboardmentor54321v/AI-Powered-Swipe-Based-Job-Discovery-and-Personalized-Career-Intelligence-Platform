@@ -1,11 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import {
   INITIAL_JOBS,
-  INITIAL_USER,
   INITIAL_APPLICATIONS,
   INITIAL_RECOMMENDATIONS,
-  INITIAL_NOTIFICATIONS,
-  MOCK_RESUME_ANALYSIS
 } from "../utils/mockData";
 import {
   INITIAL_RECRUITER_PROFILE,
@@ -13,17 +10,12 @@ import {
   INITIAL_RECRUITER_APPLICANTS,
   RECRUITER_OVERVIEW_STATS
 } from "../utils/recruiterMockData";
-import {
-  INITIAL_ADMIN_PROFILE,
-  INITIAL_ADMIN_USERS,
-  INITIAL_ADMIN_RECRUITERS,
-  INITIAL_ADMIN_JOBS,
-  INITIAL_ADMIN_APPLICATIONS,
-  ADMIN_PLATFORM_STATS,
-  ADMIN_ACTIVITY_CHART
-} from "../utils/adminMockData";
+import { adminService } from "../services/adminService";
 import { recordSwipe, getSwipeHistory, undoSwipe } from "../services/swipeService";
 import confetti from "canvas-confetti";
+
+import { authService } from "../services/authService";
+import { notificationService, toUiNotification } from "../services/notificationService";
 
 export const AppContext = createContext();
 
@@ -56,14 +48,20 @@ export function AppProvider({ children }) {
 
   // 1. User & Authentication
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.USER);
-    return saved ? JSON.parse(saved) : INITIAL_USER;
-  });
+  const saved = localStorage.getItem(
+    STORAGE_KEYS.USER
+  );
+
+  return saved
+    ? JSON.parse(saved)
+    : null;
+});
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.AUTH);
-    return saved ? JSON.parse(saved) : true; // Default true for seamless demo
-  });
+  return Boolean(
+    localStorage.getItem("swipex_access_token")
+  );
+});
 
   // 2. Recruiter States
   const [recruiterProfile, setRecruiterProfile] = useState(() => {
@@ -82,32 +80,14 @@ export function AppProvider({ children }) {
   });
 
   // 3. Admin States
-  const [adminUsers, setAdminUsers] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ADMIN_USERS);
-    return saved ? JSON.parse(saved) : INITIAL_ADMIN_USERS;
-  });
+  // Admin data comes from the database through /admin/* (loaded when an ADMIN is signed in)
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [adminRecruiters, setAdminRecruiters] = useState([]);
+  const [adminJobs, setAdminJobs] = useState([]);
+  const [adminApplications, setAdminApplications] = useState([]);
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminError, setAdminError] = useState("");
 
-  const [adminRecruiters, setAdminRecruiters] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ADMIN_RECRUITERS);
-    return saved ? JSON.parse(saved) : INITIAL_ADMIN_RECRUITERS;
-  });
-
-  const [adminJobs, setAdminJobs] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ADMIN_JOBS);
-    return saved ? JSON.parse(saved) : INITIAL_ADMIN_JOBS;
-  });
-
-  const [adminApplications, setAdminApplications] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ADMIN_APPLICATIONS);
-    return saved ? JSON.parse(saved) : INITIAL_ADMIN_APPLICATIONS;
-  });
-
-  const [adminProfile, setAdminProfile] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ADMIN_PROFILE);
-    return saved ? JSON.parse(saved) : INITIAL_ADMIN_PROFILE;
-  });
-
-  // 2. Saved Jobs
   const [savedJobs, setSavedJobs] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.SAVED_JOBS);
     return saved ? JSON.parse(saved) : [INITIAL_JOBS[0], INITIAL_JOBS[2]];
@@ -132,15 +112,13 @@ export function AppProvider({ children }) {
   });
 
   // 5. Notifications
-  const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
-    return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
-  });
+  // Notifications come from the backend (job service) and are polled; nothing is mocked or cached locally.
+  const [notifications, setNotifications] = useState([]);
 
   // 6. Resume ATS Analysis
   const [resumeAnalysis, setResumeAnalysis] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RESUME_ANALYSIS);
-    return saved ? JSON.parse(saved) : MOCK_RESUME_ANALYSIS;
+    return saved ? JSON.parse(saved) : null;
   });
 
   // 7. Search and Filter state
@@ -149,6 +127,7 @@ export function AppProvider({ children }) {
   const [filters, setFilters] = useState({
     companyType: "All",
     jobType: "All",
+    workMode: "All",
     experienceLevel: "All",
     location: "All",
     competition: "All",
@@ -157,6 +136,8 @@ export function AppProvider({ children }) {
     isInternship: false,
     isFresherFriendly: false,
     isNewlyFounded: false,
+    recentlyPosted: false,
+    lowCompetition: false,
     selectedSkill: "All"
   });
 
@@ -174,9 +155,9 @@ export function AppProvider({ children }) {
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
   }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(isAuthenticated));
-  }, [isAuthenticated]);
+  // useEffect(() => {
+  //   localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(isAuthenticated));
+  // }, [isAuthenticated]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SAVED_JOBS, JSON.stringify(savedJobs));
@@ -195,10 +176,6 @@ export function AppProvider({ children }) {
   }, [applications]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
-  }, [notifications]);
-
-  useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.RESUME_ANALYSIS, JSON.stringify(resumeAnalysis));
   }, [resumeAnalysis]);
 
@@ -214,26 +191,6 @@ export function AppProvider({ children }) {
     localStorage.setItem(STORAGE_KEYS.RECRUITER_APPLICANTS, JSON.stringify(recruiterApplicants));
   }, [recruiterApplicants]);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ADMIN_USERS, JSON.stringify(adminUsers));
-  }, [adminUsers]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ADMIN_RECRUITERS, JSON.stringify(adminRecruiters));
-  }, [adminRecruiters]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ADMIN_JOBS, JSON.stringify(adminJobs));
-  }, [adminJobs]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ADMIN_APPLICATIONS, JSON.stringify(adminApplications));
-  }, [adminApplications]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ADMIN_PROFILE, JSON.stringify(adminProfile));
-  }, [adminProfile]);
-
   // Toast trigger
   const addToast = useCallback((message, type = "success") => {
     const id = Date.now() + Math.random().toString(36).substring(2, 5);
@@ -248,8 +205,9 @@ export function AppProvider({ children }) {
   }, []);
 
   // Role switching
-  const switchRole = useCallback((newRole) => {
+  const switchRole = useCallback((newRole, { silent = false } = {}) => {
     setCurrentRole(newRole);
+    if (silent) return; // automatic URL sync (login/redirect) should not toast
     const roleLabels = {
       seeker: "Job Seeker",
       recruiter: "Recruiter",
@@ -258,55 +216,421 @@ export function AppProvider({ children }) {
     addToast(`Switched workspace to ${roleLabels[newRole] || newRole} Mode`, "info");
   }, [addToast]);
 
-  // Auth actions
-  const login = useCallback(
-    (credentials, password, rememberMe = true) => {
-      setIsAuthenticated(true);
-      if (typeof credentials === "object" && credentials !== null) {
-        setUser((prev) => ({
-          ...prev,
-          name: credentials.name || prev.name,
-          email: credentials.email || prev.email,
-          role: credentials.role || prev.role,
-          avatar: credentials.avatar || prev.avatar
-        }));
-        if (credentials.appRole) {
-          setCurrentRole(credentials.appRole);
-        }
-      } else {
-        setUser((prev) => ({
-          ...prev,
-          email: credentials || prev.email
-        }));
+
+  // ============================================================
+// LOGIN
+// Auth Service :5001
+// ============================================================
+
+  // Everything below belongs to ONE account: clear it when the account changes so a new user
+  // never inherits the previous user's swipes, saved jobs, applications or resume analysis.
+  const resetUserScopedState = useCallback(() => {
+    setSavedJobs([]);
+    setSwipedState({ skipped: [], liked: [] });
+    setSwipeHistory([]);
+    setApplications([]);
+    setNotifications([]);
+    setResumeAnalysis(null);
+    [STORAGE_KEYS.SAVED_JOBS, STORAGE_KEYS.SWIPED_JOBS, STORAGE_KEYS.SWIPE_HISTORY,
+     STORAGE_KEYS.APPLICATIONS, STORAGE_KEYS.RESUME_ANALYSIS].forEach((k) => localStorage.removeItem(k));
+  }, []);
+
+const login = useCallback(
+  async (credentials) => {
+    try {
+      // --------------------------------------------------------
+      // Support both:
+      // login({ email, password })
+      // and old:
+      // login(email, password)
+      // --------------------------------------------------------
+
+      const email =
+        typeof credentials === "object"
+          ? credentials.email
+          : credentials;
+
+      const password =
+        typeof credentials === "object"
+          ? credentials.password
+          : arguments[1];
+
+      if (!email || !password) {
+        throw new Error(
+          "Email and password are required."
+        );
       }
-      addToast("Welcome back to SwipeX!", "success");
-      return true;
-    },
-    [addToast]
-  );
+
+      // --------------------------------------------------------
+      // Call Auth Service
+      // --------------------------------------------------------
+
+      const res = await authService.login({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      console.log(
+        "LOGIN RESPONSE:",
+        res
+      );
+
+      // --------------------------------------------------------
+      // Validate response
+      // --------------------------------------------------------
+
+      if (
+        !res ||
+        !res.access_token ||
+        !res.refresh_token ||
+        !res.user
+      ) {
+        throw new Error(
+          "Invalid login response from authentication service."
+        );
+      }
+
+      // --------------------------------------------------------
+      // Store JWT
+      // --------------------------------------------------------
+
+      localStorage.setItem(
+        "swipex_access_token",
+        res.access_token
+      );
+
+      localStorage.setItem(
+        "swipex_refresh_token",
+        res.refresh_token
+      );
+
+      // --------------------------------------------------------
+      // Get actual backend user
+      // --------------------------------------------------------
+
+      const loggedInUser = {
+        ...res.user,
+        role: String(
+          res.user.role || "JOB_SEEKER"
+        ).toUpperCase(),
+      };
+
+      console.log(
+        "LOGGED IN USER:",
+        loggedInUser
+      );
+
+      console.log(
+        "LOGGED IN ROLE:",
+        loggedInUser.role
+      );
+
+      // --------------------------------------------------------
+      // Update React state
+      // --------------------------------------------------------
+
+      resetUserScopedState();
+      setUser(loggedInUser);
+
+      setIsAuthenticated(true);
+
+      // Keep currentRole synchronized with backend role
+      if (
+        loggedInUser.role === "RECRUITER"
+      ) {
+        setCurrentRole("recruiter");
+      } else if (
+        loggedInUser.role === "ADMIN"
+      ) {
+        setCurrentRole("admin");
+      } else {
+        setCurrentRole("seeker");
+      }
+
+      // --------------------------------------------------------
+      // Persist user
+      // --------------------------------------------------------
+
+      localStorage.setItem(
+        "swipex_user",
+        JSON.stringify(loggedInUser)
+      );
+
+      // --------------------------------------------------------
+      // Toast
+      // --------------------------------------------------------
+
+      addToast(
+        `Welcome back, ${loggedInUser.name || "User"}!`,
+        "success"
+      );
+
+      // IMPORTANT:
+      // Return the actual USER, not true
+      return loggedInUser;
+
+    } catch (error) {
+      console.error(
+        "Login error:",
+        error
+      );
+
+      addToast(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Invalid email or password",
+        "error"
+      );
+
+      throw error;
+    }
+  },
+  [addToast, resetUserScopedState]
+);
+
+  // Auth actions
+//   const login = useCallback(
+//   async (credentials) => {
+//     try {
+//       const response =
+//         await authService.login({
+//           email: credentials.email,
+//           password: credentials.password,
+//         });
+
+//       if (!response.success) {
+//         throw new Error(
+//           response.message ||
+//           "Login failed"
+//         );
+//       }
+
+//       localStorage.setItem(
+//         "swipex_access_token",
+//         response.access_token
+//       );
+
+//       localStorage.setItem(
+//         "swipex_refresh_token",
+//         response.refresh_token
+//       );
+
+//       localStorage.setItem(
+//         "swipex_user",
+//         JSON.stringify(response.user)
+//       );
+
+//       setUser(response.user);
+//       setIsAuthenticated(true);
+
+//       const role =
+//         String(response.user.role || "")
+//           .toUpperCase();
+
+//       if (role === "RECRUITER") {
+//         setCurrentRole("recruiter");
+//       } else if (role === "ADMIN") {
+//         setCurrentRole("admin");
+//       } else {
+//         setCurrentRole("seeker");
+//       }
+
+//       addToast(
+//         "Welcome back to SwipeX!",
+//         "success"
+//       );
+//       console.log("role from backend:", response.user.role);
+
+//       return response.user;
+
+//     } catch (error) {
+
+//       const message =
+//         error.response?.data?.message ||
+//         error.message ||
+//         "Login failed";
+
+//       addToast(message, "error");
+
+//       throw error;
+//     }
+//   },
+//   [addToast]
+// );
 
   const signup = useCallback(
-    (formData) => {
-      setIsAuthenticated(true);
-      setUser((prev) => ({
-        ...prev,
-        name: formData.name || "Candidate",
-        email: formData.email,
-        skills: formData.skills ? formData.skills.split(",").map((s) => s.trim()) : prev.skills,
-        experienceLevel: formData.experienceLevel || prev.experienceLevel,
-        preferredJobType: formData.preferredJobType || prev.preferredJobType,
-        preferredLocation: formData.preferredLocation || prev.preferredLocation
-      }));
-      addToast("Account created successfully! Welcome to SwipeX.", "success");
-      return true;
-    },
-    [addToast]
-  );
+  async (formData) => {
+    try {
 
-  const logout = useCallback(() => {
-    setIsAuthenticated(false);
-    addToast("Logged out successfully.", "info");
-  }, [addToast]);
+      const skills = Array.isArray(formData.skills)
+        ? formData.skills
+        : typeof formData.skills === "string"
+          ? formData.skills
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [];
+
+      const response =
+        await authService.register({
+
+          name: formData.name,
+
+          email: formData.email,
+
+          password: formData.password,
+
+          role:
+            formData.accountType 
+            ||
+            "JOB_SEEKER",
+
+          phone:
+            formData.phone || null,
+
+          location:
+            formData.preferredLocation ||
+            formData.location ||
+            null,
+
+          desired_role:
+            formData.targetRole ||
+            formData.desiredRole ||
+            null,
+
+          experience:
+            formData.experienceLevel ||
+            formData.experience ||
+            null,
+
+          preferred_salary:
+            formData.preferredSalary ||
+            null,
+
+          company_name:
+            formData.companyName || null,
+
+          industry:
+            formData.industry || null,
+
+          company_size:
+            formData.companySize || null,
+
+          bio:
+            formData.bio ||
+            null,
+
+          skills,
+        });
+
+      if (!response.success) {
+        throw new Error(
+          response.message ||
+          "Registration failed"
+        );
+      }
+
+      localStorage.setItem(
+        "swipex_access_token",
+        response.access_token
+      );
+
+      localStorage.setItem(
+        "swipex_refresh_token",
+        response.refresh_token
+      );
+
+      localStorage.setItem(
+        "swipex_user",
+        JSON.stringify(response.user)
+      );
+
+      resetUserScopedState();
+      setUser(response.user);
+      setIsAuthenticated(true);
+
+      const role =
+        String(response.user.role || "")
+          .toUpperCase();
+
+      if (role === "RECRUITER") {
+        setCurrentRole("recruiter");
+      } else if (role === "ADMIN") {
+        setCurrentRole("admin");
+      } else {
+        setCurrentRole("seeker");
+      }
+
+      addToast(
+        "Account created successfully!",
+        "success"
+      );
+      console.log("role from backend:", response.user.role);
+
+      return response.user;
+
+    } catch (error) {
+
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Registration failed";
+
+      addToast(message, "error");
+
+      throw error;
+    }
+  },
+  [addToast, resetUserScopedState]
+);
+
+  const logout = useCallback(
+  async () => {
+
+    try {
+      if (
+        localStorage.getItem(
+          "swipex_access_token"
+        )
+      ) {
+        await authService.logout();
+      }
+    } catch (error) {
+      console.warn(
+        "Logout API failed:",
+        error
+      );
+    } finally {
+
+      localStorage.removeItem(
+        "swipex_access_token"
+      );
+
+      localStorage.removeItem(
+        "swipex_refresh_token"
+      );
+
+      localStorage.removeItem(
+        "swipex_user"
+      );
+
+      localStorage.removeItem(
+        "swipex_auth"
+      );
+
+      resetUserScopedState();
+      setUser(null);
+      setIsAuthenticated(false);
+      setCurrentRole("seeker");
+
+      addToast(
+        "Logged out successfully.",
+        "info"
+      );
+    }
+  },
+  [addToast, resetUserScopedState]
+);
 
   // Recruiter Operations
   const updateRecruiterProfile = useCallback((fields) => {
@@ -325,23 +649,6 @@ export function AppProvider({ children }) {
       ...jobData
     };
     setRecruiterJobs((prev) => [newJob, ...prev]);
-    // Also add to Admin Jobs list for consistency
-    setAdminJobs((prev) => [
-      {
-        id: newJob.id,
-        title: newJob.title,
-        company: newJob.company,
-        recruiter: recruiterProfile.name,
-        location: newJob.location,
-        salary: newJob.salaryRange,
-        status: newJob.status,
-        jobType: newJob.employmentType,
-        applicants: 0,
-        postedDate: newJob.postedDate,
-        verified: true
-      },
-      ...prev
-    ]);
     addToast(`Job posted: "${newJob.title}" is now published!`, "success");
     return newJob;
   }, [recruiterProfile, addToast]);
@@ -350,26 +657,11 @@ export function AppProvider({ children }) {
     setRecruiterJobs((prev) =>
       prev.map((job) => (job.id === id ? { ...job, ...updatedFields } : job))
     );
-    setAdminJobs((prev) =>
-      prev.map((job) =>
-        job.id === id
-          ? {
-              ...job,
-              title: updatedFields.title || job.title,
-              company: updatedFields.company || job.company,
-              location: updatedFields.location || job.location,
-              salary: updatedFields.salaryRange || job.salary,
-              status: updatedFields.status || job.status
-            }
-          : job
-      )
-    );
     addToast("Job updated successfully", "success");
   }, [addToast]);
 
   const deleteRecruiterJob = useCallback((id) => {
     setRecruiterJobs((prev) => prev.filter((job) => job.id !== id));
-    setAdminJobs((prev) => prev.filter((job) => job.id !== id));
     addToast("Job listing deleted", "info");
   }, [addToast]);
 
@@ -378,15 +670,6 @@ export function AppProvider({ children }) {
       prev.map((job) => {
         if (job.id === id) {
           const nextStatus = job.status === "Active" ? "Inactive" : "Active";
-          return { ...job, status: nextStatus };
-        }
-        return job;
-      })
-    );
-    setAdminJobs((prev) =>
-      prev.map((job) => {
-        if (job.id === id) {
-          const nextStatus = job.status === "Active" ? "Deactivated" : "Active";
           return { ...job, status: nextStatus };
         }
         return job;
@@ -411,66 +694,117 @@ export function AppProvider({ children }) {
     addToast(`Candidate status changed to: ${newStatus}`, "success");
   }, [addToast]);
 
-  // Admin Operations
+  // ---------------------------------------------------------------------------------------------
+  // Admin console: every action calls the real /admin/* API, then reloads the lists.
+  // ---------------------------------------------------------------------------------------------
+  const isAdminUser = Boolean(isAuthenticated && user && String(user.role || "").toUpperCase() === "ADMIN");
+
+  const refreshAdminData = useCallback(async () => {
+    if (!isAdminUser) return;
+    setAdminLoading(true);
+    try {
+      const [users, recruiters, jobs, apps] = await Promise.all([
+        adminService.users(),
+        adminService.recruiters(),
+        adminService.jobs(),
+        adminService.applications(),
+      ]);
+      setAdminUsers(users);
+      setAdminRecruiters(recruiters);
+      setAdminJobs(jobs);
+      setAdminApplications(apps);
+      setAdminError("");
+    } catch (error) {
+      setAdminError(error?.response?.data?.message || "Could not load admin data.");
+    } finally {
+      setAdminLoading(false);
+    }
+  }, [isAdminUser]);
+
+  useEffect(() => {
+    if (!isAdminUser) {
+      setAdminUsers([]); setAdminRecruiters([]); setAdminJobs([]); setAdminApplications([]);
+      return undefined;
+    }
+    refreshAdminData();
+    const timer = setInterval(refreshAdminData, 30000);
+    return () => clearInterval(timer);
+  }, [isAdminUser, refreshAdminData]);
+
+  const adminAction = useCallback(async (call, okMessage) => {
+    try {
+      await call();
+      addToast(okMessage, "success");
+      await refreshAdminData();
+      return true;
+    } catch (error) {
+      addToast(error?.response?.data?.message || "Action failed", "error");
+      return false;
+    }
+  }, [addToast, refreshAdminData]);
+
   const toggleUserStatus = useCallback((id) => {
-    setAdminUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === id) {
-          const nextStatus = u.status === "Active" ? "Suspended" : "Active";
-          return { ...u, status: nextStatus };
+    const target = adminUsers.find((u) => u.id === id);
+    if (!target) return Promise.resolve(false);
+    const next = target.status === "Active" ? "Suspended" : "Active";
+    return adminAction(() => adminService.updateUser(id, { status: next }),
+      next === "Suspended" ? "Account suspended" : "Account reactivated");
+  }, [adminUsers, adminAction]);
+
+  const deleteUser = useCallback(
+    (id) => adminAction(() => adminService.deleteUser(id), "User deleted"), [adminAction]);
+
+  const updateUserRole = useCallback(
+    (id, newRole) => adminAction(() => adminService.updateUser(id, { role: newRole }), `Role changed to ${newRole}`),
+    [adminAction]);
+
+  const updateRecruiterOrgStatus = useCallback(
+    (id, newStatus) => adminAction(() => adminService.updateRecruiter(id, newStatus), `Recruiter set to ${newStatus}`),
+    [adminAction]);
+
+  const updateAdminJobStatus = useCallback(
+    (id, newStatus) => adminAction(() => adminService.updateJob(id, newStatus), `Job set to ${newStatus}`),
+    [adminAction]);
+
+  const deleteAdminJob = useCallback(
+    (id) => adminAction(() => adminService.deleteJob(id), "Job deleted"), [adminAction]);
+
+  // The admin's identity is the signed-in account (no separate mock profile)
+  const adminProfile = useMemo(() => ({
+    name: user?.name || "Admin",
+    email: user?.email || "",
+    role: "Platform Administrator",
+    avatar: null,
+  }), [user]);
+
+  const updateAdminProfile = useCallback(async (fields) => {
+    try {
+      await authService.updateProfile?.({ name: fields.name });
+      setUser((prev) => (prev ? { ...prev, name: fields.name || prev.name } : prev));
+      addToast("Profile updated", "success");
+    } catch (error) {
+      addToast(error?.response?.data?.message || "Could not update profile", "error");
+    }
+  }, [addToast]);
+
+  // Save profile fields (skills included) to the auth service; recommendations use them immediately.
+  const updateUserProfile = useCallback(
+    async (fields) => {
+      try {
+        const res = await authService.updateProfile(fields);
+        if (res?.user) {
+          setUser(res.user);
+          localStorage.setItem("swipex_user", JSON.stringify(res.user));
         }
-        return u;
-      })
-    );
-    addToast("User status updated", "info");
-  }, [addToast]);
-
-  const deleteUser = useCallback((id) => {
-    setAdminUsers((prev) => prev.filter((u) => u.id !== id));
-    addToast("User removed from platform", "info");
-  }, [addToast]);
-
-  const updateUserRole = useCallback((id, newRole) => {
-    setAdminUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, role: newRole } : u))
-    );
-    addToast(`User role updated to ${newRole}`, "success");
-  }, [addToast]);
-
-  const updateRecruiterOrgStatus = useCallback((id, newStatus) => {
-    setAdminRecruiters((prev) =>
-      prev.map((rec) => (rec.id === id ? { ...rec, status: newStatus } : rec))
-    );
-    addToast(`Recruiter account status set to ${newStatus}`, "info");
-  }, [addToast]);
-
-  const updateAdminJobStatus = useCallback((id, newStatus) => {
-    setAdminJobs((prev) =>
-      prev.map((j) => (j.id === id ? { ...j, status: newStatus } : j))
-    );
-    setRecruiterJobs((prev) =>
-      prev.map((j) =>
-        j.id === id
-          ? {
-              ...j,
-              status: newStatus === "Deactivated" ? "Inactive" : newStatus === "Rejected" ? "Inactive" : newStatus
-            }
-          : j
-      )
-    );
-    addToast(`Job status set to ${newStatus}`, "info");
-  }, [addToast]);
-
-  const deleteAdminJob = useCallback((id) => {
-    setAdminJobs((prev) => prev.filter((j) => j.id !== id));
-    setRecruiterJobs((prev) => prev.filter((j) => j.id !== id));
-    addToast("Job listing deleted by admin", "info");
-  }, [addToast]);
-
-  const updateAdminProfile = useCallback((fields) => {
-    setAdminProfile((prev) => ({ ...prev, ...fields }));
-    addToast("Admin settings updated", "success");
-  }, [addToast]);
+        addToast("Profile updated successfully", "success");
+        return true;
+      } catch (error) {
+        addToast(error?.response?.data?.message || "Could not update your profile", "error");
+        return false;
+      }
+    },
+    [addToast]
+  );
 
   const updateProfile = useCallback(
     (updatedFields) => {
@@ -665,24 +999,62 @@ export function AppProvider({ children }) {
     [applications, addToast]
   );
 
-  // Notification management
+  // Notification management (backend-backed)
+  const knownNotificationIds = React.useRef(null);
+
+  const refreshNotifications = useCallback(async () => {
+    if (!localStorage.getItem("swipex_access_token")) return;
+    try {
+      const { notifications: list } = await notificationService.list({ limit: 50 });
+      const mapped = list.map(toUiNotification);
+      // toast anything that arrived since the last poll (not on the first load)
+      if (knownNotificationIds.current) {
+        mapped
+          .filter((n) => !n.read && !knownNotificationIds.current.has(n.id))
+          .slice(0, 3)
+          .forEach((n) => addToast(`${n.title}: ${n.message}`, "info"));
+      }
+      knownNotificationIds.current = new Set(mapped.map((n) => n.id));
+      setNotifications(mapped);
+    } catch {
+      /* offline: keep what we have */
+    }
+  }, [addToast]);
+
+  useEffect(() => {
+    knownNotificationIds.current = null;
+    if (!isAuthenticated || !user?.id) {
+      setNotifications([]);
+      return undefined;
+    }
+    refreshNotifications();
+    const timer = setInterval(refreshNotifications, 15000);
+    const onFocus = () => refreshNotifications();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [isAuthenticated, user?.id, refreshNotifications]);
+
   const markNotificationRead = useCallback((id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  }, []);
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    notificationService.markRead(id).catch(() => refreshNotifications());
+  }, [refreshNotifications]);
 
   const markAllNotificationsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    notificationService.markAllRead().catch(() => refreshNotifications());
     addToast("All notifications marked as read", "info");
-  }, [addToast]);
+  }, [addToast, refreshNotifications]);
 
   const clearNotification = useCallback(
     (id) => {
       setNotifications((prev) => prev.filter((n) => n.id !== id));
+      notificationService.remove(id).catch(() => refreshNotifications());
       addToast("Notification dismissed", "info");
     },
-    [addToast]
+    [addToast, refreshNotifications]
   );
 
   const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
@@ -694,6 +1066,7 @@ export function AppProvider({ children }) {
     setFilters({
       companyType: "All",
       jobType: "All",
+      workMode: "All",
       experienceLevel: "All",
       location: "All",
       competition: "All",
@@ -702,6 +1075,8 @@ export function AppProvider({ children }) {
       isInternship: false,
       isFresherFriendly: false,
       isNewlyFounded: false,
+      recentlyPosted: false,
+      lowCompetition: false,
       selectedSkill: "All"
     });
     addToast("Filters reset to default", "info");
@@ -745,8 +1120,9 @@ export function AppProvider({ children }) {
         adminApplications,
         adminProfile,
         updateAdminProfile,
-        ADMIN_PLATFORM_STATS,
-        ADMIN_ACTIVITY_CHART,
+        adminLoading,
+        adminError,
+        refreshAdminData,
 
         // Job Seeker State & Actions (Preserved 100%)
         savedJobs,
@@ -769,6 +1145,8 @@ export function AppProvider({ children }) {
         clearNotification,
         resumeAnalysis,
         setResumeAnalysis,
+        updateUserProfile,
+        refreshNotifications,
         searchQuery,
         setSearchQuery,
         activeFilterPill,

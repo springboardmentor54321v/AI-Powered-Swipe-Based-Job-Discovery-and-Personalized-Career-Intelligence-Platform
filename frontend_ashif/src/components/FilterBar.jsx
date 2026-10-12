@@ -1,96 +1,288 @@
 import React from "react";
-import { useApp } from "../context/AppContext";
+
 import {
-  Sparkles,
-  Building2,
-  Rocket,
+  Layers,
   Globe2,
   GraduationCap,
   Briefcase,
   UserCheck,
-  TrendingDown,
   Clock,
-  Layers
+  Zap,
 } from "lucide-react";
 
+import { useApp } from "../context/AppContext";
+
+
+// ============================================================
+// FILTER PILLS
+// ============================================================
+
 export const FILTER_PILLS = [
-  { id: "All", label: "All Roles", icon: Layers },
-  { id: "MNC", label: "MNCs", icon: Building2 },
-  { id: "Startup", label: "Startups", icon: Rocket },
-  { id: "Newly Founded", label: "Newly Founded", icon: Sparkles },
-  { id: "Remote", label: "Remote", icon: Globe2 },
-  { id: "Internship", label: "Internships", icon: GraduationCap },
-  { id: "Full Time", label: "Full Time", icon: Briefcase },
-  { id: "Fresher Friendly", label: "Fresher Friendly", icon: UserCheck },
-  { id: "Low Competition", label: "Low Competition", icon: TrendingDown },
-  { id: "Recently Posted", label: "Recently Posted", icon: Clock }
+  {
+    id: "All",
+    label: "All Roles",
+    icon: Layers,
+  },
+  {
+    id: "Remote",
+    label: "Remote",
+    icon: Globe2,
+  },
+  {
+    id: "Internship",
+    label: "Internships",
+    icon: GraduationCap,
+  },
+  {
+    id: "Full Time",
+    label: "Full Time",
+    icon: Briefcase,
+  },
+  {
+    id: "Fresher Friendly",
+    label: "Fresher",
+    icon: UserCheck,
+  },
+  {
+    id: "Recently Posted",
+    label: "Recent",
+    icon: Clock,
+  },
+  {
+    id: "Low Competition",
+    label: "Low competition",
+    icon: Zap,
+  },
 ];
 
+
+// ============================================================
+// FILTER BAR
+// ============================================================
+
 export function FilterBar() {
-  const { activeFilterPill, setActiveFilterPill, setFilters } = useApp();
+  const {
+    activeFilterPill,
+    setActiveFilterPill,
+    setFilters,
+  } = useApp();
+
+
+  // ==========================================================
+  // HANDLE FILTER
+  // ==========================================================
 
   const handlePillClick = (pillId) => {
+
     setActiveFilterPill(pillId);
-    
-    // Sync to filters state
+
+
+    // --------------------------------------------------------
+    // ALL
+    // --------------------------------------------------------
+
     if (pillId === "All") {
-      setFilters((prev) => ({
-        ...prev,
-        companyType: "All",
+
+      setFilters((previous) => ({
+        ...previous,
+
+        location: "All",
         jobType: "All",
+        workMode: "All",
+        experienceLevel: "All",
+
+        selectedSkill: "All",
+
         isRemote: false,
         isInternship: false,
         isFresherFriendly: false,
-        isNewlyFounded: false,
-        competition: "All"
+        recentlyPosted: false,
+        lowCompetition: false,
       }));
-    } else if (pillId === "MNC") {
-      setFilters((prev) => ({ ...prev, companyType: "MNC" }));
-    } else if (pillId === "Startup") {
-      setFilters((prev) => ({ ...prev, companyType: "Startup" }));
-    } else if (pillId === "Newly Founded") {
-      setFilters((prev) => ({ ...prev, isNewlyFounded: true, companyType: "Newly Founded" }));
-    } else if (pillId === "Remote") {
-      setFilters((prev) => ({ ...prev, isRemote: true }));
-    } else if (pillId === "Internship") {
-      setFilters((prev) => ({ ...prev, jobType: "Internship", isInternship: true }));
-    } else if (pillId === "Full Time") {
-      setFilters((prev) => ({ ...prev, jobType: "Full Time" }));
-    } else if (pillId === "Fresher Friendly") {
-      setFilters((prev) => ({ ...prev, isFresherFriendly: true }));
-    } else if (pillId === "Low Competition") {
-      setFilters((prev) => ({ ...prev, competition: "Low" }));
-    } else if (pillId === "Recently Posted") {
-      setActiveFilterPill(pillId);
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // REMOTE
+    // --------------------------------------------------------
+
+    if (pillId === "Remote") {
+
+      setFilters((previous) => ({
+        ...previous,
+
+        workMode: "Remote",
+        isRemote: true,
+      }));
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // INTERNSHIP
+    // --------------------------------------------------------
+
+    if (pillId === "Internship") {
+
+      setFilters((previous) => ({
+        ...previous,
+
+        jobType: "Internship",
+        isInternship: true,
+      }));
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // FULL TIME
+    // --------------------------------------------------------
+
+    if (pillId === "Full Time") {
+
+      setFilters((previous) => ({
+        ...previous,
+
+        jobType: "Full Time",
+        isInternship: false,
+      }));
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // FRESHER
+    // --------------------------------------------------------
+
+    if (pillId === "Fresher Friendly") {
+
+      setFilters((previous) => ({
+        ...previous,
+
+        isFresherFriendly: true,
+
+        experienceLevel:
+          previous.experienceLevel === "All"
+            ? "Fresher"
+            : previous.experienceLevel,
+      }));
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // RECENTLY POSTED
+    // --------------------------------------------------------
+
+    if (pillId === "Low Competition") {
+      setFilters((previous) => ({ ...previous, lowCompetition: true }));
+      return;
+    }
+
+    if (pillId === "Recently Posted") {
+
+      setFilters((previous) => ({
+        ...previous,
+
+        recentlyPosted: true,
+      }));
+
+      return;
     }
   };
 
+
+  // ==========================================================
+  // UI
+  // ==========================================================
+
   return (
     <div className="w-full overflow-x-auto no-scrollbar py-2">
+
       <div className="flex items-center gap-2 min-w-max px-1">
+
         {FILTER_PILLS.map((pill) => {
+
           const Icon = pill.icon;
-          const isActive = activeFilterPill === pill.id;
+
+          const isActive =
+            activeFilterPill === pill.id;
+
 
           return (
             <button
               key={pill.id}
               type="button"
-              onClick={() => handlePillClick(pill.id)}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
-                isActive
-                  ? "bg-emerald-600 text-white border-emerald-600 shadow-xs font-bold"
-                  : "bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-slate-200"
-              }`}
+              onClick={() =>
+                handlePillClick(pill.id)
+              }
+              className={`
+                flex
+                items-center
+                gap-1.5
+                px-3
+                sm:px-3.5
+                py-1.5
+                rounded-xl
+                text-[11px]
+                sm:text-xs
+                font-semibold
+                whitespace-nowrap
+                transition-all
+                border
+
+                ${
+                  isActive
+                    ? `
+                      bg-brand-600
+                      text-white
+                      border-brand-600
+                      shadow-sm
+                    `
+                    : `
+                      bg-white dark:bg-zinc-900
+                      text-slate-600 dark:text-zinc-300
+                      border-slate-200 dark:border-zinc-800
+                      hover:bg-slate-50 dark:hover:bg-zinc-800/50
+                      hover:text-slate-900 dark:hover:text-zinc-50
+                    `
+                }
+              `}
             >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? "text-emerald-100" : "text-slate-500"}`} />
-              <span>{pill.label}</span>
+
+              <Icon
+                className={`
+                  w-3.5
+                  h-3.5
+
+                  ${
+                    isActive
+                      ? "text-brand-100"
+                      : "text-slate-500 dark:text-zinc-400"
+                  }
+                `}
+              />
+
+              <span>
+                {pill.label}
+              </span>
+
             </button>
           );
+
         })}
+
       </div>
+
     </div>
   );
 }
+
 
 export default FilterBar;
