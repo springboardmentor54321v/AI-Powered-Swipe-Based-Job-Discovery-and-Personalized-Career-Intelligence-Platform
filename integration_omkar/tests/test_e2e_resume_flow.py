@@ -1,0 +1,74 @@
+"""
+test_e2e_resume_flow.py - Live End-to-End System Tests for Resume & ATS Service via Gateway.
+
+Validates:
+Upload Resume -> Extract Skills -> Calculate ATS Score -> Retrieve Recommendations.
+"""
+import io
+import pytest
+import httpx
+
+def test_resume_upload_ats_score_and_recommendations(gateway_url, test_job_seeker):
+    headers = test_job_seeker["headers"]
+
+    # 1. Upload a text-based resume via Gateway
+    resume_content = (
+        "Experienced Software Engineer with proficiency in Python, FastAPI, Docker, "
+        "PostgreSQL, React, and Git. Built scalable microservice backends and REST APIs."
+    )
+    files = {
+        "file": ("test_resume.txt", io.BytesIO(resume_content.encode("utf-8")), "text/plain")
+    }
+
+    # Remove Content-Type header so httpx sets multipart/form-data with proper boundary
+    upload_headers = {k: v for k, v in headers.items() if k.lower() != "content-type"}
+
+    upload_res = httpx.post(
+        f"{gateway_url}/api/v1/resumes/upload",
+        files=files,
+        headers=upload_headers,
+        timeout=10.0
+    )
+    assert upload_res.status_code == 200 or upload_res.status_code == 201, (
+        f"Resume upload failed: {upload_res.status_code} - {upload_res.text}"
+    )
+    upload_data = upload_res.json()
+    assert "resume_id" in upload_data, "Response missing resume_id"
+    assert "parsed_skills" in upload_data, "Response missing parsed_skills"
+    resume_id = upload_data["resume_id"]
+    assert isinstance(upload_data["parsed_skills"], list)
+
+    # 2. Get a valid job_id from Job service via Gateway
+    jobs_res = httpx.get(f"{gateway_url}/api/v1/jobs?page_size=1", headers=headers, timeout=5.0)
+    assert jobs_res.status_code == 200
+    job_id = jobs_res.json()[0]["job_id"]
+
+    # 3. Calculate ATS match score via Gateway (M3 contract: POST /api/v1/ats/score)
+    ats_res = httpx.post(
+        f"{gateway_url}/api/v1/ats/score",
+        json={"resume_id": resume_id, "job_id": job_id},
+        headers=headers,
+        timeout=10.0
+    )
+    assert ats_res.status_code == 200, f"ATS score failed: {ats_res.status_code} - {ats_res.text}"
+    ats_data = ats_res.json()
+    assert "match_score" in ats_data or "ats_score" in ats_data
+    assert "missing_keywords" in ats_data or "missing_skills" in ats_data or "suggestions" in ats_data
+
+    # 4. Fetch job recommendations via Gateway.
+    #    The Matching Engine keys recommendations off the caller: pass user_id
+    #    (the engine's contract) as a query param; nothing may be omitted.
+    me_res = httpx.get(f"{gateway_url}/api/v1/auth/me", headers=headers, timeout=5.0)
+    assert me_res.status_code == 200, f"/auth/me failed: {me_res.status_code} - {me_res.text}"
+    user_id = me_res.json()["user_id"]
+
+    recs_res = httpx.get(
+        f"{gateway_url}/api/v1/recommendations",
+        params={"user_id": user_id},
+        headers=headers,
+        timeout=5.0
+    )
+    assert recs_res.status_code == 200, f"Recommendations failed: {recs_res.status_code} - {recs_res.text}"
+    recs_data = recs_res.json()
+    assert isinstance(recs_data["recommendations"], list)
+    assert recs_data.get("generated_by") in ("heuristic-v0", "semantic-swipe-v1")

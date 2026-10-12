@@ -1,0 +1,23 @@
+venv/
+__pycache__/
+*.pyc
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+.env
+.pytest_cache/
+node_modules/
+.vscode/
+.v/
+venv311/
+integration_omkar/.venv/
+# Secrets, certificates, databases & sensitive env configs (M4 Security Gate)
+.env.*
+!.env.example
+*.pem
+*.key
+*serviceAccount*.json
+*.sqlite*
+dist/
+AI-Powered-Swipe-Based-Job-Discovery-and-Personalized-Career-Intelligence-Platform/

@@ -1,0 +1,331 @@
+name: CI/CD - Milestone 4 Integration, QA & Deployment Gate
+
+on:
+  push:
+    branches:
+      - main
+      - 'Team-*'
+  pull_request:
+    branches:
+      - main
+      - 'Team-*'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. Lint Gate: Flake8 & ESLint
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint & Code Style Gate
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: integration_omkar/ci/constraints.txt
+
+      - name: Install Python Lint Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+
+      - name: Run Flake8 Code Inspection
+        run: |
+          python integration_omkar/scripts/run_suites.py --suite flake8 --no-docker
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend_boomika/package-lock.json
+
+      - name: Run ESLint
+        run: |
+          cd frontend_boomika
+          npm ci
+          npm run lint
+
+  # ---------------------------------------------------------------------------
+  # 2. Secret Scan Gate: Pinned Gitleaks CLI (Least Privilege, API-Free)
+  # ---------------------------------------------------------------------------
+  secret-scan:
+    name: Secret Leak Detection Gate (Gitleaks)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      GITLEAKS_VERSION: "8.24.3"
+      GITLEAKS_SHA256: "9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c"
+    steps:
+      - name: Check out repository (Full History)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install & Verify Pinned Gitleaks CLI
+        run: |
+          bash integration_omkar/scripts/install_gitleaks.sh
+
+      - name: Scan Git Commits for Leaked Secrets
+        run: |
+          CONFIG_ARGS=""
+          if [ -f ".gitleaks.toml" ]; then
+            CONFIG_ARGS="--config .gitleaks.toml"
+          fi
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Fetching base branch origin/${{ github.base_ref }} for PR commit range..."
+            git fetch origin ${{ github.base_ref }} || true
+            echo "Pull Request Scan: scanning commits in range origin/${{ github.base_ref }}..HEAD"
+            gitleaks detect --source . --redact --verbose --no-banner \
+              --log-opts="origin/${{ github.base_ref }}..HEAD" \
+              --report-path gitleaks-commits-report.json --report-format json \
+              $CONFIG_ARGS --exit-code 1
+          else
+            echo "Push / Workflow Dispatch / Scheduled Scan: scanning full git history"
+            gitleaks detect --source . --redact --verbose --no-banner \
+              --report-path gitleaks-commits-report.json --report-format json \
+              $CONFIG_ARGS --exit-code 1
+          fi
+
+      - name: Scan Working Tree for Uncommitted & Generated Files
+        run: |
+          CONFIG_ARGS=""
+          if [ -f ".gitleaks.toml" ]; then
+            CONFIG_ARGS="--config .gitleaks.toml"
+          fi
+
+          echo "Working tree scan: scanning active workspace files"
+          gitleaks detect --source . --no-git --redact --verbose --no-banner \
+            --report-path gitleaks-workingtree-report.json --report-format json \
+            $CONFIG_ARGS --exit-code 1
+
+      - name: Upload Redacted Gitleaks Scan Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gitleaks-secret-scan-report
+          path: gitleaks-*.json
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # 3. Frontend Quality Gate: Vitest, ESLint & Production Build
+  # ---------------------------------------------------------------------------
+  frontend:
+    name: Frontend Vitest & Production Build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend_boomika/package-lock.json
+
+      - name: Install npm dependencies
+        run: |
+          cd frontend_boomika
+          npm ci
+
+      - name: Run Frontend Tests (Vitest)
+        run: |
+          cd frontend_boomika
+          npm run test -- --run
+
+      - name: Build Production Frontend Artifact
+        run: |
+          cd frontend_boomika
+          npm run build
+
+  # ---------------------------------------------------------------------------
+  # 3. Backend Services & Unit Suites (Isolated Process Matrix)
+  # ---------------------------------------------------------------------------
+  backend-unit:
+    name: Unit Test Suite (${{ matrix.suite }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [backend, aiml, m3-schema, m4, integration-unit]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: integration_omkar/ci/constraints.txt
+
+      - name: Install Dependencies with Constraints
+        run: |
+          bash integration_omkar/scripts/install_ci_deps.sh
+          pip list
+
+      - name: Bootstrap Deterministic Test DB
+        run: |
+          python integration_omkar/scripts/bootstrap_test_db.py
+
+      - name: Execute Test Suite (${{ matrix.suite }})
+        run: |
+          python integration_omkar/scripts/run_suites.py --suite ${{ matrix.suite }} --no-docker
+
+  # ---------------------------------------------------------------------------
+  # 4. Infrastructure & Render Configuration Validation
+  # ---------------------------------------------------------------------------
+  render-config:
+    name: Render Blueprint & Compose Validation
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      - name: Validate render.yaml & Compose Config
+        run: |
+          pip install pyyaml
+          python integration_omkar/scripts/run_suites.py --suite render-config --no-docker
+
+      - name: Build Docker Images (Config & Build Dry-Run)
+        run: |
+          docker compose -f docker-compose.dev.yml build
+
+  # ---------------------------------------------------------------------------
+  # 5. Live Stack Integration, E2E, RBAC, Route Contract & Performance
+  # ---------------------------------------------------------------------------
+  integration:
+    name: Live Docker Stack E2E, RBAC & Contracts
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: integration_omkar/ci/constraints.txt
+
+      - name: Install Integration Test Runner Dependencies
+        run: |
+          bash integration_omkar/scripts/install_ci_deps.sh
+
+      - name: Spin Up Docker Dev Stack
+        run: |
+          docker compose -f docker-compose.dev.yml up --build -d --wait
+
+      - name: Await Stack Readiness & Database Verification
+        run: |
+          python integration_omkar/scripts/wait_for_stack.py
+
+      - name: Run Full Live Integration Test Suite
+        run: |
+          python integration_omkar/scripts/run_suites.py --suite integration-live
+
+      - name: Run Security & RBAC Verification
+        run: |
+          python integration_omkar/scripts/run_suites.py --suite security
+
+      - name: Run Latency & Concurrency Performance Benchmark
+        run: |
+          python integration_omkar/scripts/run_suites.py --suite perf
+
+      - name: Run Cold-Start Aware Smoke Test
+        run: |
+          python integration_omkar/scripts/run_suites.py --suite smoke
+
+      - name: Dump Container Logs on Failure
+        if: failure()
+        run: |
+          docker compose -f docker-compose.dev.yml logs
+
+      - name: Teardown Docker Stack
+        if: always()
+        run: |
+          docker compose -f docker-compose.dev.yml down -v
+
+  # ---------------------------------------------------------------------------
+  # 6. CI Execution Summary Gate
+  # ---------------------------------------------------------------------------
+  summary:
+    name: CI Pipeline Quality & Gate Summary
+    runs-on: ubuntu-24.04
+    needs: [lint, secret-scan, frontend, backend-unit, render-config, integration]
+    if: always()
+    steps:
+      - name: Evaluate Upstream Job Results
+        run: |
+          echo "=================================================================="
+          echo "                  SWIPEX CI PIPELINE RESULTS                      "
+          echo "=================================================================="
+          echo "Lint Gate:           ${{ needs.lint.result }}"
+          echo "Secret Scan Gate:    ${{ needs.secret-scan.result }}"
+          echo "Frontend Gate:       ${{ needs.frontend.result }}"
+          echo "Backend Units Gate:  ${{ needs.backend-unit.result }}"
+          echo "Render Config Gate:  ${{ needs.render-config.result }}"
+          echo "Live Integration:    ${{ needs.integration.result }}"
+          echo "=================================================================="
+
+          if [[ "${{ needs.lint.result }}" != "success" || \
+                "${{ needs.secret-scan.result }}" != "success" || \
+                "${{ needs.frontend.result }}" != "success" || \
+                "${{ needs.backend-unit.result }}" != "success" || \
+                "${{ needs.render-config.result }}" != "success" || \
+                "${{ needs.integration.result }}" != "success" ]]; then
+            echo "CI GATE FAILED: One or more required upstream jobs did not succeed."
+            exit 1
+          fi
+          echo "ALL CI GATES GREEN: Pipeline passed with zero defects."
+
+  # ---------------------------------------------------------------------------
+  # 7. Render Production Deployment Gate (Main Branch Only)
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Render Production Deployment & Verification
+    runs-on: ubuntu-24.04
+    needs: [summary]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      - name: Trigger Render Deploy Hooks
+        env:
+          RENDER_DEPLOY_HOOK_GATEWAY: ${{ secrets.RENDER_DEPLOY_HOOK_GATEWAY }}
+          RENDER_DEPLOY_HOOK_JOB: ${{ secrets.RENDER_DEPLOY_HOOK_JOB }}
+          RENDER_DEPLOY_HOOK_RESUME: ${{ secrets.RENDER_DEPLOY_HOOK_RESUME }}
+          RENDER_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
+        run: |
+          python integration_omkar/deploy/trigger_render_deploy.py
+
+      - name: Post-Deployment Production Smoke Test
+        run: |
+          python integration_omkar/scripts/smoke_test.py --base-url "${{ vars.RENDER_BASE_URL || 'https://swipex-auth-gateway.onrender.com' }}" --timeout 180

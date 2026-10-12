@@ -1,0 +1,456 @@
+export type UserRole = 'candidate' | 'recruiter' | 'admin';
+
+export interface User {
+  user_id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatar?: string;
+  profile_picture_url?: string;
+  title?: string;
+  tier?: string;
+  skills?: string[];
+  phone?: string;
+  location?: string;
+  bio?: string;
+  experience_years?: number;
+  resume_url?: string;
+  // Candidate-specific
+  current_title?: string;
+  expected_salary?: number;
+  job_type_preference?: string;
+  // Recruiter-specific
+  company_name?: string;
+  company_website?: string;
+  designation?: string;
+}
+
+export interface UserProfile {
+  user_id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  phone?: string;
+  location?: string;
+  bio?: string;
+  profile_picture_url?: string;
+  skills: string[];
+  experience_years?: number;
+  resume_url?: string;
+  // Candidate-specific
+  current_title?: string;
+  expected_salary?: number;
+  job_type_preference?: string;
+  // Recruiter-specific
+  company_name?: string;
+  company_website?: string;
+  designation?: string;
+}
+
+export interface UserProfileUpdate {
+  name?: string;
+  phone?: string;
+  location?: string;
+  bio?: string;
+  profile_picture_url?: string;
+  skills?: string[];
+  experience_years?: number;
+  resume_url?: string;
+  current_title?: string;
+  expected_salary?: number;
+  job_type_preference?: string;
+  company_name?: string;
+  company_website?: string;
+  designation?: string;
+}
+
+
+export interface AuthTokens {
+  access_token: string;
+  refresh_token: string;
+  role: UserRole;
+}
+
+export interface Job {
+  job_id: number | string;
+  title: string;
+  company: string;
+  location: string;
+  salary_range: string;
+  match_score?: number;
+  ats_match_score?: number;
+  is_hot_match?: boolean;
+  description: string;
+  skills_required?: string[];
+  skills?: string[];
+  company_info?: string;
+  company_overview?: string;
+  key_benefits?: string[];
+  benefits?: string[];
+  team_culture_quote?: string;
+  team_culture_author?: string;
+  culture_quote?: {
+    quote: string;
+    author: string;
+  };
+  primary_tools: string[];
+  posted_at: string;
+  company_logo?: string;
+  banner_image?: string;
+  type?: string;
+  work_environment?: 'Remote' | 'Hybrid' | 'On-site';
+  industry?: string;
+  salary_min?: number;
+  salary_max?: number;
+  tags?: string[];
+  match_badges?: string[];
+  // Milestone 2 Schema Additions
+  applicant_count?: number;
+  competition_level?: 'low' | 'medium' | 'high';
+  company_type?: 'MNC' | 'High-Growth Startup' | 'Seed-Stage';
+  experience_level?: 'Entry / Fresher' | 'Mid Level' | 'Senior' | 'Lead / Director';
+  is_fresher_friendly?: boolean;
+}
+
+export type SwipeDirection = 'left' | 'right' | 'up'; // left = pass, right = save / match
+
+export interface SwipeRecord {
+  swipe_id: string;
+  job_id: number | string;
+  direction: SwipeDirection;
+  swiped_at: string;
+}
+
+export interface FilterState {
+  industry: string;
+  salaryMin: number;
+  salaryMax: number;
+  workEnvironments: ('Remote' | 'Hybrid' | 'On-site')[];
+}
+
+export interface TimelineItem {
+  id: string;
+  type: 'interview' | 'submitted' | 'viewed' | 'offer';
+  title: string;
+  company?: string;
+  time: string;
+  description: string;
+  status?: string; // e.g. 'Active'
+}
+
+export interface RecommendedAction {
+  id: string;
+  icon: 'github' | 'summary' | 'skills' | 'portfolio';
+  title: string;
+  description: string;
+}
+
+export interface SavedJob {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  logoLetter: string;
+  logoBgColor: string;
+  savedAt: string;
+}
+
+export type ParseStatus = 'pending' | 'analyzing' | 'parsed' | 'failed';
+
+export interface SkillCategoryGroup {
+  category: string;
+  skills: string[];
+}
+
+export interface ResumeVersion {
+  id?: string;
+  resume_id: string;
+  version: number;
+  version_label?: string;
+  filename: string;
+  file_size?: string;
+  uploaded_at: string;
+  is_default: boolean;
+  parse_status: ParseStatus;
+  parsed_skills: string[];
+  extracted_skills?: string[];
+  parsed_text?: string;
+  skill_categories?: SkillCategoryGroup[];
+  overall_fit_score: number;
+  format_compatibility: 'High' | 'Medium' | 'Low';
+  experience_years?: number;
+  target_track?: string;
+  parse_error?: string;
+  resume_url?: string;
+}
+
+export interface ResumeData {
+  resume_id: string;
+  filename: string;
+  file_size?: string;
+  uploaded_at: string;
+  parsed_skills: string[];
+  overall_fit_score: number;
+  format_compatibility: 'High' | 'Medium' | 'Low';
+  status: 'uploading' | 'analyzing' | 'parsed' | 'error';
+  progress: number;
+}
+
+export interface MissingSkillItem {
+  skill: string;
+  importance: 'high' | 'medium' | 'low';
+  category?: string;
+}
+
+export interface ATSScoreResult {
+  match_score: number;
+  missing_keywords: string[];
+  generated_by: string;
+}
+
+export interface ATSScoreDetailResult {
+  resume_id: string;
+  job_id: string;
+  match_score: number;
+  is_interview_ready: boolean;
+  benchmark_threshold: number; // 80
+  matched_skills: string[];
+  missing_skills: MissingSkillItem[];
+  missing_keywords: string[];
+  sub_scores?: {
+    skills_match: number;
+    experience_fit: number;
+    work_environment_fit: number;
+  };
+  generated_by: string;
+  evaluated_at: string;
+}
+
+export interface AISuggestionItem {
+  id: string;
+  section: 'Experience' | 'Skills' | 'Summary' | 'Structure';
+  target_company?: string;
+  title: string;
+  current_text?: string;
+  recommended_text: string;
+  keywords_added?: string[];
+  estimated_score_boost: number;
+  reasoning?: string;
+}
+
+export interface AISuggestionsResult {
+  resume_id: string;
+  job_id: string;
+  suggestions: AISuggestionItem[];
+}
+
+export interface JobRecommendation {
+  job_id: string;
+  match_percentage: number;
+  generated_by: string;
+}
+
+export type JobStatus = 'active' | 'closed' | 'draft';
+
+export type PipelineStage = 'New' | 'Shortlisted' | 'Interviewing' | 'Offered' | 'Rejected';
+
+export interface RecruiterJob extends Job {
+  status?: JobStatus;
+  recruiter_id?: string;
+  applicant_count?: number;
+  job_type?: string;
+}
+
+export interface ApplicantCandidateProfile {
+  user_id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  location?: string;
+  bio?: string;
+  profile_picture_url?: string;
+  skills: string[];
+  resume_url?: string;
+  current_title?: string;
+  experience_years?: number;
+  expected_salary?: number;
+}
+
+export interface Applicant {
+  application_id: string;
+  job_id: string | number;
+  candidate_id: string;
+  candidate: ApplicantCandidateProfile;
+  stage: PipelineStage;
+  match_score: number;
+  applied_at: string;
+  updated_at?: string;
+  notes?: string;
+}
+
+export interface CreateJobInput {
+  title: string;
+  company: string;
+  location: string;
+  salary_min?: number;
+  salary_max?: number;
+  salary_range?: string;
+  work_environment?: 'Remote' | 'Hybrid' | 'On-site';
+  industry?: string;
+  job_type?: string;
+  description?: string;
+  skills?: string[];
+  status?: JobStatus;
+}
+
+export interface RecruiterAnalyticsData {
+  total_jobs: number;
+  active_jobs: number;
+  closed_jobs: number;
+  draft_jobs: number;
+  total_applicants: number;
+  stage_counts: Record<PipelineStage, number>;
+  avg_time_to_hire_days: number;
+  applicants_per_job?: { job_id: string | number; title: string; applicant_count: number }[];
+  applications_over_time?: { date: string; count: number }[];
+}
+
+export interface CandidateFunnelCounts {
+  applied: number;
+  shortlisted: number;
+  interviewing: number;
+  offered: number;
+  rejected: number;
+}
+
+export interface CandidateSkillGapItem {
+  skill: string;
+  count: number;
+  percentage: number;
+  learn_url?: string;
+}
+
+export interface CandidateScoreTrendItem {
+  date: string;
+  score: number;
+  job_title?: string;
+  company?: string;
+}
+
+export interface CandidateIndustryEngagementItem {
+  industry: string;
+  count: number;
+  percentage: number;
+}
+
+export interface CandidateActivityDayItem {
+  date: string;
+  day: string;
+  count: number;
+  level: number;
+}
+
+export interface CandidateAnalyticsData {
+  total_swipes: number;
+  applications_sent: number;
+  profile_view_rate: number;
+  profile_view_trend: string;
+  avg_match_score: number;
+  funnel_counts: CandidateFunnelCounts;
+  top_skills_gap: CandidateSkillGapItem[];
+  top_skills_matched?: string[];
+  score_trend: CandidateScoreTrendItem[];
+  top_industries: CandidateIndustryEngagementItem[];
+  activity_heatmap: CandidateActivityDayItem[];
+  generated_at?: string;
+  resume_performance?: import('./milestone4').ResumePerformanceItem[];
+  recommendation_insights?: import('./milestone4').RecommendationInsight[];
+  swipe_behavior?: import('./milestone4').SwipeBehaviorSummary;
+}
+
+export * from './milestone4';
+
+export interface AdminDashboardData {
+  total_users: number;
+  total_job_seekers: number;
+  total_recruiters: number;
+  total_jobs: number;
+  active_jobs: number;
+  total_applications: number;
+  pending_items: number;
+  stats?: {
+    total_users: number;
+    active_jobs: number;
+    total_applications: number;
+    avg_time_to_hire_days?: number;
+  };
+  overview?: Record<string, any>;
+  users_by_role?: Record<string, number>;
+  jobs_by_status?: Record<string, number>;
+  applications_by_stage?: Record<string, number>;
+}
+
+export interface AdminUserRecord {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  created_at?: string;
+  status?: string;
+}
+
+export interface AdminRecruiterRecord {
+  id: string;
+  name: string;
+  email: string;
+  company_name?: string;
+  jobs_posted_count?: number;
+  created_at?: string;
+}
+
+export interface AdminJobRecord {
+  id: string;
+  title: string;
+  company: string;
+  location?: string;
+  status: string;
+  posted_at?: string;
+  applicant_count?: number;
+}
+
+export interface AdminApplicationRecord {
+  id: string;
+  job_title: string;
+  company_name: string;
+  candidate_name: string;
+  status: string;
+  applied_at?: string;
+}
+
+export interface Company {
+  id: string;
+  company_id?: string;
+  name: string;
+  industry?: string;
+  company_type?: string;
+  about?: string;
+  location?: string;
+  size?: string;
+  is_newly_founded?: boolean;
+  aggregate_rating?: number;
+  reviews_count?: number;
+  website_url?: string;
+  active_jobs_count?: number;
+}
+
+export interface CompanyDetail extends Company {
+  jobs?: Job[];
+  active_jobs?: Job[];
+  overview?: string;
+  tech_stack?: string[];
+  culture_highlights?: string[];
+}
+
+
+
+
