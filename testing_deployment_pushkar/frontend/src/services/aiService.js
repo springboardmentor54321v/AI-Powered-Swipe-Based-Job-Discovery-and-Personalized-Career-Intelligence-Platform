@@ -1,189 +1,71 @@
-import axios from "axios";
+import { http } from "./http";
 
-const AI_API_URL =
-  import.meta.env.VITE_AI_API_BASE_URL ||
-  "http://127.0.0.1:8000/api/v1";
-
-const aiApi = axios.create({
-  baseURL: AI_API_URL,
-  timeout: 30000,
-});
-
-aiApi.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("swipex_access_token");
-
-    if (token) {
-      config.headers = config.headers || {};
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
+/**
+ * AI features, all through the gateway:
+ *   resumes  -> /resumes/*   (resume-service parses via the AI service and stores in Postgres)
+ *   AI       -> /ai/*        (recommendations, swipe deck, ATS analysis; user comes from the JWT)
+ *
+ * mode: "heuristic" | "ml" | "hybrid"
+ */
 export const aiService = {
-  // ============================================================
-  // RESUME
-  // ============================================================
-
-  uploadResume: async (file, userId) => {
-    const formData = new FormData();
-
-    formData.append("file", file);
-
-    const response = await aiApi.post(
-      "/resume/upload",
-      formData,
-      {
-        params: userId ? { user_id: userId } : undefined,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-
-    return response.data;
-  },
-
-  getResume: async () => {
-    const response = await aiApi.get("/resume");
-
-    return response.data;
-  },
-
-  // Job-agnostic heuristic resume analysis (no job_id required)
-  getResumeAnalysis: async (resumeId) => {
-    const response = await aiApi.get(`/resume/${resumeId}/analysis`);
-
-    return response.data;
-  },
-
-  // ============================================================
-  // RECOMMENDATIONS
-  // ============================================================
-
-  getRecommendations: async (userId, resumeId) => {
-    if (!userId) {
-      throw new Error("getRecommendations requires a user_id.");
-    }
-
-    const response = await aiApi.get("/recommendations", {
-      params: {
-        user_id: userId,
-        ...(resumeId ? { resume_id: resumeId } : {}),
-      },
+  // ---------------------------------------------------------------- resume
+  uploadResume: async (file) => {
+    if (!file) throw new Error("Resume file is required.");
+    const form = new FormData();
+    form.append("file", file);
+    const { data } = await http.post("/resumes/upload", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 120000,
     });
-
-    return response.data;
+    const resume = data.resume || {};
+    return {
+      ...data,
+      resume,
+      db_id: resume.id,
+      resume_id: resume.external_resume_id || resume.id,
+      parsed_skills: resume.skills || [],
+    };
   },
 
-  // ============================================================
-  // ATS SCORE FOR A SPECIFIC JOB
-  // ============================================================
+  listResumes: async () => {
+    const { data } = await http.get("/resumes/");
+    return data.resumes || [];
+  },
 
-  getJobAtsScore: async (resumeId, jobId) => {
-    const response = await aiApi.get(
-      `/resume/${resumeId}/ats-score`,
-      {
-        params: {
-          job_id: jobId,
-        },
-      }
-    );
+  // Job-agnostic ATS analysis of one resume (uuid or numeric id)
+  getResumeAnalysis: async (resumeRef, mode = "hybrid") => {
+    const { data } = await http.get(`/ai/resume/${resumeRef}/analysis`, { params: { mode } });
+    return data;
+  },
 
-    return response.data;
+  // ATS score of a stored resume (numeric db id) against one job
+  getJobAtsScore: async (resumeDbId, jobId, mode = "hybrid") => {
+    const { data } = await http.post("/resumes/ats/score", {
+      resume_id: Number(resumeDbId),
+      job_id: Number(jobId),
+      mode,
+    });
+    return data.ats;
+  },
+
+  // ---------------------------------------------------------------- recommendations
+  getRecommendations: async ({ mode = "hybrid", limit = 50, excludeSeen = false } = {}) => {
+    const { data } = await http.get("/ai/recommendations", {
+      params: { mode, limit, exclude_seen: excludeSeen },
+    });
+    return data;
+  },
+
+  // Re-ranked swipe deck (unseen jobs, best first). Call again after every swipe.
+  getDeck: async ({ mode = "hybrid", limit = 40, timeout = 6000 } = {}) => {
+    const { data } = await http.get("/ai/deck", { params: { mode, limit }, timeout });
+    return data;
+  },
+
+  getEngineInfo: async () => {
+    const { data } = await http.get("/ai/engine");
+    return data;
   },
 };
 
 export default aiService;
-
-// import axios from "axios";
-
-// const AI_API_URL =
-//   import.meta.env.VITE_AI_API_BASE_URL ||
-//   "http://127.0.0.1:8000/api/v1";
-
-// const aiApi = axios.create({
-//   baseURL: AI_API_URL,
-//   timeout: 30000,
-// });
-
-// aiApi.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem("swipex_access_token");
-
-//     if (token) {
-//       config.headers = config.headers || {};
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
-
-// export const aiService = {
-//   // ============================================================
-//   // RESUME
-//   // ============================================================
-
-//   uploadResume: async (file) => {
-//     const formData = new FormData();
-
-//     formData.append("file", file);
-
-//     const response = await aiApi.post(
-//       "/resume/upload",
-//       formData,
-//       {
-//         headers: {
-//           "Content-Type": "multipart/form-data",
-//         },
-//       }
-//     );
-
-//     return response.data;
-//   },
-
-//   getResume: async () => {
-//     const response = await aiApi.get("/resume");
-
-//     return response.data;
-//   },
-
-//   // ============================================================
-//   // RECOMMENDATIONS
-//   // ============================================================
-
-//   getRecommendations: async () => {
-//     const response = await aiApi.get("/recommendations");
-
-//     return response.data;
-//   },
-
-//   // ============================================================
-//   // ATS SCORE FOR A SPECIFIC JOB
-//   // ============================================================
-
-//   getJobAtsScore: async (resumeId, jobId) => {
-//     const response = await aiApi.get(
-//       `/resume/${resumeId}/ats-score`,
-//       {
-//         params: {
-//           job_id: jobId,
-//         },
-//       }
-//     );
-
-//     return response.data;
-//   },
-
-//   getResumeAnalysis: async (resumeId) => {
-//   const response = await aiApi.get(`/resume/${resumeId}/analysis`);
-//   return response.data;
-// },
-// };
-
-// export default aiService;

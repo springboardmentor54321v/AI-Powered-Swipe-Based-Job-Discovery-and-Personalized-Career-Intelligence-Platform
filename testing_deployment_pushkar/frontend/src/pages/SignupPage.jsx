@@ -14,6 +14,8 @@ import {
   Chrome,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { API_BASE_URL } from "../services/http";
+import { aiService } from "../services/aiService";
 
 const ROLES = [
   {
@@ -132,6 +134,8 @@ export function SignupPage() {
     }
   };
 
+  const resumeFileRef = React.useRef(null);
+
   const handleResumeSelect = (e) => {
     const file = e.target.files?.[0];
 
@@ -170,6 +174,7 @@ export function SignupPage() {
       return;
     }
 
+    resumeFileRef.current = file;
     setFormData((prev) => ({
       ...prev,
       resumeName: file.name,
@@ -290,6 +295,16 @@ export function SignupPage() {
               : null,
         });
 
+      // Optional resume: upload it now that the account (and its token) exist. Skills typed above
+      // already power recommendations, so a failed upload never blocks signup.
+      if (selectedRole === "seeker" && resumeFileRef.current) {
+        try {
+          await aiService.uploadResume(resumeFileRef.current);
+        } catch (uploadError) {
+          addToast("Account created, but the resume could not be parsed. You can upload it later.", "info");
+        }
+      }
+
       redirectUser(createdUser);
     } catch (error) {
       console.error(
@@ -312,9 +327,7 @@ export function SignupPage() {
 
     setIsGoogleLoading(true);
 
-    const authBaseUrl =
-      import.meta.env.VITE_AUTH_API_BASE_URL ||
-      "http://127.0.0.1:5001/api/v1";
+    const authBaseUrl = API_BASE_URL;
 
     const accountRole =
       selectedRole === "recruiter"
@@ -331,19 +344,19 @@ export function SignupPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-xl bg-white rounded-3xl border border-slate-200 shadow-md p-8 sm:p-10 space-y-7 animate-in fade-in zoom-in-95 duration-200">
+      <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-md p-8 sm:p-10 space-y-7 animate-in fade-in zoom-in-95 duration-200">
 
         {/* Header */}
         <div className="text-center space-y-1.5">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-600 text-white font-bold text-xl shadow-xs mb-1">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600 text-white font-bold text-xl shadow-xs mb-1">
             SX
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
             Create Your SwipeX Account
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-sm mx-auto">
             Choose your account role and create your
             SwipeX workspace.
           </p>
@@ -351,11 +364,11 @@ export function SignupPage() {
 
         {/* Role Selection */}
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5 text-center">
+          <label className="block text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2.5 text-center">
             Choose Your Account Role
           </label>
 
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 p-1.5 bg-slate-50 border border-slate-200 rounded-2xl">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 p-1.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl">
             {ROLES.map((role) => {
               const Icon = role.icon;
 
@@ -372,19 +385,19 @@ export function SignupPage() {
                   }
                   className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-xl text-center transition-all ${
                     isSelected
-                      ? "bg-white text-slate-900 shadow-sm border border-slate-200/80 font-bold"
-                      : "text-slate-500 hover:text-slate-800 font-semibold"
+                      ? "bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 shadow-sm border border-slate-200/80 dark:border-zinc-800/80 font-bold"
+                      : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-100 font-semibold"
                   }`}
                 >
                   <div
                     className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                       isSelected
                         ? role.id === "recruiter"
-                          ? "bg-blue-50 text-blue-600"
+                          ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400"
                           : role.id === "admin"
-                          ? "bg-purple-50 text-purple-600"
-                          : "bg-emerald-50 text-emerald-600"
-                        : "bg-slate-100 text-slate-400"
+                          ? "bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                          : "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400"
+                        : "bg-slate-100 dark:bg-zinc-800 text-slate-400"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -405,24 +418,24 @@ export function SignupPage() {
 
         {/* Admin restriction */}
         {selectedRole === "admin" ? (
-          <div className="border-t border-slate-100 pt-6 space-y-6">
+          <div className="border-t border-slate-100 dark:border-zinc-800 pt-6 space-y-6">
 
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 text-center space-y-4">
+            <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 sm:p-8 text-center space-y-4">
 
-              <div className="w-12 h-12 rounded-2xl bg-purple-100 border border-purple-200/80 text-purple-700 mx-auto flex items-center justify-center shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-500/15 border border-purple-200/80 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 mx-auto flex items-center justify-center shadow-xs">
                 <ShieldCheck className="w-6 h-6" />
               </div>
 
               <div className="space-y-2 max-w-md mx-auto">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-purple-700">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
                   Admin Account
                 </h2>
 
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-zinc-50 leading-snug">
                   Admin accounts are created and managed by the platform administrator.
                 </h3>
 
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed">
                   Public registration is not available
                   for Admin accounts.
                 </p>
@@ -452,7 +465,7 @@ export function SignupPage() {
                 isLoading
               }
               id="btn-google-signup"
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 disabled:opacity-50 border border-slate-300 text-slate-800 rounded-xl text-xs sm:text-sm font-bold shadow-sm transition-all"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800/50 disabled:opacity-50 border border-slate-300 dark:border-zinc-700 text-slate-800 dark:text-zinc-100 rounded-xl text-xs sm:text-sm font-bold shadow-sm transition-all"
             >
               <Chrome className="w-4 h-4" />
 
@@ -464,9 +477,9 @@ export function SignupPage() {
             </button>
 
             <div className="relative flex items-center justify-center">
-              <div className="border-t border-slate-200 w-full" />
+              <div className="border-t border-slate-200 dark:border-zinc-800 w-full" />
 
-              <span className="bg-white px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 absolute">
+              <span className="bg-white dark:bg-zinc-900 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 absolute">
                 Or register with email
               </span>
             </div>
@@ -476,7 +489,7 @@ export function SignupPage() {
               onSubmit={handleSubmit}
               className="space-y-4"
             >
-              <div className="border-t border-slate-100 pt-3">
+              <div className="border-t border-slate-100 dark:border-zinc-800 pt-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3">
                   Enter {currentRoleData.label} Information
                 </span>
@@ -484,7 +497,7 @@ export function SignupPage() {
 
               {/* Name */}
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                   Full Name
                 </label>
 
@@ -499,14 +512,14 @@ export function SignupPage() {
                     placeholder="e.g. Pushkar Vishwakarma"
                     required
                     autoComplete="name"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                   {selectedRole === "recruiter"
                     ? "Work Email Address"
                     : "Email Address"}
@@ -527,14 +540,14 @@ export function SignupPage() {
                     }
                     required
                     autoComplete="email"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                   Create Password
                 </label>
 
@@ -550,7 +563,7 @@ export function SignupPage() {
                     minLength={8}
                     required
                     autoComplete="new-password"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
               </div>
@@ -561,7 +574,7 @@ export function SignupPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                         Target Role
                       </label>
 
@@ -571,12 +584,12 @@ export function SignupPage() {
                         value={formData.targetRole}
                         onChange={handleInputChange}
                         placeholder="e.g. Backend Developer"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                         Experience
                       </label>
 
@@ -584,7 +597,7 @@ export function SignupPage() {
                         name="experience"
                         value={formData.experience}
                         onChange={handleInputChange}
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50"
                       >
                         <option value="Fresher">
                           Fresher / 0 Years
@@ -607,7 +620,7 @@ export function SignupPage() {
 
                   {/* Skills */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                       Skills
                     </label>
 
@@ -617,7 +630,7 @@ export function SignupPage() {
                       value={formData.skills}
                       onChange={handleInputChange}
                       placeholder="Java, Spring Boot, React, SQL"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50"
                     />
 
                     <p className="text-[10px] text-slate-400 mt-1">
@@ -629,7 +642,7 @@ export function SignupPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                         Preferred Location
                       </label>
 
@@ -639,12 +652,12 @@ export function SignupPage() {
                         value={formData.preferredLocation}
                         onChange={handleInputChange}
                         placeholder="Bengaluru / Remote"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                         Preferred Salary
                       </label>
 
@@ -654,18 +667,18 @@ export function SignupPage() {
                         value={formData.preferredSalary}
                         onChange={handleInputChange}
                         placeholder="e.g. ₹6-10 LPA"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50"
                       />
                     </div>
                   </div>
 
                   {/* Resume */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                       Resume / CV
                     </label>
 
-                    <div className="relative border-2 border-dashed border-slate-200 hover:border-emerald-400 rounded-xl p-4 text-center bg-slate-50/50">
+                    <div className="relative border-2 border-dashed border-slate-200 dark:border-zinc-800 hover:border-brand-400 rounded-xl p-4 text-center bg-slate-50/50 dark:bg-zinc-950/50">
 
                       <input
                         type="file"
@@ -674,9 +687,9 @@ export function SignupPage() {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       />
 
-                      <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-600">
+                      <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-600 dark:text-zinc-300">
 
-                        <Upload className="w-4 h-4 text-emerald-600" />
+                        <Upload className="w-4 h-4 text-brand-600 dark:text-brand-400" />
 
                         <span>
                           {formData.resumeName ||
@@ -694,7 +707,7 @@ export function SignupPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                       Company Name
                     </label>
 
@@ -708,13 +721,13 @@ export function SignupPage() {
                         onChange={handleInputChange}
                         placeholder="e.g. TechCorp Global"
                         required
-                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900"
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
                       Company Size
                     </label>
 
@@ -722,7 +735,7 @@ export function SignupPage() {
                       name="companySize"
                       value={formData.companySize}
                       onChange={handleInputChange}
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50"
                     >
                       <option value="1-10">
                         1-10 Employees
@@ -756,7 +769,7 @@ export function SignupPage() {
                   isGoogleLoading
                 }
                 id="btn-signup-submit"
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-xs active:scale-98 transition-all mt-4"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-xs active:scale-98 transition-all mt-4"
               >
                 <span>
                   {isLoading
@@ -771,13 +784,13 @@ export function SignupPage() {
         )}
 
         {/* Footer */}
-        <div className="text-center pt-2 border-t border-slate-100">
-          <p className="text-xs text-slate-500">
+        <div className="text-center pt-2 border-t border-slate-100 dark:border-zinc-800">
+          <p className="text-xs text-slate-500 dark:text-zinc-400">
             Already have an account?{" "}
 
             <Link
               to={`/login?role=${selectedRole}`}
-              className="text-emerald-700 font-bold hover:underline"
+              className="text-brand-700 dark:text-brand-300 font-bold hover:underline"
             >
               Sign in as{" "}
               {currentRoleData.label}

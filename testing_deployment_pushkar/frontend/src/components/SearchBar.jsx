@@ -109,18 +109,18 @@ export function SearchBar({
           pr-28
           py-3
           sm:py-3.5
-          bg-white
+          bg-white dark:bg-zinc-900
           border
-          border-slate-200
+          border-slate-200 dark:border-zinc-800
           rounded-2xl
-          text-slate-900
+          text-slate-900 dark:text-zinc-50
           placeholder:text-slate-400
           text-xs
           sm:text-sm
           focus:outline-none
           focus:ring-2
-          focus:ring-emerald-500/20
-          focus:border-emerald-500
+          focus:ring-brand-500/20
+          focus:border-brand-500
           transition-all
           shadow-sm
         "
@@ -137,8 +137,8 @@ export function SearchBar({
             className="
               p-1.5
               text-slate-400
-              hover:text-slate-700
-              hover:bg-slate-100
+              hover:text-slate-700 dark:hover:text-zinc-200
+              hover:bg-slate-100 dark:hover:bg-zinc-800
               rounded-lg
               transition-colors
             "
@@ -161,16 +161,16 @@ export function SearchBar({
             px-2.5
             sm:px-3
             py-1.5
-            bg-slate-100
-            hover:bg-slate-200
-            text-slate-700
+            bg-slate-100 dark:bg-zinc-800
+            hover:bg-slate-200 dark:hover:bg-zinc-700
+            text-slate-700 dark:text-zinc-200
             rounded-xl
             text-[11px]
             sm:text-xs
             font-semibold
             transition-all
             border
-            border-slate-200
+            border-slate-200 dark:border-zinc-800
           "
           aria-label="Open job filters"
           title="Filter jobs"
@@ -191,8 +191,8 @@ export function SearchBar({
             justify-center
             w-8
             h-8
-            bg-emerald-600
-            hover:bg-emerald-700
+            bg-brand-600
+            hover:bg-brand-700
             text-white
             rounded-xl
             transition-all
@@ -322,18 +322,18 @@ export default SearchBar;
 //           pr-28
 //           py-3
 //           sm:py-3.5
-//           bg-white
+//           bg-white dark:bg-zinc-900
 //           border
-//           border-slate-200
+//           border-slate-200 dark:border-zinc-800
 //           rounded-2xl
-//           text-slate-900
+//           text-slate-900 dark:text-zinc-50
 //           placeholder:text-slate-400
 //           text-xs
 //           sm:text-sm
 //           focus:outline-none
 //           focus:ring-2
-//           focus:ring-emerald-500/20
-//           focus:border-emerald-500
+//           focus:ring-brand-500/20
+//           focus:border-brand-500
 //           transition-all
 //           shadow-sm
 //         "
@@ -350,8 +350,8 @@ export default SearchBar;
 //             className="
 //               p-1.5
 //               text-slate-400
-//               hover:text-slate-700
-//               hover:bg-slate-100
+//               hover:text-slate-700 dark:hover:text-zinc-200
+//               hover:bg-slate-100 dark:hover:bg-zinc-800
 //               rounded-lg
 //               transition-colors
 //             "
@@ -374,16 +374,16 @@ export default SearchBar;
 //             px-2.5
 //             sm:px-3
 //             py-1.5
-//             bg-slate-100
-//             hover:bg-slate-200
-//             text-slate-700
+//             bg-slate-100 dark:bg-zinc-800
+//             hover:bg-slate-200 dark:hover:bg-zinc-700
+//             text-slate-700 dark:text-zinc-200
 //             rounded-xl
 //             text-[11px]
 //             sm:text-xs
 //             font-semibold
 //             transition-all
 //             border
-//             border-slate-200
+//             border-slate-200 dark:border-zinc-800
 //           "
 //           aria-label="Open job filters"
 //           title="Filter jobs"
@@ -404,8 +404,8 @@ export default SearchBar;
 //             justify-center
 //             w-8
 //             h-8
-//             bg-emerald-600
-//             hover:bg-emerald-700
+//             bg-brand-600
+//             hover:bg-brand-700
 //             text-white
 //             rounded-xl
 //             transition-all
@@ -489,18 +489,18 @@ export default SearchBar;
 // //           pr-28
 // //           py-3
 // //           sm:py-3.5
-// //           bg-white
+// //           bg-white dark:bg-zinc-900
 // //           border
-// //           border-slate-200
+// //           border-slate-200 dark:border-zinc-800
 // //           rounded-2xl
-// //           text-slate-900
+// //           text-slate-900 dark:text-zinc-50
 // //           placeholder:text-slate-400
 // //           text-xs
 // //           sm:text-sm
 // //           focus:outline-none
 // //           focus:ring-2
-// //           focus:ring-emerald-500/20
-// //           focus:border-emerald-500
+// //           focus:ring-brand-500/20
+// //           focus:border-brand-500
 // //           transition-all
 // //           shadow-sm
 // //         "
@@ -517,8 +517,8 @@ export default SearchBar;
 // //             className="
 // //               p-1.5
 // //               text-slate-400
-// //               hover:text-slate-700
-// //               hover:bg-slate-100
+// //               hover:text-slate-700 dark:hover:text-zinc-200
+// //               hover:bg-slate-100 dark:hover:bg-zinc-800
 // //               rounded-lg
 // //               transition-colors
 // //             "
@@ -541,16 +541,16 @@ export default SearchBar;
 // //             px-2.5
 // //             sm:px-3
 // //             py-1.5
-// //             bg-slate-100
-// //             hover:bg-slate-200
-// //             text-slate-700
+// //             bg-slate-100 dark:bg-zinc-800
+// //             hover:bg-slate-200 dark:hover:bg-zinc-700
+// //             text-slate-700 dark:text-zinc-200
 // //             rounded-xl
 // //             text-[11px]
 // //             sm:text-xs
 // //             font-semibold
 // //             transition-all
 // //             border
-// //             border-slate-200
+// //             border-slate-200 dark:border-zinc-800
 // //           "
 // //           aria-label="Open job filters"
 // //           title="Filter jobs"
@@ -572,8 +572,8 @@ export default SearchBar;
 // //             justify-center
 // //             w-8
 // //             h-8
-// //             bg-emerald-600
-// //             hover:bg-emerald-700
+// //             bg-brand-600
+// //             hover:bg-brand-700
 // //             text-white
 // //             rounded-xl
 // //             transition-all

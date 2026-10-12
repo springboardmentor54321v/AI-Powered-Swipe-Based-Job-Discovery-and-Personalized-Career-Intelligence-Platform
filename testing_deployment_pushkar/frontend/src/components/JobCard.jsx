@@ -24,6 +24,7 @@ import {
 
 import { JobBadge } from "./JobBadge";
 import { MatchScore } from "./MatchScore";
+import { CompetitionBadge } from "./CompetitionBadge";
 
 // ============================================================
 // SWIPE CONFIGURATION
@@ -81,7 +82,7 @@ export function JobCard({
     job?.matchPercentage ?? job?.match_score ?? job?.matchScore ?? 0
   );
 
-  const applicantCount = job?.applicantCount ?? job?.applicants ?? 0;
+  const applicantCount = job?.applicant_count ?? job?.applicantCount ?? job?.applicants ?? 0;
 
   // Real backend fields, with old camelCase names kept as fallback
   // in case some other source (mock data, recommendations service)
@@ -187,7 +188,7 @@ export function JobCard({
 
     return (
       <motion.div
-        className="absolute inset-0 w-full h-full bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden pointer-events-none"
+        className="absolute inset-0 w-full h-full bg-white dark:bg-zinc-900 rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-zinc-800/90 shadow-sm overflow-hidden pointer-events-none"
         animate={{ scale, y: translateY }}
         transition={{ type: "spring", stiffness: 320, damping: 26 }}
         style={{ zIndex: 10 - stackIndex }}
@@ -196,7 +197,7 @@ export function JobCard({
         <div className="h-full p-4 sm:p-6 flex flex-col justify-between opacity-70">
           <div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-50 border border-slate-200/80 p-1 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/80 dark:border-zinc-800/80 p-1 flex items-center justify-center overflow-hidden shrink-0">
                 {job.logo ? (
                   <img
                     src={job.logo}
@@ -208,26 +209,26 @@ export function JobCard({
                 )}
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 truncate">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-brand-700 dark:text-brand-300 truncate">
                   {job.company || "Company"}
                 </p>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-zinc-50 truncate">
                   {job.title || "Job Opportunity"}
                 </h3>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2 mt-4">
-              <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-700 truncate">
+              <div className="p-2.5 bg-slate-50 dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800 text-xs text-slate-700 dark:text-zinc-200 truncate">
                 {isRemoteJob ? "Remote" : job.location || "Location"}
               </div>
-              <div className="p-2.5 bg-emerald-50/70 rounded-xl border border-emerald-100 text-xs font-bold text-emerald-800 truncate">
+              <div className="p-2.5 bg-brand-50/70 dark:bg-brand-500/10 rounded-xl border border-brand-100 dark:border-brand-500/20 text-xs font-bold text-brand-800 dark:text-brand-300 truncate">
                 {job.salary || "Salary"}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-100 dark:border-zinc-800">
             <span>{employmentType || "Full Time"}</span>
             <span>{experienceLevel || "Experience"}</span>
           </div>
@@ -241,40 +242,41 @@ export function JobCard({
   // ==========================================================
   return (
     <motion.div
-      ref={cardRef}
-      style={{
-        x,
-        rotate,
-        zIndex: 30,
-        touchAction: "pan-y",
-      }}
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.72}
-      dragMomentum={false}
-      onDragEnd={handleDragEnd}
-      layout
-      transition={{ type: "spring", stiffness: 450, damping: 28 }}
-      className="absolute inset-0 w-full h-full bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden select-none flex flex-col cursor-grab active:cursor-grabbing"
-      id={`job-card-${job.id}`}
-      tabIndex={0}
-      role="region"
-      aria-label={`${job.title} at ${job.company}`}
-    >
+  ref={cardRef}
+  style={{
+    x,
+    rotate,
+    zIndex: 30,
+    touchAction: "pan-y",
+  }}
+  drag="x"
+  dragConstraints={{ left: 0, right: 0 }}
+  dragElastic={0.72}
+  dragMomentum={false}
+  onDragEnd={handleDragEnd}
+  layout
+  transition={{ type: "spring", stiffness: 450, damping: 28 }}
+  className="absolute inset-0 w-full h-full bg-white dark:bg-zinc-900 rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-zinc-800/90 shadow-xl overflow-hidden select-none flex flex-col cursor-grab active:cursor-grabbing"
+  id={`job-card-${job.id}`}
+  data-testid="job-card"
+  tabIndex={0}
+  role="region"
+  aria-label={`${job.title} at ${job.company}`}
+>
       {/* ======================================================
           SWIPE OVERLAY INDICATORS
       ====================================================== */}
       <motion.div
         style={{ opacity: likeOpacity, scale: likeScale }}
-        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-40 pointer-events-none rotate-6 bg-emerald-600 text-white px-3 sm:px-4 py-1.5 rounded-xl font-extrabold text-xs sm:text-sm tracking-wider uppercase border-2 border-white shadow-lg flex items-center gap-1.5"
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-40 pointer-events-none rotate-6 bg-brand-600 text-white px-3 sm:px-4 py-1.5 rounded-xl font-extrabold text-xs sm:text-sm tracking-wider uppercase border-2 border-white dark:border-zinc-800 shadow-lg flex items-center gap-1.5"
       >
-        <Sparkles className="w-4 h-4 text-emerald-200" />
+        <Sparkles className="w-4 h-4 text-brand-200" />
         <span>Interested</span>
       </motion.div>
 
       <motion.div
         style={{ opacity: skipOpacity, scale: skipScale }}
-        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-40 pointer-events-none -rotate-6 bg-rose-500 text-white px-3 sm:px-4 py-1.5 rounded-xl font-extrabold text-xs sm:text-sm tracking-wider uppercase border-2 border-white shadow-lg flex items-center gap-1.5"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-40 pointer-events-none -rotate-6 bg-rose-500 text-white px-3 sm:px-4 py-1.5 rounded-xl font-extrabold text-xs sm:text-sm tracking-wider uppercase border-2 border-white dark:border-zinc-800 shadow-lg flex items-center gap-1.5"
       >
         <X className="w-4 h-4 text-rose-200" />
         <span>Skip</span>
@@ -287,11 +289,11 @@ export function JobCard({
         {/* ====================================================
             COMPANY INFO (TOP ON MOBILE / LEFT SIDEBAR ON LAPTOP)
         ==================================================== */}
-        <div className="lg:w-[32%] xl:w-[30%] shrink-0 p-4 sm:p-5 lg:p-7 bg-slate-50/70 border-b lg:border-b-0 lg:border-r border-slate-200/80 flex flex-col justify-between gap-4">
+        <div className="lg:w-[32%] xl:w-[30%] shrink-0 p-4 sm:p-5 lg:p-7 bg-slate-50/70 dark:bg-zinc-950/70 border-b lg:border-b-0 lg:border-r border-slate-200/80 dark:border-zinc-800/80 flex flex-col justify-between gap-4">
           <div>
             <div className="flex items-center lg:flex-col lg:items-start gap-3 lg:gap-4">
               {/* Company Logo */}
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-18 lg:h-18 rounded-xl lg:rounded-2xl bg-white border border-slate-200/80 shadow-xs p-1.5 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-18 lg:h-18 rounded-xl lg:rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 shadow-xs p-1.5 flex items-center justify-center overflow-hidden shrink-0">
                 {job.logo ? (
                   <img
                     src={job.logo}
@@ -299,20 +301,20 @@ export function JobCard({
                     className="w-full h-full object-cover rounded-lg lg:rounded-xl"
                   />
                 ) : (
-                  <Building className="w-6 h-6 lg:w-8 lg:h-8 text-emerald-600" />
+                  <Building className="w-6 h-6 lg:w-8 lg:h-8 text-brand-600 dark:text-brand-400" />
                 )}
               </div>
 
               {/* Title & Company */}
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 truncate">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-brand-700 dark:text-brand-300 truncate">
                   {job.company || "Company"}
                 </p>
-                <h2 className="text-base sm:text-lg lg:text-xl font-extrabold text-slate-900 leading-tight line-clamp-2 mt-0.5">
+                <h2 className="text-base sm:text-lg lg:text-xl font-extrabold text-slate-900 dark:text-zinc-50 leading-tight line-clamp-2 mt-0.5">
                   {job.title || "Job Opportunity"}
                 </h2>
                 {job.companyType && (
-                  <p className="text-xs text-slate-500 font-medium mt-1 truncate">
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium mt-1 truncate">
                     {job.companyType}
                   </p>
                 )}
@@ -322,12 +324,12 @@ export function JobCard({
 
           {/* Match Score & Time Info */}
           <div className="flex flex-row lg:flex-col gap-3">
-            <div className="flex-1 flex items-center justify-between p-2.5 sm:p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+            <div className="flex-1 flex items-center justify-between p-2.5 sm:p-3 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/80 dark:border-zinc-800/80 shadow-2xs">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Profile Fit
                 </p>
-                <p className="text-xs text-slate-500 font-medium">
+                <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
                   Suitability
                 </p>
               </div>
@@ -350,50 +352,50 @@ export function JobCard({
           <div>
             {/* KEY METRICS */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5 mb-4">
-              <div className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100 min-w-0">
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800 min-w-0">
                 <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 truncate">
                     Location
                   </p>
-                  <p className="text-xs font-bold text-slate-800 truncate">
+                  <p className="text-xs font-bold text-slate-800 dark:text-zinc-100 truncate">
                     {job.location || "Not specified"}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2.5 bg-emerald-50/60 rounded-xl border border-emerald-100 min-w-0">
-                <IndianRupee className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className="flex items-center gap-2 p-2.5 bg-brand-50/60 dark:bg-brand-500/10 rounded-xl border border-brand-100 dark:border-brand-500/20 min-w-0">
+                <IndianRupee className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-[9px] sm:text-[10px] uppercase font-semibold text-emerald-700 truncate">
+                  <p className="text-[9px] sm:text-[10px] uppercase font-semibold text-brand-700 dark:text-brand-300 truncate">
                     Salary / CTC
                   </p>
-                  <p className="text-xs font-extrabold text-emerald-900 truncate">
+                  <p className="text-xs font-extrabold text-brand-900 dark:text-brand-300 truncate">
                     {job.salary || "Competitive"}
                   </p>
                 </div>
               </div>
 
-              <div className="col-span-2 sm:col-span-1 flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100 min-w-0">
+              <div className="col-span-2 sm:col-span-1 flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800 min-w-0">
                 <Briefcase className="w-4 h-4 text-slate-400 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 truncate">
                     Experience
                   </p>
-                  <p className="text-xs font-bold text-slate-800 truncate">
+                  <p className="text-xs font-bold text-slate-800 dark:text-zinc-100 truncate">
                     {experienceLevel || "Not specified"}
                   </p>
                 </div>
               </div>
 
               {/* WORK MODE — new tile so Remote/Hybrid/On-site is unambiguous */}
-              <div className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100 min-w-0">
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800 min-w-0">
                 <Globe2 className="w-4 h-4 text-slate-400 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[9px] sm:text-[10px] uppercase font-semibold text-slate-400 truncate">
                     Work Mode
                   </p>
-                  <p className="text-xs font-bold text-slate-800 truncate">
+                  <p className="text-xs font-bold text-slate-800 dark:text-zinc-100 truncate">
                     {workMode || "Not specified"}
                   </p>
                 </div>
@@ -401,7 +403,7 @@ export function JobCard({
             </div>
 
             {/* BADGES */}
-            <div className="flex flex-wrap items-center gap-1.5 pb-3 border-b border-slate-100">
+            <div className="flex flex-wrap items-center gap-1.5 pb-3 border-b border-slate-100 dark:border-zinc-800">
               {employmentType && (
                 <JobBadge type="fulltime" text={employmentType} size="sm" />
               )}
@@ -429,17 +431,12 @@ export function JobCard({
             {/* DESCRIPTION */}
             <div className="mt-3 sm:mt-4">
               <div className="flex items-center justify-between gap-2 mb-1.5">
-                <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-zinc-50">
                   Role Overview
                 </h3>
-                {applicantCount > 0 && (
-                  <span className="text-[11px] text-slate-400 flex items-center gap-1 shrink-0">
-                    <Users className="w-3.5 h-3.5" />
-                    {applicantCount} applicants
-                  </span>
-                )}
+                <CompetitionBadge job={job} className="justify-end" />
               </div>
-              <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed line-clamp-3 sm:line-clamp-4">
+              <p className="text-xs sm:text-[13px] text-slate-600 dark:text-zinc-300 leading-relaxed line-clamp-3 sm:line-clamp-4">
                 {job.description || "No job description available."}
               </p>
             </div>
@@ -454,7 +451,7 @@ export function JobCard({
                   {skills.slice(0, 7).map((skill, index) => (
                     <span
                       key={`${skill}-${index}`}
-                      className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium border border-slate-200/70"
+                      className="px-2.5 py-1 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 rounded-lg text-xs font-medium border border-slate-200/70 dark:border-zinc-800/70"
                     >
                       {skill}
                     </span>
@@ -470,16 +467,16 @@ export function JobCard({
 
             {/* HIGHLIGHTS */}
             {highlights.length > 0 && (
-              <div className="mt-3 sm:mt-4 p-3 bg-emerald-50/60 border border-emerald-100 rounded-xl space-y-1.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+              <div className="mt-3 sm:mt-4 p-3 bg-brand-50/60 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 rounded-xl space-y-1.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-brand-800 dark:text-brand-300">
                   Perks & Highlights
                 </p>
                 {highlights.slice(0, 2).map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-1.5 text-xs text-emerald-900"
+                    className="flex items-start gap-1.5 text-xs text-brand-900 dark:text-brand-300"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400 shrink-0 mt-0.5" />
                     <span className="line-clamp-1">{item}</span>
                   </div>
                 ))}
@@ -488,11 +485,11 @@ export function JobCard({
           </div>
 
           {/* VIEW DETAILS LINK */}
-          <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+          <div className="pt-2 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between">
             <button
               type="button"
               onClick={handleDetailsClick}
-              className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 group py-1"
+              className="text-xs font-bold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-300 flex items-center gap-1 group py-1"
             >
               <span>View full job details</span>
               <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -509,14 +506,14 @@ export function JobCard({
       {/* ======================================================
           ACTION FOOTER
       ====================================================== */}
-      <div className="shrink-0 p-2.5 sm:p-3.5 lg:p-4 bg-slate-50 border-t border-slate-200/80 flex items-center gap-2 sm:gap-3">
+      <div className="shrink-0 p-2.5 sm:p-3.5 lg:p-4 bg-slate-50 dark:bg-zinc-950 border-t border-slate-200/80 dark:border-zinc-800/80 flex items-center gap-2 sm:gap-3">
         {/* SKIP */}
         <button
           type="button"
           onClick={triggerSwipeLeft}
           id="btn-card-skip"
           aria-label="Skip this job"
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200/90 hover:border-rose-200 rounded-xl font-bold text-xs sm:text-sm shadow-2xs transition-all active:scale-95"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-white dark:bg-zinc-900 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-slate-700 dark:text-zinc-200 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200/90 dark:border-zinc-800/90 hover:border-rose-200 dark:hover:border-rose-500/20 rounded-xl font-bold text-xs sm:text-sm shadow-2xs transition-all active:scale-95"
         >
           <X className="w-4 h-4 text-rose-500" />
           <span>Skip</span>
@@ -533,13 +530,13 @@ export function JobCard({
           aria-label={isSaved ? "Unsave this job" : "Save this job"}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm shadow-2xs transition-all active:scale-95 border ${
             isSaved
-              ? "bg-emerald-50 border-emerald-300 text-emerald-800"
-              : "bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border-slate-200/90 hover:border-emerald-200"
+              ? "bg-brand-50 dark:bg-brand-500/10 border-brand-300 text-brand-800 dark:text-brand-300"
+              : "bg-white dark:bg-zinc-900 hover:bg-brand-50 dark:hover:bg-brand-500/10 text-slate-700 dark:text-zinc-200 hover:text-brand-700 dark:hover:text-brand-300 border-slate-200/90 dark:border-zinc-800/90 hover:border-brand-200 dark:hover:border-brand-500/20"
           }`}
         >
           <Bookmark
             className={`w-4 h-4 ${
-              isSaved ? "fill-emerald-600 text-emerald-600" : "text-emerald-600"
+              isSaved ? "fill-brand-600 text-brand-600 dark:text-brand-400" : "text-brand-600 dark:text-brand-400"
             }`}
           />
           <span>{isSaved ? "Saved" : "Save"}</span>
@@ -554,7 +551,7 @@ export function JobCard({
           }}
           id="btn-card-apply"
           aria-label="Apply now"
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs sm:text-sm shadow-2xs shadow-emerald-600/20 transition-all active:scale-95"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold text-xs sm:text-sm shadow-2xs shadow-brand-600/20 transition-all active:scale-95"
         >
           <Send className="w-4 h-4" />
           <span>Apply</span>

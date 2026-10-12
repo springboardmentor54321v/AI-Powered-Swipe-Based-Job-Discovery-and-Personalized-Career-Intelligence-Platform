@@ -48,16 +48,16 @@ export function UserManagementPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-slate-900/90 dark:bg-zinc-800/90 p-4 rounded-2xl border border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Search Input */}
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-500 dark:text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search by name or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs font-medium text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+            className="w-full pl-9 pr-3.5 py-2 bg-slate-800/80 dark:bg-zinc-700/80 border border-slate-700/80 rounded-xl text-xs font-medium text-white placeholder:text-slate-500 dark:placeholder:text-zinc-400 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
           />
         </div>
 
@@ -71,7 +71,7 @@ export function UserManagementPage() {
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap ${
                 roleFilter === rf
                   ? "bg-purple-600 text-white shadow-xs"
-                  : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
+                  : "bg-slate-800 dark:bg-zinc-700 text-slate-400 hover:text-white hover:bg-slate-700"
               }`}
             >
               {rf}
@@ -81,11 +81,11 @@ export function UserManagementPage() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-slate-900/90 rounded-2xl border border-slate-800 overflow-hidden shadow-sm">
+      <div className="bg-slate-900/90 dark:bg-zinc-800/90 rounded-2xl border border-slate-800 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/40 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <tr className="border-b border-slate-800 bg-slate-950/40 dark:bg-zinc-900/40 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                 <th className="py-3.5 px-4 sm:px-6">User</th>
                 <th className="py-3.5 px-4">Role</th>
                 <th className="py-3.5 px-4">Joined Date</th>
@@ -95,7 +95,7 @@ export function UserManagementPage() {
             </thead>
             <tbody className="divide-y divide-slate-800/60 text-xs">
               {filteredUsers.map((u) => (
-                <tr key={u.id} className="hover:bg-slate-800/30 transition-colors">
+                <tr key={u.id} className="hover:bg-slate-800/30 dark:hover:bg-zinc-700/30 transition-colors">
                   {/* User Column */}
                   <td className="py-4 px-4 sm:px-6">
                     <div className="flex items-center gap-3">
@@ -116,7 +116,7 @@ export function UserManagementPage() {
                     <select
                       value={u.role}
                       onChange={(e) => updateUserRole(u.id, e.target.value)}
-                      className="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500 cursor-pointer"
+                      className="px-2.5 py-1 bg-slate-800 dark:bg-zinc-700 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-hidden focus:ring-1 focus:ring-purple-500 cursor-pointer"
                     >
                       <option value="Job Seeker">Job Seeker</option>
                       <option value="Recruiter">Recruiter</option>
@@ -134,13 +134,13 @@ export function UserManagementPage() {
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                         u.status === "Active"
-                          ? "bg-emerald-950/60 text-emerald-300 border border-emerald-800"
+                          ? "bg-brand-950/60 text-brand-300 border border-brand-800"
                           : "bg-rose-950/60 text-rose-300 border border-rose-800"
                       }`}
                     >
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${
-                          u.status === "Active" ? "bg-emerald-400" : "bg-rose-400"
+                          u.status === "Active" ? "bg-brand-400" : "bg-rose-400"
                         }`}
                       />
                       <span>{u.status}</span>
@@ -155,8 +155,8 @@ export function UserManagementPage() {
                         onClick={() => toggleUserStatus(u.id)}
                         className={`p-1.5 rounded-lg transition-colors ${
                           u.status === "Active"
-                            ? "text-slate-400 hover:text-amber-400 hover:bg-slate-800"
-                            : "text-slate-400 hover:text-emerald-400 hover:bg-slate-800"
+                            ? "text-slate-400 hover:text-amber-400 hover:bg-slate-800 dark:hover:bg-zinc-700"
+                            : "text-slate-400 hover:text-brand-400 hover:bg-slate-800 dark:hover:bg-zinc-700"
                         }`}
                         title={u.status === "Active" ? "Suspend Account" : "Reactivate Account"}
                       >
@@ -166,7 +166,7 @@ export function UserManagementPage() {
                       <button
                         type="button"
                         onClick={() => setDeleteConfirmUser(u)}
-                        className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 dark:hover:bg-zinc-700 rounded-lg transition-colors"
                         title="Delete User"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -183,7 +183,7 @@ export function UserManagementPage() {
       {/* Delete Confirmation Modal */}
       {deleteConfirmUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-slate-900 rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-800 text-center animate-in zoom-in-95">
+          <div className="bg-slate-900 dark:bg-zinc-800 rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-800 text-center animate-in zoom-in-95">
             <div className="w-12 h-12 rounded-2xl bg-rose-950/50 text-rose-400 border border-rose-800 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
@@ -199,7 +199,7 @@ export function UserManagementPage() {
               <button
                 type="button"
                 onClick={() => setDeleteConfirmUser(null)}
-                className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors"
+                className="flex-1 px-4 py-2.5 bg-slate-800 dark:bg-zinc-700 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors"
               >
                 Cancel
               </button>

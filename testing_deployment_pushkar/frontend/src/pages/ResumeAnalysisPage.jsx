@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FileText,
   Upload,
@@ -30,6 +30,27 @@ export function ResumeAnalysisPage() {
 
   const fileInputRef = useRef(null);
 
+  // Show the analysis of the most recent stored resume when the page opens.
+  useEffect(() => {
+    if (resumeAnalysis) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const resumes = await aiService.listResumes();
+        const latest = resumes.find((r) => r.external_resume_id || r.id);
+        if (!latest || cancelled) return;
+        const analysis = await aiService.getResumeAnalysis(latest.external_resume_id || latest.id);
+        if (!cancelled) setResumeAnalysis(analysis);
+      } catch {
+        /* no resume yet, or the AI service is offline: keep the upload prompt */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ============================================================
   // FILE VALIDATION
   // ============================================================
@@ -39,13 +60,12 @@ export function ResumeAnalysisPage() {
       return false;
     }
 
-    const isPdf =
-      selectedFile.type === "application/pdf" ||
-      selectedFile.name.toLowerCase().endsWith(".pdf");
+    const lower = selectedFile.name.toLowerCase();
+    const isSupported = lower.endsWith(".pdf") || lower.endsWith(".docx");
 
-    if (!isPdf) {
+    if (!isSupported) {
       addToast(
-        "Please upload a PDF resume. The current AI parser supports PDF.",
+        "Please upload a PDF or DOCX resume.",
         "error"
       );
 
@@ -138,7 +158,7 @@ export function ResumeAnalysisPage() {
   const handleAnalyze = async () => {
     if (!file) {
       addToast(
-        "Please select a PDF resume first.",
+        "Please select a PDF or DOCX resume first.",
         "error"
       );
 
@@ -237,28 +257,28 @@ export function ResumeAnalysisPage() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-1">
 
-          <div className="p-2 bg-emerald-50 text-emerald-700 rounded-xl">
-            <FileCheck className="w-5 h-5 text-emerald-600" />
+          <div className="p-2 bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 rounded-xl">
+            <FileCheck className="w-5 h-5 text-brand-600 dark:text-brand-400" />
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
             ATS Resume Checker & Analysis
           </h1>
         </div>
 
-        <p className="text-xs sm:text-sm text-slate-500">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
           Upload your resume to extract skills, identify keyword gaps,
           and analyze your ATS compatibility.
         </p>
       </div>
 
       {/* UPLOAD CARD */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 mb-8">
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm p-6 sm:p-8 mb-8">
 
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,application/pdf"
+          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           onChange={handleFileChange}
           className="hidden"
           id="resume-upload-input"
@@ -282,30 +302,30 @@ export function ResumeAnalysisPage() {
               transition-all
               ${
                 isDragging
-                  ? "border-emerald-500 bg-emerald-50/50 scale-[0.99]"
-                  : "border-slate-300 hover:border-emerald-500 bg-slate-50 hover:bg-slate-100/70"
+                  ? "border-brand-500 bg-brand-50/50 dark:bg-brand-500/10 scale-[0.99]"
+                  : "border-slate-300 dark:border-zinc-700 hover:border-brand-500 bg-slate-50 dark:bg-zinc-950 hover:bg-slate-100/70 dark:hover:bg-zinc-800/70"
               }
             `}
           >
 
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center mx-auto mb-4">
+            <div className="w-14 h-14 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-100 dark:border-brand-500/20 flex items-center justify-center mx-auto mb-4">
               <Upload className="w-7 h-7" />
             </div>
 
-            <h3 className="text-base font-bold text-slate-900 mb-1">
+            <h3 className="text-base font-bold text-slate-900 dark:text-zinc-50 mb-1">
               Drag & drop your resume here, or{" "}
-              <span className="text-emerald-700 underline underline-offset-4">
+              <span className="text-brand-700 dark:text-brand-300 underline underline-offset-4">
                 browse files
               </span>
             </h3>
 
-            <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-              Supported format: PDF up to 10MB
+            <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-sm mx-auto mb-4">
+              Supported formats: PDF or DOCX, up to 10MB
             </p>
 
             <button
               type="button"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl text-xs font-bold shadow-sm"
             >
               <Upload className="w-3.5 h-3.5" />
               Select Resume
@@ -317,21 +337,21 @@ export function ResumeAnalysisPage() {
           /* SELECTED FILE */
           <div className="space-y-5">
 
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-4">
+            <div className="p-4 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl flex items-center justify-between gap-4">
 
               <div className="flex items-center gap-3 min-w-0">
 
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-500/20 flex items-center justify-center shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
 
                 <div className="min-w-0">
 
-                  <p className="text-sm font-bold text-slate-900 truncate">
+                  <p className="text-sm font-bold text-slate-900 dark:text-zinc-50 truncate">
                     {file.name}
                   </p>
 
-                  <p className="text-xs text-slate-500 font-medium">
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
                     {(file.size / (1024 * 1024)).toFixed(2)} MB
                     {" • "}
                     Ready to analyze
@@ -344,7 +364,7 @@ export function ResumeAnalysisPage() {
                 type="button"
                 onClick={handleRemoveFile}
                 disabled={isAnalyzing}
-                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors disabled:opacity-40"
+                className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors disabled:opacity-40"
                 title="Remove file"
               >
                 <Trash2 className="w-4 h-4" />
@@ -354,16 +374,16 @@ export function ResumeAnalysisPage() {
 
             {/* ERROR */}
             {error && (
-              <div className="flex items-start gap-3 p-4 bg-rose-50 border border-rose-200 rounded-xl">
+              <div className="flex items-start gap-3 p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl">
 
-                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
 
                 <div>
-                  <p className="text-sm font-bold text-rose-800">
+                  <p className="text-sm font-bold text-rose-800 dark:text-rose-300">
                     Resume analysis failed
                   </p>
 
-                  <p className="text-xs text-rose-700 mt-1">
+                  <p className="text-xs text-rose-700 dark:text-rose-300 mt-1">
                     {error}
                   </p>
                 </div>
@@ -375,11 +395,11 @@ export function ResumeAnalysisPage() {
             {isAnalyzing && (
               <div className="space-y-2">
 
-                <div className="flex justify-between text-xs font-bold text-slate-800">
+                <div className="flex justify-between text-xs font-bold text-slate-800 dark:text-zinc-100">
 
                   <span className="flex items-center gap-1.5">
 
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-brand-600 dark:text-brand-400" />
 
                     Parsing resume & analyzing skills...
 
@@ -391,10 +411,10 @@ export function ResumeAnalysisPage() {
 
                 </div>
 
-                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2.5 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
 
                   <div
-                    className="h-full bg-emerald-600 rounded-full transition-all duration-300"
+                    className="h-full bg-brand-600 rounded-full transition-all duration-300"
                     style={{
                       width: `${analysisProgress}%`,
                     }}
@@ -414,7 +434,7 @@ export function ResumeAnalysisPage() {
                   fileInputRef.current?.click()
                 }
                 disabled={isAnalyzing}
-                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold disabled:opacity-50"
+                className="px-4 py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-semibold disabled:opacity-50"
               >
                 Choose Another File
               </button>
@@ -424,7 +444,7 @@ export function ResumeAnalysisPage() {
                 onClick={handleAnalyze}
                 disabled={isAnalyzing}
                 id="btn-analyze-resume"
-                className="flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-sm"
+                className="flex items-center justify-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-sm"
               >
                 <Sparkles className="w-4 h-4" />
 
@@ -440,11 +460,11 @@ export function ResumeAnalysisPage() {
         )}
 
         {/* FOOTER */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-zinc-400 gap-2">
 
           <div className="flex items-center gap-2">
 
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <ShieldCheck className="w-4 h-4 text-brand-600 dark:text-brand-400" />
 
             <span>
               Logged in as {user?.name || "Job Seeker"}
@@ -453,7 +473,7 @@ export function ResumeAnalysisPage() {
           </div>
 
           {resumeAnalysis && (
-            <span className="text-emerald-700 font-semibold">
+            <span className="text-brand-700 dark:text-brand-300 font-semibold">
               Resume analysis available
             </span>
           )}

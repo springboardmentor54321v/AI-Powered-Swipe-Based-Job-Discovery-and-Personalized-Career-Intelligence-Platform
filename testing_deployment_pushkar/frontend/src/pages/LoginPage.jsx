@@ -11,6 +11,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { API_BASE_URL } from "../services/http";
 
 const ROLES = [
   {
@@ -142,9 +143,7 @@ export function LoginPage() {
   const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
 
-    const authBaseUrl =
-      import.meta.env.VITE_AUTH_API_BASE_URL ||
-      "http://127.0.0.1:5001/api/v1";
+    const authBaseUrl = API_BASE_URL;
 
     const accountRole =
       selectedRole === "recruiter"
@@ -162,19 +161,19 @@ export function LoginPage() {
 
   return (
     <div className="min-h-[calc(100vh-3rem)] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-xl bg-white rounded-3xl border border-slate-200 shadow-md p-8 sm:p-10 space-y-5 animate-in fade-in zoom-in-80 duration-200">
+      <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-md p-8 sm:p-10 space-y-5 animate-in fade-in zoom-in-80 duration-200">
 
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-600 text-white font-bold text-xl shadow-xs mb-1">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600 text-white font-bold text-xl shadow-xs mb-1">
             SX
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
             Sign In to SwipeX
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-sm mx-auto">
             Choose your account role and sign in to your
             SwipeX workspace.
           </p>
@@ -182,11 +181,11 @@ export function LoginPage() {
 
         {/* Role Selection */}
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5 text-center">
+          <label className="block text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2.5 text-center">
             Select Your Role
           </label>
 
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 p-1.5 bg-slate-50 border border-slate-200 rounded-2xl">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 p-1.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl">
             {ROLES.map((role) => {
               const Icon = role.icon;
 
@@ -203,19 +202,19 @@ export function LoginPage() {
                   id={`role-btn-${role.id}`}
                   className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-xl text-center transition-all ${
                     isSelected
-                      ? "bg-white text-slate-900 shadow-sm border border-slate-200/80 font-bold"
-                      : "text-slate-500 hover:text-slate-800 font-semibold"
+                      ? "bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 shadow-sm border border-slate-200/80 dark:border-zinc-800/80 font-bold"
+                      : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-100 font-semibold"
                   }`}
                 >
                   <div
                     className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
                       isSelected
                         ? role.id === "recruiter"
-                          ? "bg-blue-50 text-blue-600"
+                          ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400"
                           : role.id === "admin"
-                          ? "bg-purple-50 text-purple-600"
-                          : "bg-emerald-50 text-emerald-600"
-                        : "bg-slate-100 text-slate-400"
+                          ? "bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                          : "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400"
+                        : "bg-slate-100 dark:bg-zinc-800 text-slate-400"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -240,9 +239,9 @@ export function LoginPage() {
           onClick={handleGoogleLogin}
           disabled={isGoogleLoading || isLoading}
           id="btn-google-login"
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 disabled:opacity-50 border border-slate-300 text-slate-800 rounded-xl text-xs sm:text-sm font-bold shadow-sm transition-all active:scale-[0.99]"
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800/50 disabled:opacity-50 border border-slate-300 dark:border-zinc-700 text-slate-800 dark:text-zinc-100 rounded-xl text-xs sm:text-sm font-bold shadow-sm transition-all active:scale-[0.99]"
         >
-          <Chrome className="w-4 h-4 text-slate-700" />
+          <Chrome className="w-4 h-4 text-slate-700 dark:text-zinc-200" />
 
           <span>
             {isGoogleLoading
@@ -253,9 +252,9 @@ export function LoginPage() {
 
         {/* Divider */}
         <div className="relative flex items-center justify-center">
-          <div className="border-t border-slate-200 w-full" />
+          <div className="border-t border-slate-200 dark:border-zinc-800 w-full" />
 
-          <span className="bg-white px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 absolute">
+          <span className="bg-white dark:bg-zinc-900 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 absolute">
             Or continue with email
           </span>
         </div>
@@ -267,7 +266,7 @@ export function LoginPage() {
         >
           {/* Email */}
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
               {selectedRole === "recruiter"
                 ? "Work Email Address"
                 : selectedRole === "admin"
@@ -293,7 +292,7 @@ export function LoginPage() {
                 }
                 required
                 autoComplete="email"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-colors"
               />
             </div>
           </div>
@@ -301,7 +300,7 @@ export function LoginPage() {
           {/* Password */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider">
                 {selectedRole === "admin"
                   ? "Admin Security Passkey"
                   : "Password"}
@@ -315,7 +314,7 @@ export function LoginPage() {
                     "info"
                   )
                 }
-                className="text-xs font-semibold text-emerald-700 hover:underline"
+                className="text-xs font-semibold text-brand-700 dark:text-brand-300 hover:underline"
               >
                 Forgot password?
               </button>
@@ -337,21 +336,21 @@ export function LoginPage() {
                 placeholder="••••••••"
                 required
                 autoComplete="current-password"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-colors"
               />
             </div>
           </div>
 
           {/* Remember Me */}
           <div className="flex items-center">
-            <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-zinc-300 cursor-pointer">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) =>
                   setRememberMe(e.target.checked)
                 }
-                className="w-4 h-4 rounded accent-emerald-600 border-slate-300"
+                className="w-4 h-4 rounded accent-brand-600 border-slate-300 dark:border-zinc-700"
               />
 
               <span>
@@ -365,7 +364,7 @@ export function LoginPage() {
             type="submit"
             disabled={isLoading || isGoogleLoading}
             id="btn-login-submit"
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-xs active:scale-98 transition-all"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-xs active:scale-98 transition-all"
           >
             <span>
               {isLoading
@@ -378,13 +377,13 @@ export function LoginPage() {
         </form>
 
         {/* Signup */}
-        <div className="text-center pt-2 border-t border-slate-100">
-          <p className="text-xs text-slate-500">
+        <div className="text-center pt-2 border-t border-slate-100 dark:border-zinc-800">
+          <p className="text-xs text-slate-500 dark:text-zinc-400">
             Don't have an account?{" "}
 
             <Link
               to={`/signup?role=${selectedRole}`}
-              className="text-emerald-700 font-bold hover:underline"
+              className="text-brand-700 dark:text-brand-300 font-bold hover:underline"
             >
               Sign up as{" "}
               {currentRoleData.label}
@@ -533,26 +532,26 @@ export default LoginPage;
 
 //   return (
 //     <div className="min-h-[calc(40vh-3rem)] flex items-center justify-center px-4 py-8">
-//       <div className="w-full max-w-xl bg-white rounded-3xl border border-slate-200 shadow-md p-8 sm:p-10 space-y-5 animate-in fade-in zoom-in-80 duration-200">
+//       <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-md p-8 sm:p-10 space-y-5 animate-in fade-in zoom-in-80 duration-200">
 //         {/* Brand Header */}
 //         <div className="text-center space-y-2">
-//           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-600 text-white font-bold text-xl shadow-xs mb-1">
+//           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600 text-white font-bold text-xl shadow-xs mb-1">
 //             SX
 //           </div>
-//           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+//           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
 //             Sign In to SwipeX
 //           </h1>
-//           <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
+//           <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-sm mx-auto">
 //             Choose your account role to access your dedicated workspace and tools
 //           </p>
 //         </div>
 
 //         {/* Step 1: Role Selection Tabs */}
 //         <div>
-//           <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5 text-center">
+//           <label className="block text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2.5 text-center">
 //             Step 1: Select Your Role
 //           </label>
-//           <div className="grid grid-cols-3 gap-2.5 sm:gap-3 p-1.5 bg-slate-50 border border-slate-200 rounded-2xl">
+//           <div className="grid grid-cols-3 gap-2.5 sm:gap-3 p-1.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl">
 //             {ROLES.map((role) => {
 //               const Icon = role.icon;
 //               const isSelected = selectedRole === role.id;
@@ -565,19 +564,19 @@ export default LoginPage;
 //                   id={`role-btn-${role.id}`}
 //                   className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-xl text-center transition-all ${
 //                     isSelected
-//                       ? "bg-white text-slate-900 shadow-sm border border-slate-200/80 font-bold"
-//                       : "text-slate-500 hover:text-slate-800 font-semibold"
+//                       ? "bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 shadow-sm border border-slate-200/80 dark:border-zinc-800/80 font-bold"
+//                       : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-100 font-semibold"
 //                   }`}
 //                 >
 //                   <div
 //                     className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
 //                       isSelected
 //                         ? role.id === "recruiter"
-//                           ? "bg-blue-50 text-blue-600"
+//                           ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400"
 //                           : role.id === "admin"
-//                           ? "bg-purple-50 text-purple-600"
-//                           : "bg-emerald-50 text-emerald-600"
-//                         : "bg-slate-100 text-slate-400"
+//                           ? "bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400"
+//                           : "bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400"
+//                         : "bg-slate-100 dark:bg-zinc-800 text-slate-400"
 //                     }`}
 //                   >
 //                     <Icon className="w-4 h-4" />
@@ -597,15 +596,15 @@ export default LoginPage;
 //           type="button"
 //           onClick={handleDemoLogin}
 //           id="btn-demo-login"
-//           className="w-full flex items-center justify-center gap-2 p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-bold transition-all group"
+//           className="w-full flex items-center justify-center gap-2 p-3 bg-brand-50 dark:bg-brand-500/10 hover:bg-brand-100 dark:hover:bg-brand-500/15 border border-brand-200 dark:border-brand-500/20 text-brand-900 dark:text-brand-300 rounded-xl text-xs font-bold transition-all group"
 //         >
-//           <Zap className="w-4 h-4 text-emerald-600 fill-emerald-600 group-hover:scale-110 transition-transform" />
+//           <Zap className="w-4 h-4 text-brand-600 dark:text-brand-400 fill-brand-600 group-hover:scale-110 transition-transform" />
 //           <span>One-Click Demo {currentRoleData.label} Login</span>
 //         </button>
 
 //         <div className="relative flex items-center justify-center">
-//           <div className="border-t border-slate-200 w-full" />
-//           <span className="bg-white px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 absolute">
+//           <div className="border-t border-slate-200 dark:border-zinc-800 w-full" />
+//           <span className="bg-white dark:bg-zinc-900 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 absolute">
 //             Or sign in with {currentRoleData.label} credentials
 //           </span>
 //         </div>
@@ -613,7 +612,7 @@ export default LoginPage;
 //         {/* Step 2: Login Form for selected role */}
 //         <form onSubmit={handleSubmit} className="space-y-4">
 //           <div>
-//             <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+//             <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider mb-1.5">
 //               {selectedRole === "recruiter"
 //                 ? "Work Email Address"
 //                 : selectedRole === "admin"
@@ -634,20 +633,20 @@ export default LoginPage;
 //                     : "name@example.com"
 //                 }
 //                 required
-//                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+//                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-colors"
 //               />
 //             </div>
 //           </div>
 
 //           <div>
 //             <div className="flex items-center justify-between mb-1.5">
-//               <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
+//               <label className="block text-xs font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider">
 //                 {selectedRole === "admin" ? "Admin Security Passkey" : "Password"}
 //               </label>
 //               <button
 //                 type="button"
 //                 onClick={() => addToast("Password reset link sent to registered email.", "info")}
-//                 className="text-xs font-semibold text-emerald-700 hover:underline"
+//                 className="text-xs font-semibold text-brand-700 dark:text-brand-300 hover:underline"
 //               >
 //                 Forgot password?
 //               </button>
@@ -664,18 +663,18 @@ export default LoginPage;
 //                 onChange={(e) => setPassword(e.target.value)}
 //                 placeholder="••••••••"
 //                 required
-//                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+//                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs sm:text-sm font-medium text-slate-900 dark:text-zinc-50 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-colors"
 //               />
 //             </div>
 //           </div>
 
 //           <div className="flex items-center">
-//             <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
+//             <label className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-zinc-300 cursor-pointer">
 //               <input
 //                 type="checkbox"
 //                 checked={rememberMe}
 //                 onChange={(e) => setRememberMe(e.target.checked)}
-//                 className="w-4 h-4 rounded accent-emerald-600 border-slate-300"
+//                 className="w-4 h-4 rounded accent-brand-600 border-slate-300 dark:border-zinc-700"
 //               />
 //               <span>Remember me on this browser</span>
 //             </label>
@@ -685,7 +684,7 @@ export default LoginPage;
 //             type="submit"
 //             disabled={isLoading}
 //             id="btn-login-submit"
-//             className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-xs active:scale-98 transition-all"
+//             className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-xs active:scale-98 transition-all"
 //           >
 //             <span>{isLoading ? `Authenticating as ${currentRoleData.label}...` : `Sign In as ${currentRoleData.label}`}</span>
 //             <ArrowRight className="w-4 h-4" />
@@ -693,12 +692,12 @@ export default LoginPage;
 //         </form>
 
 //         {/* Footer Link */}
-//         <div className="text-center pt-2 border-t border-slate-100">
-//           <p className="text-xs text-slate-500">
+//         <div className="text-center pt-2 border-t border-slate-100 dark:border-zinc-800">
+//           <p className="text-xs text-slate-500 dark:text-zinc-400">
 //             Don't have an account?{" "}
 //             <Link
 //               to={`/signup?role=${selectedRole}`}
-//               className="text-emerald-700 font-bold hover:underline"
+//               className="text-brand-700 dark:text-brand-300 font-bold hover:underline"
 //             >
 //               Sign up as {currentRoleData.label}
 //             </Link>

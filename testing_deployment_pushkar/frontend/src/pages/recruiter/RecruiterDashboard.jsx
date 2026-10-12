@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { RecruiterAnalytics } from "../../components/RoleAnalytics";
 import { Link } from "react-router-dom";
 import {
   Briefcase,
@@ -167,14 +168,14 @@ export function RecruiterDashboard() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center">
-          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 p-12 text-center">
+          <div className="w-8 h-8 border-4 border-blue-200 dark:border-blue-500/20 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
 
-          <h3 className="text-sm font-bold text-slate-800">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100">
             Loading recruiter dashboard...
           </h3>
 
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
             Fetching your jobs and recruiter profile.
           </p>
         </div>
@@ -189,14 +190,14 @@ export function RecruiterDashboard() {
   if (loadError) {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-3xl border border-rose-200 p-12 text-center">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-rose-200 dark:border-rose-500/20 p-12 text-center">
           <XCircle className="w-12 h-12 text-rose-300 mx-auto mb-3" />
 
-          <h3 className="text-base font-bold text-slate-800">
+          <h3 className="text-base font-bold text-slate-800 dark:text-zinc-100">
             Unable to load dashboard
           </h3>
 
-          <p className="text-xs text-rose-600 mt-1">
+          <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">
             {loadError}
           </p>
 
@@ -253,7 +254,7 @@ export function RecruiterDashboard() {
             <Link
               to="/recruiter/post-job"
               id="btn-recruiter-banner-post"
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-zinc-900 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95"
             >
               <PlusCircle className="w-4 h-4" />
 
@@ -287,22 +288,22 @@ export function RecruiterDashboard() {
 
         {/* Total Jobs */}
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+        <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xs flex items-center gap-4">
 
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
             <Briefcase className="w-6 h-6" />
           </div>
 
           <div>
-            <p className="text-xs font-medium text-slate-500">
+            <p className="text-xs font-medium text-slate-500 dark:text-zinc-400">
               Total Jobs Posted
             </p>
 
-            <h3 className="text-2xl font-bold text-slate-900 mt-0.5">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-zinc-50 mt-0.5">
               {totalJobs}
             </h3>
 
-            <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1 mt-0.5">
+            <span className="text-[11px] font-semibold text-brand-600 dark:text-brand-400 flex items-center gap-1 mt-0.5">
               <TrendingUp className="w-3 h-3" />
 
               <span>
@@ -314,22 +315,22 @@ export function RecruiterDashboard() {
 
         {/* Active Jobs */}
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+        <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xs flex items-center gap-4">
 
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-6 h-6" />
           </div>
 
           <div>
-            <p className="text-xs font-medium text-slate-500">
+            <p className="text-xs font-medium text-slate-500 dark:text-zinc-400">
               Active Jobs
             </p>
 
-            <h3 className="text-2xl font-bold text-slate-900 mt-0.5">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-zinc-50 mt-0.5">
               {activeJobs}
             </h3>
 
-            <span className="text-[11px] font-medium text-slate-500 mt-0.5 block">
+            <span className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 mt-0.5 block">
               Accepting applications
             </span>
           </div>
@@ -337,22 +338,22 @@ export function RecruiterDashboard() {
 
         {/* Applicants */}
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+        <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xs flex items-center gap-4">
 
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
             <Users className="w-6 h-6" />
           </div>
 
           <div>
-            <p className="text-xs font-medium text-slate-500">
+            <p className="text-xs font-medium text-slate-500 dark:text-zinc-400">
               Total Applicants
             </p>
 
-            <h3 className="text-2xl font-bold text-slate-900 mt-0.5">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-zinc-50 mt-0.5">
               {totalApplicants}
             </h3>
 
-            <span className="text-[11px] font-medium text-slate-500 mt-0.5 block">
+            <span className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 mt-0.5 block">
               Application tracking coming next
             </span>
           </div>
@@ -360,22 +361,22 @@ export function RecruiterDashboard() {
 
         {/* Pending */}
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+        <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xs flex items-center gap-4">
 
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
             <Clock className="w-6 h-6" />
           </div>
 
           <div>
-            <p className="text-xs font-medium text-slate-500">
+            <p className="text-xs font-medium text-slate-500 dark:text-zinc-400">
               Pending Review
             </p>
 
-            <h3 className="text-2xl font-bold text-slate-900 mt-0.5">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-zinc-50 mt-0.5">
               {pendingReview}
             </h3>
 
-            <span className="text-[11px] font-medium text-slate-500 mt-0.5 block">
+            <span className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 mt-0.5 block">
               Application system coming next
             </span>
           </div>
@@ -398,18 +399,18 @@ export function RecruiterDashboard() {
           <div className="flex items-center justify-between">
 
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50">
                 Recent Job Postings
               </h2>
 
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
                 Your latest job openings
               </p>
             </div>
 
             <Link
               to="/recruiter/manage-jobs"
-              className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
             >
               <span>
                 View all ({recruiterJobs.length})
@@ -424,15 +425,15 @@ export function RecruiterDashboard() {
 
             {recentJobs.length === 0 ? (
 
-              <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center">
+              <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl border border-slate-200 dark:border-zinc-800 text-center">
 
                 <Briefcase className="w-10 h-10 text-slate-300 mx-auto mb-3" />
 
-                <h3 className="text-sm font-bold text-slate-800">
+                <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100">
                   No job postings yet
                 </h3>
 
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
                   Post your first opportunity to start
                   building your candidate pipeline.
                 </p>
@@ -452,22 +453,22 @@ export function RecruiterDashboard() {
               recentJobs.map((job) => (
                 <div
                   key={job.id}
-                  className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-blue-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-xs hover:border-blue-200 dark:hover:border-blue-500/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                 >
 
                   <div className="space-y-1 min-w-0">
 
                     <div className="flex items-center gap-2">
 
-                      <h3 className="text-sm font-bold text-slate-900 truncate">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-50 truncate">
                         {job.title}
                       </h3>
 
                       <span
                         className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           job.status === "Active"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-slate-100 text-slate-600"
+                            ? "bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-500/20"
+                            : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300"
                         }`}
                       >
                         {job.status ||
@@ -476,7 +477,7 @@ export function RecruiterDashboard() {
 
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
 
                       <span>
                         {job.location}
@@ -490,13 +491,13 @@ export function RecruiterDashboard() {
 
                       <span>•</span>
 
-                      <span className="font-semibold text-slate-700">
+                      <span className="font-semibold text-slate-700 dark:text-zinc-200">
                         {job.salaryRange}
                       </span>
 
                     </div>
 
-                    <div className="flex items-center gap-3 pt-1 text-[11px] text-slate-500">
+                    <div className="flex items-center gap-3 pt-1 text-[11px] text-slate-500 dark:text-zinc-400">
 
                       <span>
                         Posted {job.postedDate}
@@ -504,7 +505,7 @@ export function RecruiterDashboard() {
 
                       <span>•</span>
 
-                      <span className="text-blue-600 font-bold">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">
                         {job.applicantsCount}{" "}
                         total applicants
                       </span>
@@ -517,14 +518,14 @@ export function RecruiterDashboard() {
 
                     <Link
                       to="/recruiter/applicants"
-                      className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold transition-colors"
+                      className="px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/15 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold transition-colors"
                     >
                       View Applicants
                     </Link>
 
                     <Link
                       to="/recruiter/manage-jobs"
-                      className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                      className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
                       title="Manage Job"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -541,40 +542,40 @@ export function RecruiterDashboard() {
               HIRING FUNNEL
           ========================= */}
 
-          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
+          <div className="bg-slate-50 dark:bg-zinc-950 p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-3">
 
-            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-50 uppercase tracking-wider">
               Talent Pipeline Funnel
             </h4>
 
             <div className="grid grid-cols-3 gap-3 text-center">
 
-              <div className="bg-white p-3 rounded-xl border border-slate-200">
-                <p className="text-xl font-extrabold text-blue-600">
+              <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800">
+                <p className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
                   0
                 </p>
 
-                <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+                <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 mt-0.5">
                   Shortlisted
                 </p>
               </div>
 
-              <div className="bg-white p-3 rounded-xl border border-slate-200">
-                <p className="text-xl font-extrabold text-purple-600">
+              <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800">
+                <p className="text-xl font-extrabold text-purple-600 dark:text-purple-400">
                   0
                 </p>
 
-                <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+                <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 mt-0.5">
                   Interviews
                 </p>
               </div>
 
-              <div className="bg-white p-3 rounded-xl border border-slate-200">
-                <p className="text-xl font-extrabold text-emerald-600">
+              <div className="bg-white dark:bg-zinc-900 p-3 rounded-xl border border-slate-200 dark:border-zinc-800">
+                <p className="text-xl font-extrabold text-brand-600 dark:text-brand-400">
                   —
                 </p>
 
-                <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+                <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 mt-0.5">
                   Avg ATS Score
                 </p>
               </div>
@@ -593,18 +594,18 @@ export function RecruiterDashboard() {
           <div className="flex items-center justify-between">
 
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50">
                 Recent Applicants
               </h2>
 
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
                 Candidate submissions
               </p>
             </div>
 
             <Link
               to="/recruiter/applicants"
-              className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
             >
               <span>
                 All candidates
@@ -617,22 +618,22 @@ export function RecruiterDashboard() {
 
           {/* Temporary state */}
 
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center">
+          <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl border border-slate-200 dark:border-zinc-800 text-center">
 
             <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
 
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100">
               No applicants yet
             </h3>
 
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 leading-relaxed">
               Applicant data will appear here once the
               candidate application system is connected.
             </p>
 
             <Link
               to="/recruiter/applicants"
-              className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold"
+              className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded-xl text-xs font-bold"
             >
               Manage Applicants
               <ArrowRight className="w-3.5 h-3.5" />
@@ -644,11 +645,11 @@ export function RecruiterDashboard() {
               ATS INFO
           ========================= */}
 
-          <div className="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 text-xs text-blue-900 space-y-1.5">
+          <div className="bg-blue-50/70 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/20 rounded-2xl p-4 text-xs text-blue-900 dark:text-blue-300 space-y-1.5">
 
-            <div className="flex items-center gap-1.5 font-bold text-blue-800">
+            <div className="flex items-center gap-1.5 font-bold text-blue-800 dark:text-blue-300">
 
-              <Sparkles className="w-4 h-4 text-blue-600" />
+              <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
 
               <span>
                 Smart SwipeX ATS Matching
@@ -656,7 +657,7 @@ export function RecruiterDashboard() {
 
             </div>
 
-            <p className="text-[11px] text-blue-700 leading-relaxed">
+            <p className="text-[11px] text-blue-700 dark:text-blue-300 leading-relaxed">
               Once applications are connected, SwipeX
               will rank candidates against the required
               skills and job specifications.
@@ -666,6 +667,8 @@ export function RecruiterDashboard() {
 
         </div>
       </div>
+
+      <RecruiterAnalytics />
     </div>
   );
 }

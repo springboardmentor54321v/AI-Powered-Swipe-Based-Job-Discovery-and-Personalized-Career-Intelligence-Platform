@@ -159,16 +159,16 @@ export function CompaniesPage() {
   const getCategoryClass = (category) => {
     switch (category) {
       case "Startup":
-        return "bg-purple-50 text-purple-700 border-purple-200";
+        return "bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-500/20";
 
       case "Newly Founded":
-        return "bg-amber-50 text-amber-700 border-amber-200";
+        return "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/20";
 
       case "MNC":
-        return "bg-blue-50 text-blue-700 border-blue-200";
+        return "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-500/20";
 
       default:
-        return "bg-slate-50 text-slate-700 border-slate-200";
+        return "bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-800";
     }
   };
 
@@ -184,16 +184,16 @@ export function CompaniesPage() {
 
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
-          <div className="p-2 bg-emerald-50 text-emerald-700 rounded-xl">
-            <Building2 className="w-5 h-5 text-emerald-600" />
+          <div className="p-2 bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 rounded-xl">
+            <Building2 className="w-5 h-5 text-brand-600 dark:text-brand-400" />
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
             Explore Companies
           </h1>
         </div>
 
-        <p className="text-xs sm:text-sm text-slate-500 max-w-2xl">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-2xl">
           Discover technology companies, startups, engineering teams and their
           active job opportunities.
         </p>
@@ -203,7 +203,7 @@ export function CompaniesPage() {
           SEARCH + CATEGORY
       =================================================== */}
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-3 sm:p-4 mb-8 shadow-xs">
+      <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-3 sm:p-4 mb-8 shadow-xs">
         {/* Search */}
 
         <div className="relative mb-3">
@@ -214,14 +214,14 @@ export function CompaniesPage() {
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search company, industry, technology or location..."
-            className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+            className="w-full pl-10 pr-10 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-900 dark:text-zinc-50 placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
           />
 
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
               aria-label="Clear search"
             >
               <X className="w-4 h-4" />
@@ -244,8 +244,8 @@ export function CompaniesPage() {
                 onClick={() => setActiveCategory(tab.id)}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
                   isActive
-                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                    : "bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-slate-200"
+                    ? "bg-brand-600 text-white border-brand-600 shadow-xs"
+                    : "bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-50 border-slate-200 dark:border-zinc-800"
                 }`}
               >
                 <Icon
@@ -267,9 +267,9 @@ export function CompaniesPage() {
 
       {!isLoading && !error && (
         <div className="flex items-center justify-between mb-5">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-zinc-400">
             Showing{" "}
-            <span className="font-bold text-slate-900">
+            <span className="font-bold text-slate-900 dark:text-zinc-50">
               {filteredCompanies.length}
             </span>{" "}
             {filteredCompanies.length === 1 ? "company" : "companies"}
@@ -279,7 +279,7 @@ export function CompaniesPage() {
             <button
               type="button"
               onClick={clearFilters}
-              className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+              className="text-xs font-semibold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-300"
             >
               Clear filters
             </button>
@@ -296,22 +296,22 @@ export function CompaniesPage() {
           {[1, 2, 3, 4, 5, 6].map((index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 animate-pulse"
+              className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 space-y-4 animate-pulse"
             >
               <div className="flex items-center gap-3">
-                <div className="w-13 h-13 rounded-xl bg-slate-200" />
+                <div className="w-13 h-13 rounded-xl bg-slate-200 dark:bg-zinc-700" />
 
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-slate-200 rounded w-2/3" />
-                  <div className="h-3 bg-slate-100 rounded w-1/2" />
+                  <div className="h-4 bg-slate-200 dark:bg-zinc-700 rounded w-2/3" />
+                  <div className="h-3 bg-slate-100 dark:bg-zinc-800 rounded w-1/2" />
                 </div>
               </div>
 
-              <div className="h-4 bg-slate-100 rounded w-3/4" />
+              <div className="h-4 bg-slate-100 dark:bg-zinc-800 rounded w-3/4" />
 
-              <div className="h-12 bg-slate-100 rounded-xl" />
+              <div className="h-12 bg-slate-100 dark:bg-zinc-800 rounded-xl" />
 
-              <div className="h-8 bg-slate-100 rounded-xl" />
+              <div className="h-8 bg-slate-100 dark:bg-zinc-800 rounded-xl" />
             </div>
           ))}
         </div>
@@ -322,21 +322,21 @@ export function CompaniesPage() {
       =================================================== */}
 
       {!isLoading && error && (
-        <div className="bg-white rounded-2xl border border-rose-200 p-10 text-center max-w-md mx-auto">
-          <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-rose-200 dark:border-rose-500/20 p-10 text-center max-w-md mx-auto">
+          <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-7 h-7" />
           </div>
 
-          <h3 className="text-base font-bold text-slate-900 mb-1">
+          <h3 className="text-base font-bold text-slate-900 dark:text-zinc-50 mb-1">
             Failed to load companies
           </h3>
 
-          <p className="text-xs text-slate-500 mb-5">{error}</p>
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mb-5">{error}</p>
 
           <button
             type="button"
             onClick={loadCompanies}
-            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all"
+            className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all"
           >
             Retry
           </button>
@@ -348,23 +348,23 @@ export function CompaniesPage() {
       =================================================== */}
 
       {!isLoading && !error && filteredCompanies.length === 0 && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-md mx-auto">
-          <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-12 text-center max-w-md mx-auto">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-4">
             <Building2 className="w-7 h-7 text-slate-400" />
           </div>
 
-          <h3 className="text-base font-bold text-slate-900 mb-1">
+          <h3 className="text-base font-bold text-slate-900 dark:text-zinc-50 mb-1">
             No companies found
           </h3>
 
-          <p className="text-xs text-slate-500 mb-5">
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mb-5">
             Try another company name, technology, location or category.
           </p>
 
           <button
             type="button"
             onClick={clearFilters}
-            className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all"
+            className="px-5 py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded-xl text-xs font-semibold transition-all"
           >
             Clear Filters
           </button>
@@ -387,13 +387,13 @@ export function CompaniesPage() {
             return (
               <div
                 key={company.id}
-                className="bg-white rounded-2xl border border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all flex flex-col p-6 group"
+                className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 hover:border-brand-300 hover:shadow-md transition-all flex flex-col p-6 group"
               >
                 {/* TOP */}
 
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-13 h-13 rounded-xl bg-slate-50 border border-slate-200 p-1 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+                    <div className="w-13 h-13 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 p-1 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
                       {company.logo ? (
                         <img
                           src={company.logo}
@@ -413,7 +413,7 @@ export function CompaniesPage() {
 
                             const fallback = document.createElement("span");
                             fallback.className =
-                              "text-lg font-bold text-emerald-600";
+                              "text-lg font-bold text-brand-600 dark:text-brand-400";
                             fallback.textContent =
                               company.name?.charAt(0)?.toUpperCase() || "?";
 
@@ -426,11 +426,11 @@ export function CompaniesPage() {
                     </div>
 
                     <div className="min-w-0">
-                      <h3 className="text-base font-bold text-slate-900 leading-tight truncate group-hover:text-emerald-700 transition-colors">
+                      <h3 className="text-base font-bold text-slate-900 dark:text-zinc-50 leading-tight truncate group-hover:text-brand-700 dark:group-hover:text-brand-300 transition-colors">
                         {company.name}
                       </h3>
 
-                      <p className="text-xs text-slate-500 font-medium truncate">
+                      <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium truncate">
                         {company.industry || "Technology"}
                       </p>
                     </div>
@@ -447,7 +447,7 @@ export function CompaniesPage() {
 
                 {/* META */}
 
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500 mb-4">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500 dark:text-zinc-400 mb-4">
                   {company.location && (
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-slate-400" />
@@ -463,7 +463,7 @@ export function CompaniesPage() {
                   )}
 
                   {company.rating != null && (
-                    <span className="flex items-center gap-1 text-amber-600 font-bold">
+                    <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold">
                       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                       {company.rating}
                     </span>
@@ -472,7 +472,7 @@ export function CompaniesPage() {
 
                 {/* ABOUT */}
 
-                <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed mb-4 min-h-[54px]">
+                <p className="text-xs text-slate-600 dark:text-zinc-300 line-clamp-3 leading-relaxed mb-4 min-h-[54px]">
                   {company.about ||
                     "Explore this company and discover available career opportunities."}
                 </p>
@@ -485,7 +485,7 @@ export function CompaniesPage() {
                       {techStack.slice(0, 5).map((tech, index) => (
                         <span
                           key={`${tech}-${index}`}
-                          className="px-2 py-1 bg-slate-50 border border-slate-200 text-slate-600 text-[10px] rounded-md font-medium"
+                          className="px-2 py-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-300 text-[10px] rounded-md font-medium"
                         >
                           {tech}
                         </span>
@@ -502,15 +502,15 @@ export function CompaniesPage() {
 
                 {/* FOOTER */}
 
-                <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-100">
+                <div className="mt-auto pt-4 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-500/10 px-2.5 py-1.5 rounded-lg border border-brand-100 dark:border-brand-500/20">
                     <Briefcase className="w-3.5 h-3.5" />
                     {openJobs} {openJobs === 1 ? "Open Role" : "Open Roles"}
                   </span>
 
                   <Link
                     to={`/companies/${company.id}`}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-emerald-700 group-hover:translate-x-0.5 transition-all"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-zinc-200 hover:text-brand-700 dark:hover:text-brand-300 group-hover:translate-x-0.5 transition-all"
                   >
                     View Profile
                     <ChevronRight className="w-3.5 h-3.5" />

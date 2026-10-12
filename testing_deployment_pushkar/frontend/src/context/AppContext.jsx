@@ -3,8 +3,6 @@ import {
   INITIAL_JOBS,
   INITIAL_APPLICATIONS,
   INITIAL_RECOMMENDATIONS,
-  INITIAL_NOTIFICATIONS,
-  MOCK_RESUME_ANALYSIS
 } from "../utils/mockData";
 import {
   INITIAL_RECRUITER_PROFILE,
@@ -25,6 +23,7 @@ import { recordSwipe, getSwipeHistory, undoSwipe } from "../services/swipeServic
 import confetti from "canvas-confetti";
 
 import { authService } from "../services/authService";
+import { notificationService, toUiNotification } from "../services/notificationService";
 
 export const AppContext = createContext();
 
@@ -139,15 +138,13 @@ export function AppProvider({ children }) {
   });
 
   // 5. Notifications
-  const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
-    return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
-  });
+  // Notifications come from the backend (job service) and are polled; nothing is mocked or cached locally.
+  const [notifications, setNotifications] = useState([]);
 
   // 6. Resume ATS Analysis
   const [resumeAnalysis, setResumeAnalysis] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RESUME_ANALYSIS);
-    return saved ? JSON.parse(saved) : MOCK_RESUME_ANALYSIS;
+    return saved ? JSON.parse(saved) : null;
   });
 
   // 7. Search and Filter state
@@ -166,6 +163,7 @@ export function AppProvider({ children }) {
     isFresherFriendly: false,
     isNewlyFounded: false,
     recentlyPosted: false,
+    lowCompetition: false,
     selectedSkill: "All"
   });
 
@@ -202,10 +200,6 @@ export function AppProvider({ children }) {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.APPLICATIONS, JSON.stringify(applications));
   }, [applications]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
-  }, [notifications]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.RESUME_ANALYSIS, JSON.stringify(resumeAnalysis));
@@ -272,6 +266,19 @@ export function AppProvider({ children }) {
 // LOGIN
 // Auth Service :5001
 // ============================================================
+
+  // Everything below belongs to ONE account: clear it when the account changes so a new user
+  // never inherits the previous user's swipes, saved jobs, applications or resume analysis.
+  const resetUserScopedState = useCallback(() => {
+    setSavedJobs([]);
+    setSwipedState({ skipped: [], liked: [] });
+    setSwipeHistory([]);
+    setApplications([]);
+    setNotifications([]);
+    setResumeAnalysis(null);
+    [STORAGE_KEYS.SAVED_JOBS, STORAGE_KEYS.SWIPED_JOBS, STORAGE_KEYS.SWIPE_HISTORY,
+     STORAGE_KEYS.APPLICATIONS, STORAGE_KEYS.RESUME_ANALYSIS].forEach((k) => localStorage.removeItem(k));
+  }, []);
 
 const login = useCallback(
   async (credentials) => {
@@ -367,6 +374,7 @@ const login = useCallback(
       // Update React state
       // --------------------------------------------------------
 
+      resetUserScopedState();
       setUser(loggedInUser);
 
       setIsAuthenticated(true);
@@ -422,7 +430,7 @@ const login = useCallback(
       throw error;
     }
   },
-  [addToast]
+  [addToast, resetUserScopedState]
 );
 
   // Auth actions
@@ -544,6 +552,15 @@ const login = useCallback(
             formData.preferredSalary ||
             null,
 
+          company_name:
+            formData.companyName || null,
+
+          industry:
+            formData.industry || null,
+
+          company_size:
+            formData.companySize || null,
+
           bio:
             formData.bio ||
             null,
@@ -573,6 +590,7 @@ const login = useCallback(
         JSON.stringify(response.user)
       );
 
+      resetUserScopedState();
       setUser(response.user);
       setIsAuthenticated(true);
 
@@ -608,7 +626,7 @@ const login = useCallback(
       throw error;
     }
   },
-  [addToast]
+  [addToast, resetUserScopedState]
 );
 
   const logout = useCallback(
@@ -645,6 +663,7 @@ const login = useCallback(
         "swipex_auth"
       );
 
+      resetUserScopedState();
       setUser(null);
       setIsAuthenticated(false);
       setCurrentRole("seeker");
@@ -655,7 +674,7 @@ const login = useCallback(
       );
     }
   },
-  [addToast]
+  [addToast, resetUserScopedState]
 );
 
   // Recruiter Operations
@@ -821,6 +840,25 @@ const login = useCallback(
     setAdminProfile((prev) => ({ ...prev, ...fields }));
     addToast("Admin settings updated", "success");
   }, [addToast]);
+
+  // Save profile fields (skills included) to the auth service; recommendations use them immediately.
+  const updateUserProfile = useCallback(
+    async (fields) => {
+      try {
+        const res = await authService.updateProfile(fields);
+        if (res?.user) {
+          setUser(res.user);
+          localStorage.setItem("swipex_user", JSON.stringify(res.user));
+        }
+        addToast("Profile updated successfully", "success");
+        return true;
+      } catch (error) {
+        addToast(error?.response?.data?.message || "Could not update your profile", "error");
+        return false;
+      }
+    },
+    [addToast]
+  );
 
   const updateProfile = useCallback(
     (updatedFields) => {
@@ -1015,24 +1053,62 @@ const login = useCallback(
     [applications, addToast]
   );
 
-  // Notification management
+  // Notification management (backend-backed)
+  const knownNotificationIds = React.useRef(null);
+
+  const refreshNotifications = useCallback(async () => {
+    if (!localStorage.getItem("swipex_access_token")) return;
+    try {
+      const { notifications: list } = await notificationService.list({ limit: 50 });
+      const mapped = list.map(toUiNotification);
+      // toast anything that arrived since the last poll (not on the first load)
+      if (knownNotificationIds.current) {
+        mapped
+          .filter((n) => !n.read && !knownNotificationIds.current.has(n.id))
+          .slice(0, 3)
+          .forEach((n) => addToast(`${n.title}: ${n.message}`, "info"));
+      }
+      knownNotificationIds.current = new Set(mapped.map((n) => n.id));
+      setNotifications(mapped);
+    } catch {
+      /* offline: keep what we have */
+    }
+  }, [addToast]);
+
+  useEffect(() => {
+    knownNotificationIds.current = null;
+    if (!isAuthenticated || !user?.id) {
+      setNotifications([]);
+      return undefined;
+    }
+    refreshNotifications();
+    const timer = setInterval(refreshNotifications, 15000);
+    const onFocus = () => refreshNotifications();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [isAuthenticated, user?.id, refreshNotifications]);
+
   const markNotificationRead = useCallback((id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  }, []);
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    notificationService.markRead(id).catch(() => refreshNotifications());
+  }, [refreshNotifications]);
 
   const markAllNotificationsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    notificationService.markAllRead().catch(() => refreshNotifications());
     addToast("All notifications marked as read", "info");
-  }, [addToast]);
+  }, [addToast, refreshNotifications]);
 
   const clearNotification = useCallback(
     (id) => {
       setNotifications((prev) => prev.filter((n) => n.id !== id));
+      notificationService.remove(id).catch(() => refreshNotifications());
       addToast("Notification dismissed", "info");
     },
-    [addToast]
+    [addToast, refreshNotifications]
   );
 
   const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
@@ -1054,6 +1130,7 @@ const login = useCallback(
       isFresherFriendly: false,
       isNewlyFounded: false,
       recentlyPosted: false,
+      lowCompetition: false,
       selectedSkill: "All"
     });
     addToast("Filters reset to default", "info");
@@ -1121,6 +1198,8 @@ const login = useCallback(
         clearNotification,
         resumeAnalysis,
         setResumeAnalysis,
+        updateUserProfile,
+        refreshNotifications,
         searchQuery,
         setSearchQuery,
         activeFilterPill,

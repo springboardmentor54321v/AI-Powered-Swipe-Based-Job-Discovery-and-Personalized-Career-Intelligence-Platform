@@ -25,6 +25,7 @@ import {
 
 import { useApp } from "../context/AppContext";
 import { jobService } from "../services/jobService";
+import { aiService } from "../services/aiService";
 import { JobCard } from "../components/JobCard";
 
 export function DiscoverPage() {
@@ -63,6 +64,42 @@ export function DiscoverPage() {
   );
 
   const [swipeHistory, setSwipeHistory] = useState([]);
+
+  // ============================================================
+  // AI DECK RANKING
+  // ============================================================
+  //
+  // The AI service re-ranks the unseen jobs from the user's profile skills, resume and every swipe
+  // stored in the database. It is re-queried after each swipe (see fetchDeckRanking below), so the
+  // next card already reflects the swipe that just happened.
+  //
+  // ============================================================
+
+  const [deckRank, setDeckRank] = useState(null); // { order: string[], scores: {id: number} }
+
+  const fetchDeckRanking = useCallback(async () => {
+    try {
+      const deck = await aiService.getDeck({ limit: 100, timeout: 5000 });
+      return {
+        order: (deck.order || []).map(String),
+        scores: deck.scores || {},
+      };
+    } catch (err) {
+      // The deck keeps its current order if the AI service is slow or down.
+      console.info("AI deck unavailable, keeping current order:", err?.message);
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchDeckRanking().then((ranking) => {
+      if (!cancelled && ranking) setDeckRank(ranking);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchDeckRanking]);
 
   // ============================================================
   // SAVE STATE
@@ -239,6 +276,10 @@ export function DiscoverPage() {
 
       if (filters?.recentlyPosted) {
         params.recently_posted = "true";
+      }
+
+      if (filters?.lowCompetition) {
+        params.low_competition = "true";
       }
 
       console.log(
@@ -431,7 +472,7 @@ export function DiscoverPage() {
   // ============================================================
 
   const filteredJobs = useMemo(() => {
-    return allJobs.filter((job) => {
+    const unseen = allJobs.filter((job) => {
       if (!job?.id) {
         return false;
       }
@@ -450,9 +491,28 @@ export function DiscoverPage() {
 
       return true;
     });
+
+    if (!deckRank) {
+      return unseen;
+    }
+
+    // AI order (best first); jobs the AI did not rank keep their original order at the end.
+    const position = new Map(deckRank.order.map((id, index) => [id, index]));
+
+    return unseen
+      .map((job) => {
+        const score = deckRank.scores[String(job.id)];
+        return score === undefined ? job : { ...job, match_score: score };
+      })
+      .sort(
+        (a, b) =>
+          (position.get(String(a.id)) ?? Number.MAX_SAFE_INTEGER) -
+          (position.get(String(b.id)) ?? Number.MAX_SAFE_INTEGER)
+      );
   }, [
     allJobs,
     swipedJobIds,
+    deckRank,
   ]);
 
   // ============================================================
@@ -542,6 +602,8 @@ export function DiscoverPage() {
             "Job saved successfully.",
             "success"
           );
+
+          fetchDeckRanking().then((ranking) => ranking && setDeckRank(ranking));
         } catch (err) {
           console.error(
             "Save job error:",
@@ -561,6 +623,7 @@ export function DiscoverPage() {
         savedJobIds,
         savingJobId,
         addToast,
+        fetchDeckRanking,
       ]
     );
 
@@ -594,6 +657,12 @@ export function DiscoverPage() {
 
           const jobId =
             String(job.id);
+
+          // Re-rank the deck with this swipe included, then update everything in one render.
+          const nextRanking = await fetchDeckRanking();
+          if (nextRanking) {
+            setDeckRank(nextRanking);
+          }
 
           // ----------------------------------------------------
           // Remove from current deck immediately
@@ -647,6 +716,7 @@ export function DiscoverPage() {
       [
         processingSwipe,
         addToast,
+        fetchDeckRanking,
       ]
     );
 
@@ -691,6 +761,12 @@ export function DiscoverPage() {
 
           const jobId =
             String(job.id);
+
+          // Re-rank the deck with this swipe included, then update everything in one render.
+          const nextRanking = await fetchDeckRanking();
+          if (nextRanking) {
+            setDeckRank(nextRanking);
+          }
 
           // ----------------------------------------------------
           // Remove from discovery
@@ -763,6 +839,7 @@ export function DiscoverPage() {
       [
         processingSwipe,
         addToast,
+        fetchDeckRanking,
       ]
     );
 
@@ -956,7 +1033,7 @@ export function DiscoverPage() {
   // ============================================================
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-4rem)] w-full bg-slate-50/60 pb-6 select-none">
+    <div className="flex flex-col min-h-[calc(100dvh-4rem)] w-full bg-slate-50/60 dark:bg-zinc-950/60 pb-6 select-none">
 
       <div className="flex-1 flex flex-col w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-5">
 
@@ -968,11 +1045,11 @@ export function DiscoverPage() {
 
           {/* STATUS */}
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-zinc-200 shadow-sm">
 
             {isLiveConnected ? (
               <>
-                <Radio className="h-3 w-3 text-emerald-600 animate-pulse" />
+                <Radio className="h-3 w-3 text-brand-600 dark:text-brand-400 animate-pulse" />
 
                 <span className="text-[11px] sm:text-xs">
                   Live Matches
@@ -980,7 +1057,7 @@ export function DiscoverPage() {
               </>
             ) : (
               <>
-                <Sparkles className="h-3 w-3 text-emerald-600" />
+                <Sparkles className="h-3 w-3 text-brand-600 dark:text-brand-400" />
 
                 <span className="text-[11px] sm:text-xs">
                   Smart Discovery
@@ -988,9 +1065,11 @@ export function DiscoverPage() {
               </>
             )}
 
-            <span className="h-1 w-1 rounded-full bg-slate-300" />
+            <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-zinc-600" />
 
-            <span className="text-[11px] sm:text-xs text-slate-500 font-normal">
+            <span
+             id="job-results-count"
+             className="text-[11px] sm:text-xs text-slate-500 dark:text-zinc-400 font-normal">
               {filteredJobs.length}{" "}
               {filteredJobs.length === 1
                 ? "role"
@@ -1005,7 +1084,7 @@ export function DiscoverPage() {
             type="button"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-medium text-slate-600 shadow-sm hover:border-emerald-300 hover:text-emerald-700 hover:bg-emerald-50/50 active:scale-95 transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium text-slate-600 dark:text-zinc-300 shadow-sm hover:border-brand-300 hover:text-brand-700 dark:hover:text-brand-300 hover:bg-brand-50/50 dark:hover:bg-brand-500/10 active:scale-95 transition-all disabled:opacity-50"
           >
             <RotateCcw
               className={`w-3.5 h-3.5 ${
@@ -1026,11 +1105,11 @@ export function DiscoverPage() {
         ====================================================== */}
 
         {isLoading && (
-          <div className="flex-1 flex flex-col justify-center items-center w-full min-h-[460px] max-h-[640px] bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8">
+          <div className="flex-1 flex flex-col justify-center items-center w-full min-h-[460px] max-h-[640px] bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200/80 dark:border-zinc-800/80 shadow-sm p-8">
 
-            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mb-3" />
+            <Loader2 className="w-8 h-8 text-brand-600 dark:text-brand-400 animate-spin mb-3" />
 
-            <p className="text-sm font-semibold text-slate-600">
+            <p className="text-sm font-semibold text-slate-600 dark:text-zinc-300">
               Loading job opportunities...
             </p>
 
@@ -1046,24 +1125,24 @@ export function DiscoverPage() {
         ====================================================== */}
 
         {!isLoading && error && (
-          <div className="flex-1 flex flex-col items-center justify-center min-h-[460px] bg-white rounded-3xl border border-rose-100 shadow-sm p-6 text-center">
+          <div className="flex-1 flex flex-col items-center justify-center min-h-[460px] bg-white dark:bg-zinc-900 rounded-3xl border border-rose-100 dark:border-rose-500/20 shadow-sm p-6 text-center">
 
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
               <AlertCircle className="w-6 h-6" />
             </div>
 
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="text-base font-bold text-slate-900 dark:text-zinc-50">
               Failed to load jobs
             </h3>
 
-            <p className="text-xs text-slate-500 max-w-sm mt-1 mb-5">
+            <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-sm mt-1 mb-5">
               {error}
             </p>
 
             <button
               type="button"
               onClick={fetchJobs}
-              className="py-2.5 px-5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm active:scale-95 transition-all"
+              className="py-2.5 px-5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-sm active:scale-95 transition-all"
             >
               Retry Connection
             </button>
@@ -1097,7 +1176,7 @@ export function DiscoverPage() {
                     }
                     aria-label="Skip job"
                     title="Skip job"
-                    className="hidden lg:flex absolute left-2 xl:left-6 z-40 h-13 w-13 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400 shadow-lg transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 hover:scale-105 active:scale-95 disabled:opacity-50"
+                    className="hidden lg:flex absolute left-2 xl:left-6 z-40 h-13 w-13 items-center justify-center rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-400 shadow-lg transition-all hover:border-rose-200 dark:hover:border-rose-500/20 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 hover:scale-105 active:scale-95 disabled:opacity-50"
                   >
                     <ChevronLeft className="w-6 h-6 stroke-[2.5]" />
                   </button>
@@ -1200,7 +1279,7 @@ export function DiscoverPage() {
                     }
                     aria-label="Apply for job"
                     title="Apply for job"
-                    className="hidden lg:flex absolute right-2 xl:right-6 z-40 h-13 w-13 items-center justify-center rounded-2xl border border-emerald-500 bg-emerald-600 text-white shadow-lg transition-all hover:bg-emerald-700 hover:scale-105 active:scale-95 disabled:opacity-50"
+                    className="hidden lg:flex absolute right-2 xl:right-6 z-40 h-13 w-13 items-center justify-center rounded-2xl border border-brand-500 bg-brand-600 text-white shadow-lg transition-all hover:bg-brand-700 hover:scale-105 active:scale-95 disabled:opacity-50"
                   >
                     <ChevronRight className="w-6 h-6 stroke-[2.5]" />
                   </button>
@@ -1213,17 +1292,17 @@ export function DiscoverPage() {
                    EMPTY STATE
                    ================================================== */
 
-                <div className="flex flex-col items-center justify-center w-full max-w-lg min-h-[460px] bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8 text-center">
+                <div className="flex flex-col items-center justify-center w-full max-w-lg min-h-[460px] bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200/80 dark:border-zinc-800/80 shadow-sm p-8 text-center">
 
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+                  <div className="w-14 h-14 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center mb-3">
                     <Inbox className="w-7 h-7" />
                   </div>
 
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-50">
                     You're all caught up!
                   </h3>
 
-                  <p className="text-xs text-slate-500 max-w-xs mt-1 mb-6 leading-relaxed">
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-xs mt-1 mb-6 leading-relaxed">
                     No more jobs match your
                     current search and filters,
                     or you have already reviewed
@@ -1233,13 +1312,14 @@ export function DiscoverPage() {
                   <div className="flex flex-col sm:flex-row gap-2.5 w-full">
 
                     <button
+                      id="btn-open-filters"
                       type="button"
                       onClick={() =>
                         setIsFilterModalOpen(
                           true
                         )
                       }
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 text-xs font-bold rounded-xl transition-all"
                     >
                       <SlidersHorizontal className="w-4 h-4" />
 
@@ -1251,7 +1331,7 @@ export function DiscoverPage() {
                       onClick={
                         handleRefresh
                       }
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all"
                     >
                       <RotateCcw className="w-4 h-4" />
 
@@ -1284,7 +1364,7 @@ export function DiscoverPage() {
                     }
                     aria-label="Skip job"
                     title="Skip job"
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-white border border-slate-200 text-rose-500 shadow-md active:scale-90 transition-transform disabled:opacity-50"
+                    className="flex h-12 w-12 items-center justify-center rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-rose-500 shadow-md active:scale-90 transition-transform disabled:opacity-50"
                   >
                     <X className="w-5 h-5 stroke-[2.5]" />
                   </button>
@@ -1326,8 +1406,8 @@ export function DiscoverPage() {
                           currentCard?.id
                         )
                       )
-                        ? "bg-amber-50 border-amber-200 text-amber-600"
-                        : "bg-white border-slate-200 text-slate-600"
+                        ? "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400"
+                        : "bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-300"
                     }`}
                   >
                     <Bookmark
@@ -1357,7 +1437,7 @@ export function DiscoverPage() {
                     }
                     aria-label="Apply for job"
                     title="Apply for job"
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-md shadow-emerald-600/30 active:scale-90 transition-transform disabled:opacity-50"
+                    className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-white shadow-md shadow-brand-600/30 active:scale-90 transition-transform disabled:opacity-50"
                   >
                     <Heart className="w-5 h-5 fill-current" />
                   </button>

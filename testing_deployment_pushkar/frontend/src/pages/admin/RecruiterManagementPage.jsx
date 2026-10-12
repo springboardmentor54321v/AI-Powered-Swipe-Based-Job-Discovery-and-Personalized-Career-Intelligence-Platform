@@ -48,15 +48,15 @@ export function RecruiterManagementPage() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-slate-900/90 dark:bg-zinc-800/90 p-4 rounded-2xl border border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-500 dark:text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search company or recruiter..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs font-medium text-white placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+            className="w-full pl-9 pr-3.5 py-2 bg-slate-800/80 dark:bg-zinc-700/80 border border-slate-700/80 rounded-xl text-xs font-medium text-white placeholder:text-slate-500 dark:placeholder:text-zinc-400 focus:outline-hidden focus:ring-2 focus:ring-purple-500"
           />
         </div>
 
@@ -69,7 +69,7 @@ export function RecruiterManagementPage() {
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap ${
                 statusFilter === st
                   ? "bg-purple-600 text-white shadow-xs"
-                  : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
+                  : "bg-slate-800 dark:bg-zinc-700 text-slate-400 hover:text-white hover:bg-slate-700"
               }`}
             >
               {st}
@@ -83,7 +83,7 @@ export function RecruiterManagementPage() {
         {filteredRecruiters.map((rec) => (
           <div
             key={rec.id}
-            className="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 space-y-4 hover:border-slate-700 transition-all flex flex-col justify-between"
+            className="bg-slate-900/90 dark:bg-zinc-800/90 rounded-2xl border border-slate-800 p-5 space-y-4 hover:border-slate-700 transition-all flex flex-col justify-between"
           >
             {/* Header */}
             <div className="space-y-3">
@@ -92,7 +92,7 @@ export function RecruiterManagementPage() {
                   <img
                     src={rec.logo}
                     alt={rec.companyName}
-                    className="w-12 h-12 rounded-xl object-cover border border-slate-700 bg-white"
+                    className="w-12 h-12 rounded-xl object-cover border border-slate-700 bg-white dark:bg-zinc-900"
                   />
                   <div>
                     <h3 className="text-sm font-bold text-white truncate">{rec.companyName}</h3>
@@ -103,7 +103,7 @@ export function RecruiterManagementPage() {
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${
                     rec.status === "Approved"
-                      ? "bg-emerald-950/60 text-emerald-300 border-emerald-800"
+                      ? "bg-brand-950/60 text-brand-300 border-brand-800"
                       : rec.status === "Pending Verification"
                       ? "bg-amber-950/60 text-amber-300 border-amber-800"
                       : "bg-rose-950/60 text-rose-300 border-rose-800"
@@ -116,15 +116,15 @@ export function RecruiterManagementPage() {
               {/* Meta details */}
               <div className="space-y-1 text-xs text-slate-400 pt-1">
                 <p className="flex items-center gap-2 truncate">
-                  <Mail className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <Mail className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400 shrink-0" />
                   <span>{rec.email}</span>
                 </p>
                 <p className="flex items-center gap-2 truncate">
-                  <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <MapPin className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400 shrink-0" />
                   <span>{rec.location}</span>
                 </p>
                 <p className="flex items-center gap-2 truncate">
-                  <Briefcase className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <Briefcase className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400 shrink-0" />
                   <span className="text-white font-semibold">{rec.jobsPosted} Job Postings</span>
                 </p>
               </div>
@@ -136,7 +136,7 @@ export function RecruiterManagementPage() {
                 <button
                   type="button"
                   onClick={() => updateRecruiterOrgStatus(rec.id, "Approved")}
-                  className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+                  className="flex-1 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Approve</span>
@@ -147,7 +147,7 @@ export function RecruiterManagementPage() {
                 <button
                   type="button"
                   onClick={() => updateRecruiterOrgStatus(rec.id, "Suspended")}
-                  className="flex-1 py-1.5 bg-slate-800 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 border border-slate-700 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+                  className="flex-1 py-1.5 bg-slate-800 dark:bg-zinc-700 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 border border-slate-700 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
                 >
                   <Power className="w-3.5 h-3.5" />
                   <span>Suspend</span>

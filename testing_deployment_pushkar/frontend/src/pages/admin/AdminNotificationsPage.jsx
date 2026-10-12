@@ -41,12 +41,12 @@ export function AdminNotificationsPage() {
         </p>
       </div>
 
-      <div className="bg-slate-900/90 rounded-3xl border border-slate-800 shadow-sm divide-y divide-slate-800/80 overflow-hidden">
+      <div className="bg-slate-900/90 dark:bg-zinc-800/90 rounded-3xl border border-slate-800 shadow-sm divide-y divide-slate-800/80 overflow-hidden">
         {alerts.map((a) => (
           <Link
             key={a.id}
             to={a.link}
-            className="p-5 flex items-start gap-4 hover:bg-slate-800/50 transition-colors block"
+            className="p-5 flex items-start gap-4 hover:bg-slate-800/50 dark:hover:bg-zinc-700/50 transition-colors block"
           >
             <div
               className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
@@ -69,7 +69,7 @@ export function AdminNotificationsPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-xs sm:text-sm font-bold text-white">{a.title}</h3>
-                <span className="text-[11px] text-slate-500 font-medium shrink-0">{a.time}</span>
+                <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium shrink-0">{a.time}</span>
               </div>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">{a.message}</p>
             </div>

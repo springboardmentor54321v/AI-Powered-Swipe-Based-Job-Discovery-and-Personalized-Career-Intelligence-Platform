@@ -18,23 +18,23 @@ export function AdminNavbar({ onToggleMobileMenu, isMobileMenuOpen }) {
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xs h-16 text-white">
+    <header className="sticky top-0 z-30 bg-slate-900/95 dark:bg-zinc-800/95 backdrop-blur-md border-b border-slate-800 shadow-xs h-16 text-white">
       <div className="h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Left Side: Mobile Menu Button & Breadcrumb */}
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onToggleMobileMenu}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl lg:hidden"
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 dark:hover:bg-zinc-700 rounded-xl lg:hidden"
             aria-label="Toggle Navigation"
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse" />
             <span className="text-xs font-semibold text-slate-400">Platform Control</span>
-            <span className="text-slate-600">/</span>
+            <span className="text-slate-600 dark:text-zinc-300">/</span>
             <span className="text-xs font-bold text-white">
               SwipeX Global Instance
             </span>
@@ -49,11 +49,11 @@ export function AdminNavbar({ onToggleMobileMenu, isMobileMenuOpen }) {
           {/* System Alerts */}
           <Link
             to="/admin/notifications"
-            className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all"
+            className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 dark:hover:bg-zinc-700 rounded-xl transition-all"
             aria-label="System Notifications"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-purple-500 rounded-full ring-2 ring-slate-900" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-purple-500 rounded-full ring-2 ring-slate-900 dark:ring-white/10" />
           </Link>
 
           {/* Admin Avatar Dropdown */}
@@ -61,7 +61,7 @@ export function AdminNavbar({ onToggleMobileMenu, isMobileMenuOpen }) {
             <button
               type="button"
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-800 transition-all"
+              className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-800 dark:hover:bg-zinc-700 transition-all"
             >
               <img
                 src={adminProfile.avatar}
@@ -71,8 +71,8 @@ export function AdminNavbar({ onToggleMobileMenu, isMobileMenuOpen }) {
             </button>
 
             {isProfileOpen && (
-              <div className="absolute right-0 top-11 w-56 bg-slate-900 rounded-2xl shadow-xl border border-slate-800 py-1.5 z-50 text-slate-200 animate-in fade-in zoom-in-95 duration-150">
-                <div className="px-4 py-2.5 border-b border-slate-800 bg-slate-950/50">
+              <div className="absolute right-0 top-11 w-56 bg-slate-900 dark:bg-zinc-800 rounded-2xl shadow-xl border border-slate-800 py-1.5 z-50 text-slate-200 animate-in fade-in zoom-in-95 duration-150">
+                <div className="px-4 py-2.5 border-b border-slate-800 bg-slate-950/50 dark:bg-zinc-900/50">
                   <p className="text-xs font-bold text-white truncate">
                     {adminProfile.name}
                   </p>
@@ -84,7 +84,7 @@ export function AdminNavbar({ onToggleMobileMenu, isMobileMenuOpen }) {
                 <Link
                   to="/admin/settings"
                   onClick={() => setIsProfileOpen(false)}
-                  className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                  className="flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800 dark:hover:bg-zinc-700 hover:text-white transition-colors"
                 >
                   <Settings className="w-4 h-4 text-slate-400" />
                   <span>Admin Settings</span>

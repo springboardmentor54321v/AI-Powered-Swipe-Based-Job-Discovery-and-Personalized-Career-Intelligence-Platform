@@ -245,14 +245,14 @@ export function RecruiterProfilePage() {
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center">
-          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 p-12 text-center">
+          <div className="w-8 h-8 border-4 border-blue-200 dark:border-blue-500/20 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
 
-          <h3 className="text-sm font-bold text-slate-800">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100">
             Loading recruiter profile...
           </h3>
 
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
             Fetching your profile from SwipeX.
           </p>
         </div>
@@ -273,11 +273,11 @@ export function RecruiterProfilePage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
             Employer & Recruiter Profile
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
             Manage your organization's presence seen by candidates.
           </p>
         </div>
@@ -288,7 +288,7 @@ export function RecruiterProfilePage() {
           disabled={isSaving}
           className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs ${
             isEditing
-              ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              ? "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 hover:bg-slate-200 dark:hover:bg-zinc-700"
               : "bg-blue-600 hover:bg-blue-700 text-white active:scale-95"
           }`}
         >
@@ -311,14 +311,14 @@ export function RecruiterProfilePage() {
       ========================= */}
 
       {successMessage && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-700">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+        <div className="flex items-center gap-2 px-4 py-3 bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 rounded-xl text-xs font-semibold text-brand-700 dark:text-brand-300">
+          <span className="w-2 h-2 rounded-full bg-brand-500" />
           {successMessage}
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-700">
+        <div className="flex items-center gap-2 px-4 py-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl text-xs font-semibold text-rose-700 dark:text-rose-300">
           <XCircle className="w-4 h-4 shrink-0" />
           {error}
         </div>
@@ -335,31 +335,31 @@ export function RecruiterProfilePage() {
 
         {/* Branding Card */}
 
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-zinc-800 shadow-sm">
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
 
-            <div className="w-20 h-20 rounded-2xl bg-blue-50 border-2 border-blue-100 flex items-center justify-center">
-              <Building2 className="w-9 h-9 text-blue-600" />
+            <div className="w-20 h-20 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border-2 border-blue-100 dark:border-blue-500/20 flex items-center justify-center">
+              <Building2 className="w-9 h-9 text-blue-600 dark:text-blue-400" />
             </div>
 
             <div className="space-y-1 min-w-0">
 
               <div className="flex flex-wrap items-center gap-2">
 
-                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-zinc-50">
                   {profile.companyName ||
                     "Your Company"}
                 </h2>
 
-                <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-bold">
+                <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/20 rounded-full text-[10px] font-bold">
                   Recruiter
                 </span>
               </div>
 
-              <p className="text-xs text-slate-600 font-medium">
+              <p className="text-xs text-slate-600 dark:text-zinc-300 font-medium">
                 Managed by{" "}
-                <span className="font-bold text-slate-900">
+                <span className="font-bold text-slate-900 dark:text-zinc-50">
                   {profile.name ||
                     "Recruiter"}
                 </span>
@@ -372,7 +372,7 @@ export function RecruiterProfilePage() {
                 )}
               </p>
 
-              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 pt-1">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-zinc-400 pt-1">
 
                 {profile.location && (
                   <span className="flex items-center gap-1">
@@ -398,7 +398,7 @@ export function RecruiterProfilePage() {
                         }
                         target="_blank"
                         rel="noreferrer"
-                        className="hover:text-blue-600 truncate max-w-[250px]"
+                        className="hover:text-blue-600 dark:hover:text-blue-400 truncate max-w-[250px]"
                       >
                         {profile.website}
                       </a>
@@ -412,10 +412,10 @@ export function RecruiterProfilePage() {
 
         {/* Organization Details */}
 
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-zinc-800 shadow-sm space-y-6">
 
-          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-blue-600" />
+          <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-50 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-zinc-800 flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             Organization Specifications
           </h3>
 
@@ -543,7 +543,7 @@ export function RecruiterProfilePage() {
           {/* Description */}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-zinc-200 mb-1.5">
               Company Description & Mission
             </label>
 
@@ -560,8 +560,8 @@ export function RecruiterProfilePage() {
               placeholder="Tell candidates about your company, culture and mission..."
               className={`w-full p-3.5 rounded-xl text-xs font-medium transition-all leading-relaxed resize-none ${
                 isEditing
-                  ? "bg-white border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-                  : "bg-slate-50 border border-transparent text-slate-700"
+                  ? "bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  : "bg-slate-50 dark:bg-zinc-950 border border-transparent text-slate-700 dark:text-zinc-200"
               }`}
             />
           </div>
@@ -569,7 +569,7 @@ export function RecruiterProfilePage() {
           {/* Save */}
 
           {isEditing && (
-            <div className="pt-4 border-t border-slate-100 flex justify-end">
+            <div className="pt-4 border-t border-slate-100 dark:border-zinc-800 flex justify-end">
 
               <button
                 type="submit"
@@ -578,7 +578,7 @@ export function RecruiterProfilePage() {
               >
                 {isSaving ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    <span className="w-4 h-4 border-2 border-white/40 dark:border-zinc-800/40 border-t-white rounded-full animate-spin" />
                     Saving...
                   </>
                 ) : (
@@ -611,7 +611,7 @@ function ProfileField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+      <label className="block text-xs font-bold text-slate-700 dark:text-zinc-200 mb-1.5">
         {label}
       </label>
 
@@ -624,8 +624,8 @@ function ProfileField({
         }
         className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
           editing
-            ? "bg-white border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-            : "bg-slate-50 border border-transparent text-slate-700"
+            ? "bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+            : "bg-slate-50 dark:bg-zinc-950 border border-transparent text-slate-700 dark:text-zinc-200"
         }`}
       />
     </div>
