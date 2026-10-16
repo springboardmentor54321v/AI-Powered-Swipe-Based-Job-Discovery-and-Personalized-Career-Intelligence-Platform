@@ -1,89 +1,72 @@
-"""
-app/main.py
+"""FastAPI application factory for SwipeX backend."""
+from __future__ import annotations
 
-Application entry point. Run with:
+from contextlib import asynccontextmanager
 
-    uvicorn app.main:app --reload
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse, ORJSONResponse
+from slowapi.errors import RateLimitExceeded
 
-Swagger UI will be available at http://127.0.0.1:8000/docs
-ReDoc will be available at      http://127.0.0.1:8000/redoc
-"""
+from app.api.v1.router import api_router
+from app.core.config import settings
+from app.core.exceptions import RateLimitedError, register_exception_handlers
+from app.core.logging import configure_logging, get_logger
+from app.core.middleware import register_middleware
+from app.core.rate_limit import limiter
+from app.realtime.connection_manager import connection_manager
 
-import os
-import logging
-
-from dotenv import load_dotenv
-from fastapi import FastAPI, Request, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
-
-from app.database import init_db
-from app.routes import api_router
-
-load_dotenv()
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("job_swipe_backend")
-
-APP_NAME = os.getenv("APP_NAME", "Job Swipe Gateway API")
-APP_ENV = os.getenv("APP_ENV", "development")
-CORS_ORIGINS_RAW = os.getenv("CORS_ORIGINS", "*")
-CORS_ORIGINS = ["*"] if CORS_ORIGINS_RAW.strip() == "*" else [
-    origin.strip() for origin in CORS_ORIGINS_RAW.split(",") if origin.strip()
-]
-
-app = FastAPI(
-    title=APP_NAME,
-    description=(
-        "Unified backend gateway combining Auth/RBAC (Milestone 1) and "
-        "Job Listings, Search, Swipes, Metrics, and Recommendations "
-        "(Milestone 2) behind a single API surface."
-    ),
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+logger = get_logger("app.main")
 
 
-@app.on_event("startup")
-def on_startup():
-    logger.info("Starting %s in '%s' mode", APP_NAME, APP_ENV)
-    init_db()
-    logger.info("Database tables verified/created successfully")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    configure_logging("DEBUG" if settings.DEBUG else "INFO")
+    logger.info("Starting %s in %s mode", settings.APP_NAME, settings.ENVIRONMENT)
+    await connection_manager.startup()
+    if settings.SEED_ON_STARTUP:
+        try:
+            from scripts.seed_data import seed_all
+
+            await seed_all()
+            logger.info("Seed on startup complete")
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Seed on startup skipped: %s", exc)
+    yield
+    await connection_manager.shutdown()
+    logger.info("Shutting down %s", settings.APP_NAME)
 
 
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"detail": exc.errors()},
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title=settings.APP_NAME,
+        version="0.1.0",
+        default_response_class=ORJSONResponse,
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
+        lifespan=lifespan,
     )
 
+    app.state.limiter = limiter
 
-@app.get("/", tags=["Health"], summary="Root health check")
-def root():
-    return {
-        "service": APP_NAME,
-        "status": "ok",
-        "environment": APP_ENV,
-        "docs": "/docs",
-    }
+    @app.exception_handler(RateLimitExceeded)
+    async def _rate_limit_handler(request: Request, exc: RateLimitExceeded):
+        rid = getattr(request.state, "request_id", None)
+        err = RateLimitedError()
+        body: dict = {"error": {"code": err.code, "message": err.message}}
+        if rid:
+            body["error"]["request_id"] = rid
+        return JSONResponse(status_code=err.status_code, content=body)
+
+    register_exception_handlers(app)
+    register_middleware(app)
+    app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+    @app.get("/", tags=["root"], summary="Root")
+    async def root():
+        return {"name": settings.APP_NAME, "environment": settings.ENVIRONMENT}
+
+    return app
 
 
-@app.get("/health", tags=["Health"], summary="Liveness/readiness probe")
-def health():
-    return {"status": "healthy"}
-
-
-# Mount the unified gateway router
-app.include_router(api_router, prefix="/api/v1")
+app = create_app()

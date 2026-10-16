@@ -1,63 +1,66 @@
-import sys
-import os
+"""Alembic async environment for SQLAlchemy 2.0."""
+from __future__ import annotations
+
+import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
-# 1. Add the project root directory to sys.path so Python can find 'app'
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from app.core.config import settings
+from app.db.base import Base
 
-# 2. Import your Base and models
-from app.database import Base
-import app.models  # Ensures all ORM models (including Resume) are registered
+# Import models so they register on Base.metadata. Import errors must surface: swallowing
+# them would leave empty metadata and make autogenerate emit DROP statements.
+from app import models  # noqa: F401,E402
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
+# ConfigParser treats "%" as interpolation syntax; URL-encoded passwords contain it.
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
-# Interpret the config file for Python logging.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# 3. Set target_metadata to your Base.metadata
 target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_type=True,
     )
-
     with context.begin_transaction():
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
-    connectable = engine_from_config(
+def do_run_migrations(connection: Connection) -> None:
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_type=True,
+    )
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+async def run_migrations_online() -> None:
+    connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
-
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
-
-        with context.begin_transaction():
-            context.run_migrations()
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
+    await connectable.dispose()
 
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    run_migrations_online()
+    asyncio.run(run_migrations_online())
