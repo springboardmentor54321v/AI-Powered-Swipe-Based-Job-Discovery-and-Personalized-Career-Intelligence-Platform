@@ -1,0 +1,1 @@
+from app.routes.applications import applications_bp
